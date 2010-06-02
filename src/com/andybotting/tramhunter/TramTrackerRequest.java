@@ -1,7 +1,6 @@
 package com.andybotting.tramhunter;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Vector;
 
 import org.ksoap2.SoapEnvelope;
@@ -9,9 +8,14 @@ import org.ksoap2.SoapFault;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
+import android.widget.TextView;
 
 
 public class TramTrackerRequest {
@@ -21,28 +25,43 @@ public class TramTrackerRequest {
 	
 	// Start with a blank GUID, and we'll generate one for the 
 	// life of the TramTrackerRequest object
-	//String guid = "";
+	String guid = "";
 
-	// Generating a guid not working.. using fixed for now
-	String guid = "73c0c26f-2603-45a1-87b7-c2c2e4b1f475";
-
-
+	// Web Services fields for TramTracker
+	private static final String CLIENTTYPE = "WEBPID";
+	private static final String CLIENTVERSION = "1.1.0";
+	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
+	
 	private Object makeTramTrackerRequest(SoapObject request) {	
-
+		
 		String methodName = request.getName();
 		String soapAction = NAMESPACE + methodName;
-
+		
 		SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);	
  		envelope.setOutputSoapObject(request);
- 		 
+ 	
+ 		envelope.setClientType(CLIENTTYPE);
+ 		envelope.setClientVersion(CLIENTVERSION);
+ 		envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
+		envelope.dotNet = true;
+ 		
  		// Generate a new Guid, if it doesn't exist
- 		if (guid == "")
- 			if (methodName != "GetNewClientGuid")
+ 		if (guid == "") {
+ 			if (methodName != "GetNewClientGuid") {
  				getNewClientGuid();
+ 				
+ 				// Sleep for a sec so that our GUID works with the next TT Request
+ 				try {
+					Thread.sleep(1000);
+				} 
+ 				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+ 			}
+ 		}
  			
  		envelope.setGuid(guid);
-		envelope.dotNet = true;
-		
+ 				
 		HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
 		
 		// Call the URL
@@ -61,21 +80,20 @@ public class TramTrackerRequest {
 		try {
 			result = envelope.getResponse();
 		} catch (SoapFault e) {
+			Log.d("Testing", "Error getting SOAP envelope response");
 			e.printStackTrace();
 		}
 		return result;
 	}
 
 	
+	
 	public void getNewClientGuid() {
 		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	  
 		Object result =  makeTramTrackerRequest(request);
 		guid = result.toString();
-
 	}
-	
-	
-	
+		
 	
 	public Stop GetStopInformation(int tramTrackerID) {
 
@@ -109,70 +127,61 @@ public class TramTrackerRequest {
 		}
 
 		System.out.println("Stop not found");
+		
 		return null;
 	}
 
 	
 	public Vector GetNextPredictedRoutesCollection (Stop stop) {
-	
-		Log.d("Testing", "GetNextPredictedRoutesCollection() for Stop: " + stop.getTramTrackerID() + ", " + stop.getPrimaryName());
-		
 		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedRoutesCollection");
 		request.addProperty("stopNo", stop.getTramTrackerID());
 		request.addProperty("routeNo", "0");
 		request.addProperty("lowFloor", "false");
 	   
 		SoapObject result = null;
-		Vector collection = null;
+		Vector collection = new Vector();
 			
 		try {
 			result = (SoapObject) makeTramTrackerRequest(request);
-			
-			collection = new Vector();
-			
-			if (result.getPropertyCount() > 0) {
-				
-				//Stop stop = GetStopInformation(stopNumber);
-				//collection.add(stop);
-				
-				SoapObject result1 = (SoapObject)result.getProperty("diffgram");
-				SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
-			
-				for (int i = 0; i < result2.getPropertyCount(); i++) {
-					
-						SoapObject nextPredicted = (SoapObject)result2.getProperty(i);
-						
-						NextTram tram = new NextTram();
-
-						tram.setInternalRouteNo(nextPredicted.getProperty(0).toString());
-						tram.setRouteNo(nextPredicted.getProperty(1).toString());
-						tram.setHeadboardRouteNo(nextPredicted.getProperty(2).toString());
-						tram.setVehicleNo(nextPredicted.getProperty(3).toString());
-						tram.setDestination(nextPredicted.getProperty(4).toString());
-						tram.setHasDisruption(nextPredicted.getProperty(5).toString());
-						tram.setIsTTAvailable(nextPredicted.getProperty(6).toString());
-						tram.setIsLowFloorTram(nextPredicted.getProperty(7).toString());
-						tram.setAirConditioned(nextPredicted.getProperty(8).toString());
-						tram.setDisplayAC(nextPredicted.getProperty(9).toString());
-						tram.setHasSpecialEvent(nextPredicted.getProperty(10).toString());
-						tram.setSpecialEventMessage(nextPredicted.getProperty(11).toString());
-						tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
-						tram.setRequestDateTime(nextPredicted.getProperty(13).toString());
-						
-						collection.add(tram);
-				}
-						
-			}
-			else {
-				System.out.println("Error: Not enough results");
-			}
-			
-			return collection;
 		}
 		catch (ClassCastException exc) {
-			Log.d("Testing", "ClassCastException getting SOAP results");
+			Log.d("Testing", "ClassCastException getting SOAP results: " + exc);
 		}
-		
+
+		if (result != null) {
+				
+			SoapObject result1 = (SoapObject)result.getProperty("diffgram");
+			SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
+			
+			for (int i = 0; i < result2.getPropertyCount(); i++) {
+				
+					SoapObject nextPredicted = (SoapObject)result2.getProperty(i);
+					
+					NextTram tram = new NextTram();
+
+					tram.setInternalRouteNo(nextPredicted.getProperty(0).toString());
+					tram.setRouteNo(nextPredicted.getProperty(1).toString());
+					tram.setHeadboardRouteNo(nextPredicted.getProperty(2).toString());
+					tram.setVehicleNo(nextPredicted.getProperty(3).toString());
+					tram.setDestination(nextPredicted.getProperty(4).toString());
+					tram.setHasDisruption(nextPredicted.getProperty(5).toString());
+					tram.setIsTTAvailable(nextPredicted.getProperty(6).toString());
+					tram.setIsLowFloorTram(nextPredicted.getProperty(7).toString());
+					tram.setAirConditioned(nextPredicted.getProperty(8).toString());
+					tram.setDisplayAC(nextPredicted.getProperty(9).toString());
+					tram.setHasSpecialEvent(nextPredicted.getProperty(10).toString());
+					tram.setSpecialEventMessage(nextPredicted.getProperty(11).toString());
+					tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
+					tram.setRequestDateTime(nextPredicted.getProperty(13).toString());
+						
+					collection.add(tram);
+			}
+						
+		}
+		else {
+			Log.d("Testing", "result is null");
+		}
+			
 		return collection;
 
 	}

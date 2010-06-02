@@ -1,6 +1,7 @@
 package com.andybotting.tramhunter;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Vector;
 
 import android.app.ListActivity;
@@ -10,28 +11,30 @@ import android.content.Context;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 
 import android.widget.BaseAdapter;
 
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 public class StopDetailsActivity extends ListActivity {
-
+	
 	ListView listView;
 	TextView firstLineField;
 	TextView secondLineField;
+	
+	Date melbourneTime = new Date();
+	Date localTime = new Date();
+	long timeDifference = 1;
 
 	public Route selectedRoute;
 
@@ -39,7 +42,14 @@ public class StopDetailsActivity extends ListActivity {
 	public Stop stop;
 	public int tramTrackerId;
 	
-	CompoundButton cb;
+	CompoundButton starButton;
+	
+	Thread myRefreshThread = null;
+	
+	// Make our TramTrackerRequest now, so future requests
+	// in this activity will get the already generated GUID
+	TramTrackerRequest ttRequest = new TramTrackerRequest();
+
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -53,12 +63,13 @@ public class StopDetailsActivity extends ListActivity {
 
 		// Display stop data from DB
 		displayStop();
-			
+		
 		// Get tram times from TramTracker using AsyncTask
 		new GetNextTramTimes().execute();
+
 	}
-
-
+	
+	
 	public void displayStop() {
 		  
 		// Get bundle data
@@ -71,8 +82,6 @@ public class StopDetailsActivity extends ListActivity {
 		TramHunterDB db = new TramHunterDB(this);
 		stop = db.getStop(tramTrackerId);
 		db.close();
-
-
 
 		firstLineField = (TextView)findViewById(R.id.firstLine);
 		secondLineField = (TextView)findViewById(R.id.secondLine);
@@ -90,28 +99,17 @@ public class StopDetailsActivity extends ListActivity {
 		firstLineField.setText(firstLineText);
 		secondLineField.setText(secondLineText);
 		
-		cb = (CompoundButton)findViewById(R.id.stopStar);
-		cb.setChecked(stop.isStarred());
+		starButton = (CompoundButton)findViewById(R.id.stopStar);
+		starButton.setChecked(stop.isStarred());
 
-		cb.setOnClickListener(new View.OnClickListener() {
+		starButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				TramHunterDB db = new TramHunterDB(getBaseContext());
-				db.setStopStar(tramTrackerId, cb.isChecked());
-				stop.setStarred(cb.isChecked());
+				db.setStopStar(tramTrackerId, starButton.isChecked());
+				stop.setStarred(starButton.isChecked());
 				db.close();
 			}
 		});
-		
-			
-		ScrollView sv = new ScrollView(this);
-		sv.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-		
-		LinearLayout layout = new LinearLayout(this);
-		
-		layout.setPadding(10, 10, 10, 0);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));		
-			
-		layout.setOrientation(LinearLayout.VERTICAL);	
 
 	}
 
@@ -127,13 +125,14 @@ public class StopDetailsActivity extends ListActivity {
 
 		// automatically done on worker thread (separate from UI thread)
 		protected Vector doInBackground(final Vector... params) {
-			TramTrackerRequest ttRequest = new TramTrackerRequest();
+			//TramTrackerRequest ttRequest = new TramTrackerRequest();
 			//nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
 
 			try {
 				nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
 			} catch (Exception e) {
 				// Fail :(
+				Log.d("Testing", "Failed to get next trams");
 			}
 			
 			return nextTrams;
@@ -284,16 +283,16 @@ public class StopDetailsActivity extends ListActivity {
 			return true;
 		case 1:
 			TramHunterDB db = new TramHunterDB(getBaseContext());
-			cb = (CompoundButton)findViewById(R.id.stopStar);
+			starButton = (CompoundButton)findViewById(R.id.stopStar);
 			
 			if (stop.isStarred()) {
 				db.setStopStar(tramTrackerId, false);
-				cb.setChecked(false);
+				starButton.setChecked(false);
 				stop.setStarred(false);
 			}	
 			else {
 				db.setStopStar(tramTrackerId, true);
-				cb.setChecked(true);
+				starButton.setChecked(true);
 				stop.setStarred(true);
 			}
 			db.close();

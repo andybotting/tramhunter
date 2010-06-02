@@ -58,14 +58,12 @@ public class SoapEnvelope {
 
     /* Header information for TramTracker */
 	private static final String NAMESPACE = "http://www.yarratrams.com.au/pidsservice/";
+	
 	public String guid = "00000000-0000-0000-0000-000000000001";
-	
-	public static final String CLIENTTYPE = "WEBPID";
-	public static final String CLIENTVERSION = "1.1.0";
-	public static final String CLIENTWEBSERVICEVERSION = "6.4.0.0";
-	
-	
-	
+	public String clientType = "";
+	public String clientVersion = "";
+	public String clientWebServiceVersion = "";
+
     
     /**
      * Returns true for the string values "1" and "true", ignoring upper/lower
@@ -227,17 +225,17 @@ public class SoapEnvelope {
 		
 		// ClientType
 		writer.startTag(NAMESPACE, "ClientType");
-		writer.text(CLIENTTYPE);
+		writer.text(clientType);
 		writer.endTag(NAMESPACE, "ClientType");		
 		
 		// ClientVersion
 		writer.startTag(NAMESPACE, "ClientVersion");
-		writer.text(CLIENTVERSION);
+		writer.text(clientVersion);
 		writer.endTag(NAMESPACE, "ClientVersion");			
 		
 		// ClientWebServiceVersion
 		writer.startTag(NAMESPACE, "ClientWebServiceVersion");
-		writer.text(CLIENTWEBSERVICEVERSION);
+		writer.text(clientWebServiceVersion);
 		writer.endTag(NAMESPACE, "ClientWebServiceVersion");			
 		
 		
@@ -274,5 +272,31 @@ public class SoapEnvelope {
     public void setGuid(String _guid) {
     	guid = _guid; 
     }
+    
+    /**
+     * Assigns the clientType to the soap envelope
+     * @param string the new clientType.
+     */
+    public void setClientType(String _clientType) {
+    	clientType = _clientType;
+    }
+    
+    /**
+     * Assigns the clientVersion to the soap envelope
+     * @param string the new clientVersion.
+     */
+    public void setClientVersion(String _clientVersion) {
+    	clientVersion = _clientVersion;
+    }
+    
+    /**
+     * Assigns the clientWebServiceVersion to the soap envelope
+     * @param string the new clientWebServiceVersion.
+     */
+    public void setClientWebServiceVersion (String _clientWebServiceVersion) {
+    	clientWebServiceVersion = _clientWebServiceVersion;
+    }
+   
+    
 
 }

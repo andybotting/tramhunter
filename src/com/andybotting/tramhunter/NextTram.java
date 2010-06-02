@@ -154,6 +154,7 @@ public class NextTram implements Comparable {
 	public void setRequestDateTime(String _requestDateTime) {
 		requestDateTime = parseDate(_requestDateTime);
 	}
+	
 	public Date getRequestDateTime() {
 		return requestDateTime;
 	}  	 

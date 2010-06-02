@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
-                android:layout_height="wrap_content"
-                android:padding="10px" >
+				android:layout_width="fill_parent" 
+				android:layout_height="wrap_content"
+				android:padding="10px" >
 
-    <TextView android:id="@+id/label"
-              android:layout_width="fill_parent" 
-              android:layout_height="wrap_content" 
-              android:text="TramTracker ID:" />
-              
+	<TextView android:id="@+id/label"
+			  android:layout_width="fill_parent" 
+			  android:layout_height="wrap_content" 
+			  android:text="TramTracker ID:" />
+			  
 	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:layout_below="@+id/label"
-	    android:stretchColumns="0">
-	    
-	    <TableRow>
-		    <EditText android:id="@+id/textTramTrackerId" 
-    		  android:minHeight="40dip"
-    		  android:minWidth="100dip"
-              android:layout_width="fill_parent" 
-              android:layout_height="wrap_content" 
-              android:singleLine="true"
-              android:inputType="number"
-              android:background="@android:drawable/editbox_background"/>
-              
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_below="@+id/label"
+		android:stretchColumns="0">
+		
+		<TableRow>
+			<EditText android:id="@+id/textTramTrackerId" 
+			  android:minHeight="40dip"
+			  android:minWidth="100dip"
+			  android:layout_width="fill_parent" 
+			  android:layout_height="wrap_content" 
+			  android:singleLine="true"
+			  android:inputType="number"
+			  android:background="@android:drawable/editbox_background"/>
+			  
 			<Button 
 				android:text="Go" 
 				android:id="@+id/buttonGo" 
 				android:layout_width="wrap_content" 
 				android:layout_height="wrap_content"
 				/>
-    	</TableRow>
+		</TableRow>
 
 	</TableLayout>
 
