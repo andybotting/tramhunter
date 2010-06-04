@@ -59,7 +59,9 @@ public class HttpTransportSE extends Transport {
         requestDump = debug ? new String(requestData) : null;
         responseDump = null;
         ServiceConnection connection = getServiceConnection();
-        connection.setRequestProperty("User-Agent", "TramHunter");
+        
+        // Use the iPhone user-agent
+        connection.setRequestProperty("User-Agent", "tramTRACKER/1.3.2.1 CFNetwork/445.6 Darwin/10.0.0d3");
         connection.setRequestProperty("SOAPAction", soapAction);
         connection.setRequestProperty("Content-Type", "text/xml");
         connection.setRequestProperty("Connection", "close");

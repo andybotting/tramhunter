@@ -6,8 +6,8 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
-		android:paddingTop="10dip"
-		android:paddingBottom="10dip">
+		android:paddingTop="8dip"
+		android:paddingBottom="8dip">
 		
 		<LinearLayout
 			android:layout_width="wrap_content"

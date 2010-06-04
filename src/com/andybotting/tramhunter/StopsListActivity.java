@@ -2,6 +2,8 @@ package com.andybotting.tramhunter;
 
 import java.util.Vector;
 
+import com.andybotting.tramhunter.RoutesListActivity.ViewWrapper;
+
 import android.app.ListActivity;
 
 import android.content.Context;
@@ -24,6 +26,7 @@ public class StopsListActivity extends ListActivity {
 
 	ListView listView;
 	Vector<Stop> stops;
+	TramHunterDB db;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -41,6 +44,8 @@ public class StopsListActivity extends ListActivity {
 		  routeId = extras.getLong("routeId");
 		}  
 		
+		db = new TramHunterDB(this);
+				
 		// Are we looking for stops for a route, or fav stops?
 		if (routeId > -1) {
 			title += ": Stops for Route";
@@ -57,13 +62,12 @@ public class StopsListActivity extends ListActivity {
 	  
 	
 	public void displayFavStops() {
-		TramHunterDB db = new TramHunterDB(this);
 		stops = db.getFavouriteStops();
 		displayStops();
 	}
 
+	
 	public void displayStopsForRoute(long routeId) {
-		TramHunterDB db = new TramHunterDB(this);
 		stops = db.getStopsForRoute(routeId);
 		displayStops();
 	}
@@ -86,14 +90,6 @@ public class StopsListActivity extends ListActivity {
 			}
 
 		});		
-
-		ScrollView sv = new ScrollView(this);
-		sv.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-		LinearLayout layout = new LinearLayout(this);
-		layout.setPadding(10, 10, 10, 0);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));		
-		
-		layout.setOrientation(LinearLayout.VERTICAL);	
 
 		setListAdapter(new StopsListAdapter(this));
 	}
@@ -125,26 +121,12 @@ public class StopsListActivity extends ListActivity {
 	
 			View pv = convertView;
 			ViewWrapper wrapper = null;
+
+			LayoutInflater inflater = getLayoutInflater();
+			pv = inflater.inflate(R.layout.stops_list_row, parent, false);
 					
-			if (pv == null) {
-				LayoutInflater inflater = getLayoutInflater();
-				pv = inflater.inflate(R.layout.stops_list_row, parent, false);
-						
-				wrapper = new ViewWrapper(pv);
-				if (position == 0) {
-					usenameHeight = wrapper.getTextLabel2().getHeight();
-				}
-						
-				pv.setTag(wrapper);
-						
-				wrapper = new ViewWrapper(pv);
-				pv.setTag(wrapper);
-			} 
-			else {
-				wrapper = (ViewWrapper) pv.getTag();
-			}
-					
-			pv.setId(0);
+			wrapper = new ViewWrapper(pv);
+			pv.setTag(wrapper);
 
 			Stop thisStop = (Stop) stops.get(position);
 			

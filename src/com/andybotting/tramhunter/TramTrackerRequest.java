@@ -11,26 +11,26 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.Context;
 import android.util.Log;
-import android.widget.TextView;
 
 
 public class TramTrackerRequest {
 
 	private static final String NAMESPACE = "http://www.yarratrams.com.au/pidsservice/";
 	private static final String URL = "http://ws.tramtracker.com.au/pidsservice/pids.asmx";
+
+	private static final String CLIENTTYPE = "IPHONEPID";
+	private static final String CLIENTVERSION = "1.3.2.1";
+	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 	
-	// Start with a blank GUID, and we'll generate one for the 
-	// life of the TramTrackerRequest object
+	private Context context;
+	
 	String guid = "";
 
-	// Web Services fields for TramTracker
-	private static final String CLIENTTYPE = "WEBPID";
-	private static final String CLIENTVERSION = "1.1.0";
-	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
+	public TramTrackerRequest(Context context) {
+		this.context = context;
+	}
 	
 	private Object makeTramTrackerRequest(SoapObject request) {	
 		
@@ -45,11 +45,18 @@ public class TramTrackerRequest {
  		envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
 		envelope.dotNet = true;
  		
- 		// Generate a new Guid, if it doesn't exist
+		// Get our GUID from the database
+		TramHunterDB db = new TramHunterDB(context);
+		guid = db.getGUID();
+		db.close();
+		
+		// If we don't have a GUID yet, get from from TramTracker
  		if (guid == "") {
+ 			Log.d("Testing","GUID is null, methodName is " + methodName);
+ 			
  			if (methodName != "GetNewClientGuid") {
  				getNewClientGuid();
- 				
+
  				// Sleep for a sec so that our GUID works with the next TT Request
  				try {
 					Thread.sleep(1000);
@@ -87,13 +94,23 @@ public class TramTrackerRequest {
 	}
 
 	
-	
 	public void getNewClientGuid() {
-		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	  
-		Object result =  makeTramTrackerRequest(request);
-		guid = result.toString();
-	}
 		
+		Log.d("Testing", "Getting new GUID from TT");
+		
+		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	 
+		Object result = makeTramTrackerRequest(request);
+
+		guid = result.toString();
+		
+		Log.d("Testing", "GUID from TT is: " + guid);
+		
+		// Create out DB instance
+		TramHunterDB db = new TramHunterDB(context);
+		db.setGUID(guid);
+		db.close();
+	}
+
 	
 	public Stop GetStopInformation(int tramTrackerID) {
 

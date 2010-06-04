@@ -1,7 +1,10 @@
 package com.andybotting.tramhunter;
 
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.android.maps.GeoPoint;
 
 import android.location.Location;
 
@@ -15,10 +18,11 @@ public class Stop {
 	private String secondaryName;
 	private String cityDirection;
 	private Location location;
-	private Float latitude;
-	private Float longitude;
+	private double latitude;
+	private double longitude;
 	private String suburb;
 	private boolean starred = false;
+	private Vector<Route> routes;
 
 	
 	
@@ -73,7 +77,12 @@ public class Stop {
 
 	
 	public String getStopName() {
-	   String stopName = primaryName + " & " + secondaryName;
+	   String stopName = primaryName;
+	   
+	   if (secondaryName.length() > 0) {
+		   stopName += " & " + secondaryName;
+	   }
+	   
 	   return stopName;
 	}	
 
@@ -110,15 +119,27 @@ public class Stop {
 		  return cityDirection;
 	}	
 	
+	
+	public double getLatitude() {
+		return latitude;
+	}	
+
+	
 	public void setLatitude(Float _latitude) {
 		latitude = _latitude;		
 	}
-	 
+	
+	
+	public double getLongitude() {
+		return longitude;
+	}	 
 	
 	public void setLongitude(Float _longitude) {
 		longitude = _longitude;
 		
 	}
+	
+	
 	
 	public void setLocation(Location _location) {
 		 location = _location;
@@ -137,6 +158,55 @@ public class Stop {
 
 		}
 	}	
+	
+	
+	/**
+	 * @return a float representing the distance between the stop and
+	 * a given location
+	 */
+	public double distanceTo(Location location) {
+		double distance = this.getLocation().distanceTo(location);
+		return distance;
+	}
+	
+	
+    public String formatDistanceTo(Location location){
+    	
+    	double distance = this.distanceTo(location);
+    	
+    	String result = "0m";
+    	
+    	if(distance > 10000) {
+    		// More than 10kms
+    		distance = distance / 1000;
+    		result = (int)roundToDecimals(distance, 0) + "km";
+    	}
+    	else if(distance > 1000) {
+    		distance = distance / 1000;
+    		result = roundToDecimals(distance, 1) + "km";
+    	}
+    	else {
+    		result = roundToDecimals(distance, 3) + "m";
+    	}
+    	
+    	return result;
+    }
+    
+    private static double roundToDecimals(double value, int decimalPlaces) {
+    	int intValue = (int)((value * Math.pow(10, decimalPlaces)));
+    	return (((double)intValue) / Math.pow(10, decimalPlaces));
+    }
+
+	
+	/**
+	 * @return the GeoPoint of the stop
+	 */
+	public GeoPoint getGeoPoint() {
+        int lat1E6 = (int) (latitude * 1E6);
+        int lng1E6 = (int) (longitude * 1E6);
+        GeoPoint point = new GeoPoint(lat1E6, lng1E6);
+        return point;
+	}
 	
 	
 	public void setSuburb(String _suburb) {
@@ -184,11 +254,47 @@ public class Stop {
 	}
 	
 	
+	public void setRoutes(Vector _routes) {
+		routes = _routes;
+	}
+	
+	
+	public Vector<Route> getRoutes() {
+	   return routes;
+	}   	
+	
+	
+	public String getRoutesString() {
+		String routesString = "";
+		
+		if(routes.size() < 2) {
+			routesString = "Route ";
+		}
+		else {
+			routesString = "Routes ";
+		}
+		
+		for(int i=0; i < routes.size(); i++) {
+			Route route = routes.get(i);
+			routesString += route.getNumber();
+		
+			if (i < routes.size() -2) {
+				routesString += ", ";
+			}
+			else if (i == routes.size() -2){
+				routesString += " and ";
+			}
+		}
+
+		return routesString;
+	}
+	                               
+	
 	/**
 	 * @return String representing the stop
 	 */
 	public String toString() {
 		return ("Stop " + tramTrackerID + ": " + getPrimaryName());
 	}
-
+	
 }

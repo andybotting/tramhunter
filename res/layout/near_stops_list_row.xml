@@ -1,0 +1,69 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical">
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingTop="8dip"
+		android:paddingBottom="8dip">
+		
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:layout_weight="1"
+			android:gravity="center_vertical"
+			android:layout_marginLeft="8dip"
+			android:layout_marginRight="8dip">
+			
+			<TextView android:id="@+id/stopNameText"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:gravity="left"
+				android:textSize="18dip"
+				android:singleLine="true"
+				android:ellipsize="end"
+				android:shadowDx="0"
+				android:shadowDy="1"
+				android:shadowRadius="1"
+				android:layout_marginBottom="-2dip"
+				android:paddingRight="8dip"
+				android:text="Route Number"/>
+				
+				<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content">
+
+				    <TextView
+				    	android:id="@+id/distanceText"
+				        android:layout_width="50dip"
+				        android:layout_height="wrap_content"
+				        android:layout_alignParentRight="true"
+				        android:layout_alignParentTop="true"
+						android:textSize="12dip"
+				        android:gravity="center_vertical"
+				        android:textColor="#666666"
+				        android:text="Distance" />
+				
+				    <TextView  
+				        android:id="@+id/directionText"
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content" 
+				        android:layout_toLeftOf="@+id/secondLine"
+				        android:layout_alignParentTop="true"
+				        android:layout_alignParentLeft="true"
+				        android:textSize="12dip"
+				        android:singleLine="true"
+				        android:ellipsize="marquee"
+				        android:textColor="#666666"
+				        android:text="Direction" />
+				
+				</RelativeLayout>
+
+				
+		</LinearLayout>
+	</LinearLayout>
+</RelativeLayout>

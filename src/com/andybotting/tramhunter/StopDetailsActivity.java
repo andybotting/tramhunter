@@ -1,5 +1,7 @@
 package com.andybotting.tramhunter;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
@@ -8,15 +10,18 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 
 import android.content.Context;
+import android.content.Intent;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 
 import android.widget.BaseAdapter;
 
@@ -28,13 +33,12 @@ import android.widget.Toast;
 
 public class StopDetailsActivity extends ListActivity {
 	
+	TramHunterDB db;
+	
 	ListView listView;
 	TextView firstLineField;
 	TextView secondLineField;
-	
-	Date melbourneTime = new Date();
-	Date localTime = new Date();
-	long timeDifference = 1;
+	TextView thirdLineField;
 
 	public Route selectedRoute;
 
@@ -43,35 +47,36 @@ public class StopDetailsActivity extends ListActivity {
 	public int tramTrackerId;
 	
 	CompoundButton starButton;
-	
-	Thread myRefreshThread = null;
-	
-	// Make our TramTrackerRequest now, so future requests
-	// in this activity will get the already generated GUID
-	TramTrackerRequest ttRequest = new TramTrackerRequest();
+	TramTrackerRequest ttRequest;
 
+	
+
+    protected boolean running = false;
+   
+    private volatile Thread refreshThread;
+    
+    boolean loadingError = false;
+    boolean showDialog = true;
+ 
+    Date melbourneTime;
+    
+    Handler UpdateHandler = new Handler() {
+    	public void handleMessage(Message msg) {
+    		new GetNextTramTimes().execute();
+    	}
+	};
+    
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 		
+		// Set the window to have a spinner in the title bar
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		
 		setContentView(R.layout.stop_details);
 		listView = (ListView)this.findViewById(android.R.id.list);
-		
-		String title = getResources().getText(R.string.app_name) + ": Details for Stop";
-		setTitle(title);
 
-		// Display stop data from DB
-		displayStop();
-		
-		// Get tram times from TramTracker using AsyncTask
-		new GetNextTramTimes().execute();
-
-	}
-	
-	
-	public void displayStop() {
-		  
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
@@ -79,13 +84,73 @@ public class StopDetailsActivity extends ListActivity {
 		}  
 		
 		// Create out DB instance
-		TramHunterDB db = new TramHunterDB(this);
+		db = new TramHunterDB(this);
 		stop = db.getStop(tramTrackerId);
 		db.close();
 
+		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
+		setTitle(title);
+
+		// Display stop data from DB
+		displayStop(stop);
+		
+		
+		starButton = (CompoundButton)findViewById(R.id.stopStar);
+		starButton.setChecked(stop.isStarred());
+
+		starButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				db = new TramHunterDB(getBaseContext());
+				db.setStopStar(tramTrackerId, starButton.isChecked());
+				stop.setStarred(starButton.isChecked());
+				db.close();
+			}
+		});
+
+		// Our thread for updating the stops every 60 secs
+        refreshThread = new Thread(new CountDown());
+        refreshThread.setDaemon(true);
+        refreshThread.start();	
+
+	}
+	
+	public void onStop() {
+		super.onStop();
+		refreshThread.interrupt();
+	}
+	
+	
+	public void onResume() {
+		super.onResume();
+		if(refreshThread.isInterrupted()) {
+			refreshThread.start();
+		}
+	}
+
+	
+    class CountDown implements Runnable {
+        public void run() {
+        	while(!Thread.currentThread().isInterrupted()){
+        		Message m = new Message();
+        		UpdateHandler.sendMessage(m);
+        		try {
+        			// 60 Seconds
+        			Thread.sleep(60 * 1000);
+        		} 
+        		catch (InterruptedException e) {
+        			Thread.currentThread().interrupt();
+        		}
+        	}
+        }
+	}
+	
+
+    
+	public void displayStop(Stop stop) {
 		firstLineField = (TextView)findViewById(R.id.firstLine);
 		secondLineField = (TextView)findViewById(R.id.secondLine);
-					
+		thirdLineField = (TextView)findViewById(R.id.thirdLine);
+		
 		// Set labels from Stop hash map
 		String firstLineText = stop.getPrimaryName();	
 		
@@ -95,73 +160,110 @@ public class StopDetailsActivity extends ListActivity {
 			secondLineText += ": " + stop.getSecondaryName();
 		}
 		secondLineText += " - " + stop.getCityDirection();
+		
+		db = new TramHunterDB(this);
+		stop.setRoutes(db.getRoutesForStop(tramTrackerId));
+		db.close();
+		
+		String thirdLineText = stop.getRoutesString();
 			
 		firstLineField.setText(firstLineText);
 		secondLineField.setText(secondLineText);
+		thirdLineField.setText(thirdLineText);
 		
-		starButton = (CompoundButton)findViewById(R.id.stopStar);
-		starButton.setChecked(stop.isStarred());
-
-		starButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				TramHunterDB db = new TramHunterDB(getBaseContext());
-				db.setStopStar(tramTrackerId, starButton.isChecked());
-				stop.setStarred(starButton.isChecked());
-				db.close();
-			}
-		});
-
+		
 	}
-
+	
 	
 	private class GetNextTramTimes extends AsyncTask<Vector, Void, Vector> {
 		private final ProgressDialog dialog = new ProgressDialog(StopDetailsActivity.this);
+		
+		TextView dateStringText = (TextView)findViewById(R.id.bottomLine);
 
-		// can use UI thread here
+		// Can use UI thread here
 		protected void onPreExecute() {
-			this.dialog.setMessage("Fetching Tram Times...");
-			this.dialog.show();
+
+			if (showDialog) {
+				// Show the dialog window
+				this.dialog.setMessage("Fetching Tram Times...");
+				this.dialog.show();
+				showDialog = false;
+			}
+			// Show the spinner in the title bar
+			setProgressBarIndeterminateVisibility(true);
+
 		}
 
-		// automatically done on worker thread (separate from UI thread)
+		// Automatically done on worker thread (separate from UI thread)
 		protected Vector doInBackground(final Vector... params) {
-			//TramTrackerRequest ttRequest = new TramTrackerRequest();
-			//nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
-
+			TramTrackerRequest ttRequest = new TramTrackerRequest(getBaseContext());
+			
 			try {
 				nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
+				
+
+				
+				// We'll remove all NextTrams which are longer than
+				// 99 minutes away
+				for(int i=0; i < nextTrams.size(); i++) {
+					if (nextTrams.get(i).minutesAway() > 99) {
+						nextTrams.remove(i);
+					}
+				}
+				
+				
 			} catch (Exception e) {
-				// Fail :(
-				Log.d("Testing", "Failed to get next trams");
+				// TODO: Put something here
 			}
 			
 			return nextTrams;
 		}
 
-		// can use UI thread here
+		// Can use UI thread here
 		protected void onPostExecute(Vector nextTrams) {
-			if (this.dialog.isShowing()) {
-				this.dialog.dismiss();
-			}
 			
 			if(nextTrams.size() > 0) {
 				// Sort trams by minutesAway
 				Collections.sort(nextTrams);
+				loadingError = false;
+				
+//				// Get the request time from the first tram
+//				NextTram firstTram = (NextTram) nextTrams.get(0);
+//				melbourneTime = firstTram.getRequestDateTime();
+//				Date date = new Date();
+				
+			    //String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
+				String DATE_FORMAT = "EEE, d MMM yyyy h:mm a";
+			    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+			    Calendar c1 = Calendar.getInstance(); // today				
+				
+				dateStringText.setText("Last updated: " + sdf.format(c1.getTime()));
+				
 				setListAdapter(new NextTramsListAdapter(StopDetailsActivity.this));	
 			}
 			else {
-				Context context = getApplicationContext();
-				CharSequence text = "Failed to fetch tram times";
-				int duration = Toast.LENGTH_SHORT;
-				Toast toast = Toast.makeText(context, text, duration);
-				toast.show();
+				// If we've not had a loading error already
+				if (!loadingError) {				
+					Context context = getApplicationContext();
+					CharSequence text = "Failed to fetch tram times";
+					int duration = Toast.LENGTH_SHORT;
+					Toast toast = Toast.makeText(context, text, duration);
+					toast.show();
+				}
+				loadingError = true;
 			}	
+
+			// Hide our dialog window
+			if (this.dialog.isShowing()) {
+				this.dialog.dismiss();
+			}
+			setProgressBarIndeterminateVisibility(false);
+			
+			
 		}
 	}
 	
-	
-	
-	
+
 	private class NextTramsListAdapter extends BaseAdapter {
 		
 		private Context mContext;		
@@ -193,10 +295,7 @@ public class StopDetailsActivity extends ListActivity {
 				pv = inflater.inflate(R.layout.stop_details_row, parent, false);
 					
 				wrapper = new ViewWrapper(pv);
-//				if (position == 0) {
-//					usenameHeight = wrapper.getNextTramDestination().getHeight();
-//				}
-					
+				
 				pv.setTag(wrapper);
 					
 				wrapper = new ViewWrapper(pv);
@@ -269,7 +368,11 @@ public class StopDetailsActivity extends ListActivity {
 		menu.add(0, 1, 0, "Favourite");
 		MenuItem menuItem2 = menu.findItem(1);
 		menuItem2.setIcon(R.drawable.ic_menu_star);
-		// TODO: Fix icon
+		
+		menu.add(0, 2, 0, "Map");
+		MenuItem menuItem3 = menu.findItem(2);
+		menuItem3.setIcon(R.drawable.ic_menu_mapmode);
+		
 		return true;
 	}
 
@@ -279,9 +382,12 @@ public class StopDetailsActivity extends ListActivity {
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
 		case 0:
+			// Refresh
+			showDialog = true;
 			new GetNextTramTimes().execute();
 			return true;
 		case 1:
+			// Star/Favourite
 			TramHunterDB db = new TramHunterDB(getBaseContext());
 			starButton = (CompoundButton)findViewById(R.id.stopStar);
 			
@@ -296,6 +402,15 @@ public class StopDetailsActivity extends ListActivity {
 				stop.setStarred(true);
 			}
 			db.close();
+			return true;
+		case 2:
+			// Map view
+			Bundle bundle = new Bundle();
+			bundle.putInt("tramTrackerId", tramTrackerId);
+			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+			intent.putExtras(bundle);
+			startActivityForResult(intent, 1);
+			
 			return true;
 		}
 		return false;

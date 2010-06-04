@@ -22,18 +22,26 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DB_NAME = "tramhunter.db";
 	private static final String DB_PATH = "/data/data/"+ AUTHORITY + "/databases/";
-	private static final int DB_VERSION = 1;
+	private static final int DB_VERSION = 2;
 	
+	// Create
 	private static final String TABLE_FIRST_LAUNCH = "first_launch";
+	private static final String TABLE_GUID = "guid";
+	
+	// Existing
 	private static final String TABLE_ROUTES = "routes";
 	private static final String TABLE_STOPS = "stops";
 	private static final String TABLE_STOPS_JOIN_ROUTES = "stops "
 		+ "JOIN route_stops ON route_stops.stop_id = stops._id "
 		+ "JOIN routes ON route_stops.route_id = routes._id";
 	
-	
-	private static final String CREATE_TABLE_FIRST_LAUNCH  = "create table if not exists 'first_launch' "
+	// Create first_launch table
+	private static final String CREATE_TABLE_FIRST_LAUNCH  = "create table if not exists '" + TABLE_FIRST_LAUNCH + "' "
 		+ "(id integer primary key autoincrement, read integer not null);";
+	
+	// Create guid table
+	private static final String CREATE_TABLE_GUID  = "create table if not exists '" + TABLE_GUID + "' "
+		+ "(id integer primary key autoincrement, guid integer not null);";
  
 	private SQLiteDatabase db; 
 	private Context context;
@@ -63,7 +71,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		}
 
 		db = this.getWritableDatabase();
-		db.execSQL(CREATE_TABLE_FIRST_LAUNCH );
+		
+		Log.d("Testing", "Creating DB tables");
+		// Create extra tables in our DB
+		db.execSQL(CREATE_TABLE_FIRST_LAUNCH);
+		db.execSQL(CREATE_TABLE_GUID);
 		
 		return db;
 	}
@@ -209,6 +221,109 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		db.close();
 		return routes;
 	}
+	
+	
+	
+	
+	// Get a Vector list of our routes
+	public Vector<Route> getRoutesForStop(int tramTrackerId) {
+		db = getDatabase();
+
+		Vector<Route> routes = new Vector<Route>();
+		
+		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
+							new String[] { "routes._id", "number", "destination", "direction"}, 
+							StopsColumns.TRAMTRACKER_ID + " = '"  + tramTrackerId + "'", 
+							null, 
+							"routes._id", 
+							null, 
+							"routes._id", 
+							null);
+		
+		if (c.moveToFirst()) {		
+			do {	
+				Route route = new Route();
+
+				int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
+				int col_destination = c.getColumnIndexOrThrow(RoutesColumns.DESTINATION);
+				int col_direction = c.getColumnIndexOrThrow(RoutesColumns.DIRECTION);
+
+				route.setNumber(c.getString(col_number));
+				route.setDestination(c.getString(col_destination));
+				route.setUp(c.getInt(col_direction));
+			
+				routes.add(route);
+			} 
+			while(c.moveToNext());
+		}
+		
+		c.close();
+		db.close();
+		return routes;
+	}	
+	
+	
+	
+	
+	
+	
+	// Get a Vector list of our 'starred' stops
+	public Vector<Stop> getAllStops() {
+		db = getDatabase();
+		
+		Vector<Stop> stops = new Vector<Stop>();
+		
+		Cursor c = db.query(TABLE_STOPS, 
+							null, 
+							null, 
+							null, 
+							null, 
+							null, 
+							null, 
+							null);
+	
+		if (c.moveToFirst()) {		
+			do {
+				Stop stop = new Stop();
+			
+				int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
+				int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
+				int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
+				int col_secondaryName = c.getColumnIndexOrThrow(StopsColumns.SECONDARY_NAME);
+				int col_cityDirection = c.getColumnIndexOrThrow(StopsColumns.CITY_DIRECTION);
+				int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
+				int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
+				int col_suburb = c.getColumnIndexOrThrow(StopsColumns.SUBURB);
+				int col_starred = c.getColumnIndexOrThrow(StopsColumns.STARRED);
+
+				stop.setTramTrackerID(c.getInt(col_tramTrackerID));
+				stop.setFlagStopNumber(c.getString(col_flagStopNumber));
+				stop.setPrimaryName(c.getString(col_primaryName));
+				stop.setSecondaryName(c.getString(col_secondaryName));
+				stop.setCityDirection(c.getString(col_cityDirection));
+				stop.setLatitude(c.getFloat(col_latitude));
+				stop.setLongitude(c.getFloat(col_longitude));
+				stop.setSuburb(c.getString(col_suburb));
+				stop.setStarred(c.getInt(col_starred));
+				
+				//stop.setRoutes(getRoutesForStop(stop.getTramTrackerID()));
+				
+				stops.add(stop);
+				
+			} while(c.moveToNext());
+		}
+		
+		c.close();
+		db.close();
+		return stops;
+	}	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	// Get a Vector list of our 'starred' stops
@@ -458,6 +573,53 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}
 
 	
+	
+	// Set the GUID in our database for next time
+	public void setGUID(String guid) {
+		db = getDatabase();
+		
+		ContentValues values = new ContentValues();
+		values.put("id", 0);
+		values.put("guid", guid);
+	
+		boolean returnValue = db.insert(TABLE_GUID, null, values) > 0;
+		
+		Log.d("Testing", "Storing GUID in DB: " + guid);
+		
+		db.close();
+	}
+	
+	
+	// Return a String of the GUID value generated from TramTracker
+	public String getGUID(){
+		db = getDatabase();	
+		
+		Cursor c = db.query(TABLE_GUID, 
+							new String[] { "guid" }, 
+							"id=0", 
+							null, 
+							null, 
+							null, 
+							null);
+		
+		int numRows = c.getCount();
+		c.moveToFirst();
+		
+		String guid = "";
+		
+		if (numRows == 1){
+			guid = c.getString(0);
+		}
+		
+		Log.d("Testing", "Returning GUID from DB: " + guid);
+		
+		c.close();
+		db.close();
+			
+		return guid;
+	}
+	
+
 	// Database column definitions
 	 public static interface StopsColumns {
 			public static final String ID = "_id";
@@ -485,7 +647,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		 public static final String STOP_ID = "stop_id";
 		 public static final String STOP_ORDER = "stop_order";
 	}
-
+	
 		
 	public static class Stops implements BaseColumns, StopsColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/stops/");

@@ -1,98 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
-	android:layout_width="fill_parent" 
-	android:layout_height="fill_parent">
-
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="?android:attr/listPreferredItemHeight"
-	android:padding="6dip">
-
-		<CheckBox android:id="@+id/stopStar"
-			android:layout_width="32dip"
-			android:layout_height="32dip"
-
-			android:layout_alignParentTop="true"
-			android:layout_marginRight="6dip"
-
-			android:focusable="false"
-			android:button="@drawable/btn_star"
-			android:paddingLeft="8dip"/>	
-
-
-		<TextView
-			android:id="@+id/secondLine"
-			
-			android:layout_width="fill_parent"
-			android:layout_height="26dip" 
-
-			android:layout_toRightOf="@+id/stopStar"
-			android:layout_alignParentBottom="true"
-			android:layout_alignParentRight="true"
-
-			android:singleLine="true"
-			android:ellipsize="marquee"
-			android:text="Direction" />
-
-		<TextView
-			android:id="@+id/firstLine"
-			
-			android:textSize="20dip"
-			
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent">
+	
+	
+		<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
+			android:padding="5dip" >
 	
-			android:layout_toRightOf="@+id/stopStar"
-			android:layout_alignParentRight="true"
-			android:layout_alignParentTop="true"
-			android:layout_above="@id/secondLine"
-			android:layout_alignWithParentIfMissing="true"
+			<CheckBox android:id="@+id/stopStar"
+				android:layout_width="32dip"
+				android:layout_height="32dip"
 	
-			android:ellipsize="marquee"
-			android:gravity="center_vertical"
-			android:text="Stop Name" />
+				android:layout_alignParentTop="true"
+				android:layout_marginRight="5dip"
+	
+				android:focusable="false"
+				android:button="@drawable/btn_star"
+				android:paddingLeft="8dip"/>	
+	
+	
+			<TextView
+				android:id="@+id/firstLine"
+				
+				android:textSize="20dip"
+				
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+		
+				android:layout_toRightOf="@+id/stopStar"
+	
+				android:layout_alignParentRight="true"
+				android:layout_alignParentTop="true"
+				android:layout_alignWithParentIfMissing="true"
+		
+				android:ellipsize="marquee"
+				android:gravity="center_vertical"
+				android:text="FirstLine" />
+	
+	
+	
+			<TextView
+				android:id="@+id/secondLine"
+				
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" 
+	
+				android:layout_toRightOf="@+id/stopStar"
+				android:layout_below="@+id/firstLine"
+	
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:text="SecondLine" />
+				
+			<TextView
+				android:id="@+id/thirdLine"
+				
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" 
+	
+				android:layout_toRightOf="@+id/stopStar"
+				android:layout_below="@+id/secondLine"
+				
+				android:layout_alignParentRight="true"
+	
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:text="ThirdLine" />
+	
+		</RelativeLayout>
+	
+		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:stretchColumns="1"
+			>
+			
+			<TableRow>
+			
+				<TextView
+					android:text="Route"
+					android:id="@+id/headingRouteNumber" 
+					android:padding="3dip"
+					android:textSize="14dip" 
+					android:width="45dip" />
+			
+				<TextView
+					android:text="To" 
+					android:id="@+id/headingRouteDestination"
+					android:gravity="left"
+					android:padding="3dip"
+					android:textSize="14dip" />
+			
+				<TextView
+	   				android:text="Mins" 
+					android:id="@+id/headingNextTime" 
+					android:gravity="right"
+					android:padding="3dip"
+					android:textSize="14dip" 
+					android:width="45dip"
+					android:layout_alignParentRight="true"/>
+			
+			</TableRow>
+		
+		</TableLayout>
+	
+		<ListView android:id="@android:id/list"
+		   	android:layout_width="fill_parent"
+		   	android:layout_height="wrap_content"
+			android:cacheColorHint="#00000000"/>
+	</LinearLayout>
+			
+		
+	<RelativeLayout 
+        android:id="@+id/InnerRelativeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dip"
+        android:layout_alignParentBottom="true" >
 
+    	<TextView
+        	android:id="@+id/bottomLine"
+        	android:textSize="12dip"
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+			android:text="" />
+
+    </RelativeLayout>	
+		
 </RelativeLayout>
 
-	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:stretchColumns="1">
-		<TableRow>
-			<TextView
-				android:text="Route"
-				android:id="@+id/headingRouteNumber" 
-				android:padding="3dip"
-				android:textSize="14dip" 
-				android:width="45dip" />
-			<TextView
-				android:text="To" 
-				android:id="@+id/headingRouteDestination"
-				android:gravity="left"
-				android:padding="3dip"
-				android:textSize="14dip" />
-			<TextView
-   				android:text="Mins" 
-				android:id="@+id/headingNextTime" 
-				android:gravity="right"
-				android:padding="3dip"
-				android:textSize="14dip" 
-				android:width="45dip"
-				android:layout_alignParentRight="true"/>
-		</TableRow>
-	</TableLayout>
-
-	<ListView android:id="@android:id/list"
-	   	android:layout_width="fill_parent"
-	   	android:layout_height="wrap_content"
-		android:cacheColorHint="#00000000"/>
-
-
-
-</LinearLayout>
 
 
 

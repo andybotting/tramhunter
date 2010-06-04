@@ -1,5 +1,7 @@
 package com.andybotting.tramhunter;
 
+import com.andybotting.tramhunter.RoutesListActivity.ViewWrapper;
+
 import android.app.AlertDialog;
 import android.app.ListActivity;
 
@@ -30,13 +32,15 @@ public class TramHunter extends ListActivity {
 	String[] menuItems = {
 			 "Favourite Stops",
 			 "Browse for a Stop",
-			 "Enter a TramTracker ID" 
+			 "Enter a TramTracker ID",
+			 "Nearby Stops" 
 	};
 
 	String[] menuDesc = {
 			 "Find your favourite stops fast",
 			 "Pick your stop from the list",
-			 "Use the TramTracker ID from the tram stop sign post" 
+			 "Use the TramTracker ID from the tram stop sign post",
+			 "Use location services to find the nearest stops"
 	};
 
 
@@ -104,24 +108,22 @@ public class TramHunter extends ListActivity {
 						startActivityForResult(intent, 1);
 						break;
 					}
-					case 2:
+					case 2: {
 						Intent intent = new Intent(TramHunter.this, EnterTTIDActivity.class);
 						startActivityForResult(intent, 1);
 						break;
-
 					}
+					case 3: {
+						Intent intent = new Intent(TramHunter.this, NearStopsActivity.class);
+						startActivityForResult(intent, 1);
+						break;
+					}
+				}
   
 			}
 								
 		});
 
-		ScrollView sv = new ScrollView(this);
-		sv.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-		LinearLayout layout = new LinearLayout(this);
-		layout.setPadding(10, 10, 10, 0);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));		
-		
-		layout.setOrientation(LinearLayout.VERTICAL);	
 		
 		setListAdapter(new MenuListAdapter(this));
 	}
@@ -152,26 +154,12 @@ public class TramHunter extends ListActivity {
 				
 			View pv = convertView;
 			ViewWrapper wrapper = null;
-				
-			if (pv == null) {
-				LayoutInflater inflater = getLayoutInflater();
-				pv = inflater.inflate(R.layout.home_row, parent, false);
+
+			LayoutInflater inflater = getLayoutInflater();
+			pv = inflater.inflate(R.layout.home_row, parent, false);
 					
-				wrapper = new ViewWrapper(pv);
-				if (position == 0) {
-					usenameHeight = wrapper.getTextLabel1().getHeight();
-				}
-					
-				pv.setTag(wrapper);
-					
-				wrapper = new ViewWrapper(pv);
-				pv.setTag(wrapper);
-			} 
-			else {
-				wrapper = (ViewWrapper) pv.getTag();
-			}
-				
-			pv.setId(0);
+			wrapper = new ViewWrapper(pv);
+			pv.setTag(wrapper);
 				
 			wrapper.getTextLabel1().setText(menuItems[position]);
 			wrapper.getTextLabel2().setText(menuDesc[position]);
