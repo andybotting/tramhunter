@@ -95,8 +95,7 @@ public class Stop {
 	public String getPrimaryName() {
 			return primaryName;
 	}
-	
-	
+		
 
 
 	public void setSecondaryName(String _secondaryName) {
@@ -181,12 +180,12 @@ public class Stop {
     		distance = distance / 1000;
     		result = (int)roundToDecimals(distance, 0) + "km";
     	}
-    	else if(distance > 1000) {
+    	else if(distance > 700) {
     		distance = distance / 1000;
     		result = roundToDecimals(distance, 1) + "km";
     	}
     	else {
-    		result = roundToDecimals(distance, 3) + "m";
+    		result = (int)roundToDecimals(distance, 0) + "m";
     	}
     	
     	return result;
@@ -254,7 +253,7 @@ public class Stop {
 	}
 	
 	
-	public void setRoutes(Vector _routes) {
+	public void setRoutes(Vector<Route> _routes) {
 		routes = _routes;
 	}
 	
