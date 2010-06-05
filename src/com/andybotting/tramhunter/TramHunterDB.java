@@ -223,6 +223,37 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}
 	
 	
+	// Get a stop object from a given TramTracker ID
+	public Route getRoute(long routeId) {
+		db = getDatabase();
+
+		Cursor c = db.query(TABLE_ROUTES, 
+				new String[] { "_id", "number", "destination", "direction"}, 
+				null, 
+				null, 
+				null, 
+				null, 
+				null);
+	
+		Route route = new Route();
+		
+		if (c.moveToFirst()) {		
+			int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
+			int col_destination = c.getColumnIndexOrThrow(RoutesColumns.DESTINATION);
+			int col_direction = c.getColumnIndexOrThrow(RoutesColumns.DIRECTION);
+
+			route.setNumber(c.getString(col_number));
+			route.setDestination(c.getString(col_destination));
+			route.setUp(c.getInt(col_direction));
+
+		}
+		c.close();
+		db.close();
+		
+		return route;
+	}
+	
+	
 	
 	
 	// Get a Vector list of our routes

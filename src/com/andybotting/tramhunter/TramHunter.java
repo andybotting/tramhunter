@@ -132,7 +132,6 @@ public class TramHunter extends ListActivity {
 	private class MenuListAdapter extends BaseAdapter {
 		
 		private Context mContext;		
-		private int usenameHeight;
 
 		public MenuListAdapter(Context context) {
 			mContext = context;

@@ -33,7 +33,7 @@ public class RoutesListActivity extends ListActivity {
 		
 		listView = (ListView)this.findViewById(android.R.id.list);
 		
-		String title = getResources().getText(R.string.app_name) + ": Routes";
+		String title = "Routes";
 		setTitle(title);
 		
 		displayRoutes();

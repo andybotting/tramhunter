@@ -49,8 +49,6 @@ public class StopDetailsActivity extends ListActivity {
 	CompoundButton starButton;
 	TramTrackerRequest ttRequest;
 
-	
-
     protected boolean running = false;
    
     private volatile Thread refreshThread;
@@ -60,12 +58,12 @@ public class StopDetailsActivity extends ListActivity {
  
     Date melbourneTime;
     
+    // Handle the timer
     Handler UpdateHandler = new Handler() {
     	public void handleMessage(Message msg) {
     		new GetNextTramTimes().execute();
     	}
 	};
-    
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -200,17 +198,14 @@ public class StopDetailsActivity extends ListActivity {
 			
 			try {
 				nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
-				
 
-				
-				// We'll remove all NextTrams which are longer than
-				// 99 minutes away
-				for(int i=0; i < nextTrams.size(); i++) {
-					if (nextTrams.get(i).minutesAway() > 99) {
-						nextTrams.remove(i);
-					}
-				}
-				
+//				// We'll remove all NextTrams which are longer than
+//				// 99 minutes away
+//				for(int i=0; i < nextTrams.size(); i++) {
+//					if (nextTrams.get(i).minutesAway() > 99) {
+//						nextTrams.remove(i);
+//					}
+//				}
 				
 			} catch (Exception e) {
 				// TODO: Put something here
@@ -227,17 +222,10 @@ public class StopDetailsActivity extends ListActivity {
 				Collections.sort(nextTrams);
 				loadingError = false;
 				
-//				// Get the request time from the first tram
-//				NextTram firstTram = (NextTram) nextTrams.get(0);
-//				melbourneTime = firstTram.getRequestDateTime();
-//				Date date = new Date();
+			    SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy h:mm a");
+			    Calendar today = Calendar.getInstance(); // today				
 				
-			    //String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
-				String DATE_FORMAT = "EEE, d MMM yyyy h:mm a";
-			    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-			    Calendar c1 = Calendar.getInstance(); // today				
-				
-				dateStringText.setText("Last updated: " + sdf.format(c1.getTime()));
+				dateStringText.setText("Last updated: " + sdf.format(today.getTime()));
 				
 				setListAdapter(new NextTramsListAdapter(StopDetailsActivity.this));	
 			}

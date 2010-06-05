@@ -27,6 +27,7 @@ public class StopsListActivity extends ListActivity {
 	ListView listView;
 	Vector<Stop> stops;
 	TramHunterDB db;
+	Route route;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -37,23 +38,24 @@ public class StopsListActivity extends ListActivity {
 		setContentView(R.layout.stops_list);
 		listView = (ListView)this.findViewById(android.R.id.list);
 		
-		String title = (String) getResources().getText(R.string.app_name);
-				
+		String title = "";
+		db = new TramHunterDB(this);
+		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
 		  routeId = extras.getLong("routeId");
+		  route = db.getRoute(routeId);
 		}  
 		
-		db = new TramHunterDB(this);
 				
 		// Are we looking for stops for a route, or fav stops?
 		if (routeId > -1) {
-			title += ": Stops for Route";
+			title = "Stops for Route " + route.getNumber();
 			setTitle(title);
 			displayStopsForRoute(routeId);
 		}
 		else {
-			title += ": Favourite Stops";
+			title = "Favourite Stops";
 			setTitle(title);
 			displayFavStops();
 		}

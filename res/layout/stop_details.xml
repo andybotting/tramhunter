@@ -104,7 +104,7 @@
 					android:gravity="right"
 					android:padding="3dip"
 					android:textSize="14dip" 
-					android:width="45dip"
+					android:width="50dip"
 					android:layout_alignParentRight="true"/>
 			
 			</TableRow>

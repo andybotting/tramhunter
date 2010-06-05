@@ -42,14 +42,16 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	Vector<Stop> sortedStops = new Vector<Stop>();
 	SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
 	TramHunterDB db;
-	
-	Location location;
+
 	private LocationManager locationManager;
-	private static final String PROVIDER = "passive";
+	private Location location;
 	
-	// Maximum stops
+	// Maximum stops to list
 	final static int MAXSTOPS = 20;
  
+	// Only show loading dialog at first load
+	boolean showDialog = true;
+	
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	 
 	
@@ -66,41 +68,19 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		// Get the location
 		location = findLocation();
-		if(location != null) {
-			new GetNearStops().execute();
-		}
-		else {
-			// Toast?
-		}
+    	if (location != null)
+    		new GetNearStops().execute();
 	}
 
 	
-	private Location findLocation() {
+	private Location findLocation() {	
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		Location location = locationManager.getLastKnownLocation(PROVIDER);
+	  	// TODO: Check if GPS is enabled and tell the user if it's not?
+	  	Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		return location;
 	}
 	
-	
-	public void sortStops(Location location) {
-		
-		// Iterate through stops, adding to a sortlist 
-    	for(Stop stop : stops){
-    		double distance = location.distanceTo(stop.getLocation());
-    		sortedStopList.put(distance, stop);
-    	}  
 
-    	// Build a sorted list, of MAXSTOPS stops 
-    	for(Entry<Double, Stop> item : sortedStopList.entrySet()) {
-
-    		Stop stop = item.getValue();
-    		sortedStops.add(stop);
-
-    		if(sortedStops.size() > MAXSTOPS)
-    			break;
-    	}
-	}
-	
 	
 	public void displayStops() {
 		
@@ -131,30 +111,32 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		// Can use UI thread here
 		protected void onPreExecute() {
+			if (showDialog) {
+				// Show the dialog window
 				this.dialog.setMessage("Finding tram stops...");
 				this.dialog.show();
-
+				showDialog = false;
+			}
 		}
 
 		// Automatically done on worker thread (separate from UI thread)
 		protected Vector doInBackground(final Vector... params) {
-			
-			// Iterate through stops, adding to a sortlist 
+		
 	    	for(Stop stop : stops){
 	    		double distance = location.distanceTo(stop.getLocation());
 	    		sortedStopList.put(distance, stop);
 	    	}  
-
+	
 	    	// Build a sorted list, of MAXSTOPS stops 
 	    	for(Entry<Double, Stop> item : sortedStopList.entrySet()) {
-
+	
 	    		Stop stop = item.getValue();
 	    		sortedStops.add(stop);
-
+	
 	    		if(sortedStops.size() > MAXSTOPS)
 	    			break;
 	    	}
-	    	
+			
 			return sortedStops;
 		}
 
@@ -162,26 +144,34 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Can use UI thread here
 		protected void onPostExecute(final Vector sortedStops) {
 
-
-		
-			listView.setOnItemClickListener(new OnItemClickListener() {
-
-				public void onItemClick(AdapterView<?> arg0, View row, int position, long id) {
-					
-					Stop thisStop = (Stop) sortedStops.get(position);
-
-					int tramTrackerId = thisStop.getTramTrackerID();
-								
-					Bundle bundle = new Bundle();
-					bundle.putInt("tramTrackerId", tramTrackerId);
-					Intent intent = new Intent(NearStopsActivity.this, StopDetailsActivity.class);
-					intent.putExtras(bundle);
-					startActivityForResult(intent, 1);
-				}
-
-			});		
-
-			setListAdapter(new StopsListAdapter(NearStopsActivity.this));
+			if (location != null) {
+			
+				listView.setOnItemClickListener(new OnItemClickListener() {
+	
+					public void onItemClick(AdapterView<?> arg0, View row, int position, long id) {
+						
+						Stop thisStop = (Stop) sortedStops.get(position);
+	
+						int tramTrackerId = thisStop.getTramTrackerID();
+									
+						Bundle bundle = new Bundle();
+						bundle.putInt("tramTrackerId", tramTrackerId);
+						Intent intent = new Intent(NearStopsActivity.this, StopDetailsActivity.class);
+						intent.putExtras(bundle);
+						startActivityForResult(intent, 1);
+					}
+	
+				});		
+	
+				setListAdapter(new StopsListAdapter(NearStopsActivity.this));
+			}
+			else {
+				Context context = getApplicationContext();
+				CharSequence text = "Failed to get location";
+				int duration = Toast.LENGTH_SHORT;
+				Toast toast = Toast.makeText(context, text, duration);
+				toast.show();
+			}
 			
 			// Hide dialog
 			if (this.dialog.isShowing()) {
@@ -285,28 +275,52 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	}	
 	
 	
-	@Override
-	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub
-		
+    @Override
+    protected void onPause() {
+    	super.onPause();
+        stopLocationListening();
+	}
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationListening();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    	stopLocationListening();
+    }
+    
+    public void onLocationChanged(Location location) {
+    	if (location != null)
+    		new GetNearStops().execute();
+    }
+    
+    private void stopLocationListening() {
+        if (locationManager != null)
+        	locationManager.removeUpdates(this);
+	}
+    
+    private void startLocationListening() {
+    	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    	locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-		
 	}
 
 }
