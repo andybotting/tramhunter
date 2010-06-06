@@ -84,13 +84,16 @@ public class StopsListActivity extends ListActivity {
 				// Action for 'Yes' Button				
 					startActivity(routeListIntent);		
 				}
-				})
+			})
 			.setNegativeButton("No", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-				//  Action for 'NO' Button
-				dialog.cancel();
+					//  Action for 'NO' Button
+					dialog.cancel();				
+					// TODO: getParent() instead?
+					StopsListActivity.this.finish();
 				}
-		});
+			});
+		
 		AlertDialog alert = dialogBuilder.create();
 		// Title for AlertDialog
 		alert.setTitle("No Favourite Stops");
@@ -130,11 +133,10 @@ public class StopsListActivity extends ListActivity {
 	  
 	private class StopsListAdapter extends BaseAdapter {
 			
-		private Context mContext;		
-		private int usenameHeight;
+		private Context context;		
 
-		public StopsListAdapter(Context context) {
-			mContext = context;
+		public StopsListAdapter(Context _context) {
+			context = _context;
 		}
 
 		public int getCount() {
