@@ -1,4 +1,4 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -8,10 +8,8 @@ import java.util.Vector;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-
 import android.content.Context;
 import android.content.Intent;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,23 +20,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-
 import android.widget.BaseAdapter;
-
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.andybotting.tramhunter.NextTram;
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.service.TramTrackerService;
+import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
+
 
 public class StopDetailsActivity extends ListActivity {
 	
-	TramHunterDB db;
+	private TramHunterDB db;
 	
-	ListView listView;
-	TextView firstLineField;
-	TextView secondLineField;
-	TextView thirdLineField;
+	private ListView listView;
+	private TextView firstLineField;
+	private TextView secondLineField;
+	private TextView thirdLineField;
 
 	public Route selectedRoute;
 
@@ -47,7 +51,7 @@ public class StopDetailsActivity extends ListActivity {
 	public int tramTrackerId;
 	
 	CompoundButton starButton;
-	TramTrackerRequest ttRequest;
+	TramTrackerService ttService;
 
     protected boolean running = false;
    
@@ -82,9 +86,8 @@ public class StopDetailsActivity extends ListActivity {
 		}  
 		
 		// Create out DB instance
-		db = new TramHunterDB(this);
+		initialiseDatabase();
 		stop = db.getStop(tramTrackerId);
-		db.close();
 
 		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
 		setTitle(title);
@@ -98,10 +101,8 @@ public class StopDetailsActivity extends ListActivity {
 
 		starButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				db = new TramHunterDB(getBaseContext());
 				db.setStopStar(tramTrackerId, starButton.isChecked());
 				stop.setStarred(starButton.isChecked());
-				db.close();
 			}
 		});
 
@@ -112,12 +113,23 @@ public class StopDetailsActivity extends ListActivity {
 
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (db != null) {
+			db.close();
+		}
+	}
+
+
+
+	@Override
 	public void onStop() {
 		super.onStop();
 		refreshThread.interrupt();
 	}
 	
-	
+	@Override
 	public void onResume() {
 		super.onResume();
 		if(refreshThread.isInterrupted()) {
@@ -125,8 +137,96 @@ public class StopDetailsActivity extends ListActivity {
 		}
 	}
 
+	// Add settings to menu
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		
+		menu.add(0, 0, 0, "Refresh");
+		MenuItem menuItem1 = menu.findItem(0);
+		menuItem1.setIcon(R.drawable.ic_menu_refresh);
+		
+		menu.add(0, 1, 0, "Favourite");
+		MenuItem menuItem2 = menu.findItem(1);
+		menuItem2.setIcon(R.drawable.ic_menu_star);
+		
+		menu.add(0, 2, 0, "Map");
+		MenuItem menuItem3 = menu.findItem(2);
+		menuItem3.setIcon(R.drawable.ic_menu_mapmode);
+		
+		return true;
+	}
 	
-    class CountDown implements Runnable {
+	// Menu actions
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case 0:
+			// Refresh
+			showDialog = true;
+			new GetNextTramTimes().execute();
+			return true;
+		case 1:
+			// Star/Favourite
+			starButton = (CompoundButton)findViewById(R.id.stopStar);
+			
+			if (stop.isStarred()) {
+				db.setStopStar(tramTrackerId, false);
+				starButton.setChecked(false);
+				stop.setStarred(false);
+			}	
+			else {
+				db.setStopStar(tramTrackerId, true);
+				starButton.setChecked(true);
+				stop.setStarred(true);
+			}
+			return true;
+		case 2:
+			// Map view
+			Bundle bundle = new Bundle();
+			bundle.putInt("tramTrackerId", tramTrackerId);
+			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+			intent.putExtras(bundle);
+			startActivityForResult(intent, 1);
+			
+			return true;
+		}
+		return false;
+
+	}
+	
+	private void initialiseDatabase() {
+		db = new TramHunterDB(this);
+	}
+    
+	private void displayStop(Stop stop) {
+		firstLineField = (TextView)findViewById(R.id.firstLine);
+		secondLineField = (TextView)findViewById(R.id.secondLine);
+		thirdLineField = (TextView)findViewById(R.id.thirdLine);
+		
+		// Set labels from Stop hash map
+		String firstLineText = stop.getPrimaryName();	
+		
+		String secondLineText = "Stop " + stop.getFlagStopNumber();
+		// If the stop has a secondary name, add it
+		if (stop.getSecondaryName().length() > 0) {
+			secondLineText += ": " + stop.getSecondaryName();
+		}
+		secondLineText += " - " + stop.getCityDirection();
+		
+		initialiseDatabase();
+		stop.setRoutes(db.getRoutesForStop(tramTrackerId));
+		
+		String thirdLineText = stop.getRoutesString();
+			
+		firstLineField.setText(firstLineText);
+		secondLineField.setText(secondLineText);
+		thirdLineField.setText(thirdLineText);
+		
+		
+	}
+	
+    private class CountDown implements Runnable {
         public void run() {
         	while(!Thread.currentThread().isInterrupted()){
         		Message m = new Message();
@@ -142,43 +242,13 @@ public class StopDetailsActivity extends ListActivity {
         }
 	}
 	
-
-    
-	public void displayStop(Stop stop) {
-		firstLineField = (TextView)findViewById(R.id.firstLine);
-		secondLineField = (TextView)findViewById(R.id.secondLine);
-		thirdLineField = (TextView)findViewById(R.id.thirdLine);
-		
-		// Set labels from Stop hash map
-		String firstLineText = stop.getPrimaryName();	
-		
-		String secondLineText = "Stop " + stop.getFlagStopNumber();
-		// If the stop has a secondary name, add it
-		if (stop.getSecondaryName().length() > 0) {
-			secondLineText += ": " + stop.getSecondaryName();
-		}
-		secondLineText += " - " + stop.getCityDirection();
-		
-		db = new TramHunterDB(this);
-		stop.setRoutes(db.getRoutesForStop(tramTrackerId));
-		db.close();
-		
-		String thirdLineText = stop.getRoutesString();
-			
-		firstLineField.setText(firstLineText);
-		secondLineField.setText(secondLineText);
-		thirdLineField.setText(thirdLineText);
-		
-		
-	}
-	
-	
-	private class GetNextTramTimes extends AsyncTask<Vector, Void, Vector> {
+	private class GetNextTramTimes extends AsyncTask<NextTram, Void, Vector<NextTram>> {
 		private final ProgressDialog dialog = new ProgressDialog(StopDetailsActivity.this);
 		
 		TextView dateStringText = (TextView)findViewById(R.id.bottomLine);
 
 		// Can use UI thread here
+		@Override
 		protected void onPreExecute() {
 
 			if (showDialog) {
@@ -193,11 +263,12 @@ public class StopDetailsActivity extends ListActivity {
 		}
 
 		// Automatically done on worker thread (separate from UI thread)
-		protected Vector doInBackground(final Vector... params) {
-			TramTrackerRequest ttRequest = new TramTrackerRequest(getBaseContext());
+		@Override
+		protected Vector<NextTram> doInBackground(final NextTram... params) {
+			TramTrackerService ttService = new TramTrackerServiceSOAP(getBaseContext());
 			
 			try {
-				nextTrams = ttRequest.GetNextPredictedRoutesCollection(stop);
+				nextTrams = ttService.getNextPredictedRoutesCollection(stop);
 
 //				// We'll remove all NextTrams which are longer than
 //				// 99 minutes away
@@ -215,7 +286,8 @@ public class StopDetailsActivity extends ListActivity {
 		}
 
 		// Can use UI thread here
-		protected void onPostExecute(Vector nextTrams) {
+		@Override
+		protected void onPostExecute(Vector<NextTram> nextTrams) {
 			
 			if(nextTrams.size() > 0) {
 				// Sort trams by minutesAway
@@ -254,11 +326,11 @@ public class StopDetailsActivity extends ListActivity {
 
 	private class NextTramsListAdapter extends BaseAdapter {
 		
-		private Context mContext;		
+		private Context context;		
 		private int usenameHeight;
 
 		public NextTramsListAdapter(Context context) {
-			mContext = context;
+			this.context = context;
 		}
 
 		public int getCount() {
@@ -307,7 +379,7 @@ public class StopDetailsActivity extends ListActivity {
 
 	}
 
-	class ViewWrapper {
+	private class ViewWrapper {
 		View base;
 			
 		TextView nextTramRouteNumber = null;
@@ -339,69 +411,6 @@ public class StopDetailsActivity extends ListActivity {
 			}
 			return (nextTramTime);
 		}		
-
-	}
-	
-	
-	
-	// Add settings to menu
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		
-		menu.add(0, 0, 0, "Refresh");
-		MenuItem menuItem1 = menu.findItem(0);
-		menuItem1.setIcon(R.drawable.ic_menu_refresh);
-		
-		menu.add(0, 1, 0, "Favourite");
-		MenuItem menuItem2 = menu.findItem(1);
-		menuItem2.setIcon(R.drawable.ic_menu_star);
-		
-		menu.add(0, 2, 0, "Map");
-		MenuItem menuItem3 = menu.findItem(2);
-		menuItem3.setIcon(R.drawable.ic_menu_mapmode);
-		
-		return true;
-	}
-
-	
-	// Menu actions
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) {
-		case 0:
-			// Refresh
-			showDialog = true;
-			new GetNextTramTimes().execute();
-			return true;
-		case 1:
-			// Star/Favourite
-			TramHunterDB db = new TramHunterDB(getBaseContext());
-			starButton = (CompoundButton)findViewById(R.id.stopStar);
-			
-			if (stop.isStarred()) {
-				db.setStopStar(tramTrackerId, false);
-				starButton.setChecked(false);
-				stop.setStarred(false);
-			}	
-			else {
-				db.setStopStar(tramTrackerId, true);
-				starButton.setChecked(true);
-				stop.setStarred(true);
-			}
-			db.close();
-			return true;
-		case 2:
-			// Map view
-			Bundle bundle = new Bundle();
-			bundle.putInt("tramTrackerId", tramTrackerId);
-			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, 1);
-			
-			return true;
-		}
-		return false;
 
 	}
 }

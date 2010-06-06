@@ -1,10 +1,13 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.dao;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
+
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.Stop;
 
 import android.content.ContentValues;
 import android.content.Context;

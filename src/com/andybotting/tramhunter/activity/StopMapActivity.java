@@ -1,4 +1,4 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
 
 import java.util.List;
 
@@ -8,6 +8,13 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import com.andybotting.tramhunter.MapItemizedOverlay;
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.R.drawable;
+import com.andybotting.tramhunter.R.id;
+import com.andybotting.tramhunter.R.layout;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;

@@ -1,17 +1,12 @@
 package com.andybotting.tramhunter;
 
-import java.util.*;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import org.apache.http.impl.cookie.DateParseException;
-
-import android.util.Log;
+import java.util.Date;
 
 
-public class NextTram implements Comparable { 
+public class NextTram implements Comparable<NextTram> { 
 	
 	private String internalRouteNo;
 	private String routeNo;
@@ -209,10 +204,8 @@ public class NextTram implements Comparable {
 	
 	
 	
-	public int compareTo(Object obj) {
+	public int compareTo(NextTram otherTram) {
 
-		NextTram otherTram = (NextTram)obj;
-		
 		int thisTramMinutes = this.minutesAway();
 		int otherTramMinutes = otherTram.minutesAway();
 		

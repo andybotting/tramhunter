@@ -1,8 +1,14 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
 
 import java.util.Vector;
 
-import com.andybotting.tramhunter.RoutesListActivity.ViewWrapper;
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.R.id;
+import com.andybotting.tramhunter.R.layout;
+import com.andybotting.tramhunter.activity.RoutesListActivity.ViewWrapper;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 import android.app.ListActivity;
 

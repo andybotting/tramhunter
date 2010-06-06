@@ -1,26 +1,26 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
 
-import com.andybotting.tramhunter.RoutesListActivity.ViewWrapper;
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.R.drawable;
+import com.andybotting.tramhunter.R.id;
+import com.andybotting.tramhunter.R.layout;
+import com.andybotting.tramhunter.R.string;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 

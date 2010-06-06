@@ -10,7 +10,7 @@
 				 android:label="@string/app_name" 
 				 android:theme="@android:style/Theme.Light">
 		
-		<activity android:name=".TramHunter"
+		<activity android:name="com.andybotting.tramhunter.activity.TramHunter"
 				  android:label="@string/app_name" > 
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -18,12 +18,12 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".EnterTTIDActivity" android:label="@string/app_name" />
-		<activity android:name=".RoutesListActivity" android:label="@string/app_name" />
-		<activity android:name=".NearStopsActivity" android:label="@string/app_name" />
-		<activity android:name=".StopsListActivity" android:label="@string/app_name" />
-		<activity android:name=".StopDetailsActivity" android:label="@string/app_name" />
-		<activity android:name=".StopMapActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.EnterTTIDActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.RoutesListActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.NearStopsActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.StopsListActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.StopDetailsActivity" android:label="@string/app_name" />
+		<activity android:name="com.andybotting.tramhunter.activity.StopMapActivity" android:label="@string/app_name" />
 		
 		<uses-library android:name="com.google.android.maps" />
 		   

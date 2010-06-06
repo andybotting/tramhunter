@@ -1,4 +1,10 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
+
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.R.id;
+import com.andybotting.tramhunter.R.layout;
+import com.andybotting.tramhunter.R.string;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 import android.app.Activity;
 

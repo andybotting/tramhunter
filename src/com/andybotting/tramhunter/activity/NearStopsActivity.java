@@ -1,9 +1,10 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.activity;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Map.Entry;
+
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -22,6 +23,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.dao.TramHunterDB;
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
