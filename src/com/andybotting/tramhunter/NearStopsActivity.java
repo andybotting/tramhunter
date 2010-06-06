@@ -1,15 +1,9 @@
 package com.andybotting.tramhunter;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Map.Entry;
-
-import com.andybotting.tramhunter.RoutesListActivity.ViewWrapper;
-
-import android.app.Activity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -17,20 +11,14 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -68,14 +56,26 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		// Get the location
 		location = findLocation();
-    	if (location != null)
+    	if (location != null) { 
     		new GetNearStops().execute();
+    	}
+    	else {
+    		// TODO: This should a nicer dialog explaining that no location services
+    		// e.g. GPS or network are available and to enable them. 		
+			Context context = getApplicationContext();
+			CharSequence text = "No Location Services Available!";
+			int duration = Toast.LENGTH_SHORT;
+			Toast toast = Toast.makeText(context, text, duration);
+			toast.show();
+			
+			// Finish the activity, and go back to the main menu
+			this.finish();
+    	}
 	}
 
 	
 	private Location findLocation() {	
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-	  	// TODO: Check if GPS is enabled and tell the user if it's not?
 	  	Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		return location;
 	}
