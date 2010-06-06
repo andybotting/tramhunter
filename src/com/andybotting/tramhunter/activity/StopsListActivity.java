@@ -2,31 +2,25 @@ package com.andybotting.tramhunter.activity;
 
 import java.util.Vector;
 
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.Stop;
-import com.andybotting.tramhunter.R.id;
-import com.andybotting.tramhunter.R.layout;
-import com.andybotting.tramhunter.activity.RoutesListActivity.ViewWrapper;
-import com.andybotting.tramhunter.dao.TramHunterDB;
-
+import android.app.AlertDialog;
 import android.app.ListActivity;
-
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class StopsListActivity extends ListActivity {
 
@@ -71,9 +65,39 @@ public class StopsListActivity extends ListActivity {
 	
 	public void displayFavStops() {
 		stops = db.getFavouriteStops();
+		
+		if (stops.size() == 0) {
+			alertNoFavourites();		
+		}
 		displayStops();
 	}
 
+
+	private void alertNoFavourites() {
+		final Intent routeListIntent = new Intent(this, RoutesListActivity.class);
+		
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setMessage("You current have no favourites. To add a favourite stop simply click the yellow star when browsing trams stops.\nDo you want to browse some now?")
+			.setCancelable(false)
+			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+				// Action for 'Yes' Button				
+					startActivity(routeListIntent);		
+				}
+				})
+			.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+				//  Action for 'NO' Button
+				dialog.cancel();
+				}
+		});
+		AlertDialog alert = dialogBuilder.create();
+		// Title for AlertDialog
+		alert.setTitle("No Favourite Stops");
+		// Icon for AlertDialog
+		alert.setIcon(R.drawable.icon);
+		alert.show();
+	}
 	
 	public void displayStopsForRoute(long routeId) {
 		stops = db.getStopsForRoute(routeId);
