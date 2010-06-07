@@ -1,10 +1,11 @@
 package com.andybotting.tramhunter.activity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -22,13 +23,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andybotting.tramhunter.NextTram;
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.service.TramTrackerService;
@@ -38,17 +37,14 @@ import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 public class StopDetailsActivity extends ListActivity {
 	
 	private TramHunterDB db;
-	
-	private ListView listView;
+
 	private TextView firstLineField;
 	private TextView secondLineField;
 	private TextView thirdLineField;
 
-	public Route selectedRoute;
-
-	public Vector<NextTram> nextTrams = new Vector<NextTram>();
-	public Stop stop;
-	public int tramTrackerId;
+	private List<NextTram> nextTrams = new ArrayList<NextTram>();
+	private Stop stop;
+	private int tramTrackerId;
 	
 	CompoundButton starButton;
 	TramTrackerService ttService;
@@ -77,7 +73,6 @@ public class StopDetailsActivity extends ListActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		
 		setContentView(R.layout.stop_details);
-		listView = (ListView)this.findViewById(android.R.id.list);
 
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
@@ -242,7 +237,7 @@ public class StopDetailsActivity extends ListActivity {
         }
 	}
 	
-	private class GetNextTramTimes extends AsyncTask<NextTram, Void, Vector<NextTram>> {
+	private class GetNextTramTimes extends AsyncTask<NextTram, Void, List<NextTram>> {
 		private final ProgressDialog dialog = new ProgressDialog(StopDetailsActivity.this);
 		
 		TextView dateStringText = (TextView)findViewById(R.id.bottomLine);
@@ -264,7 +259,7 @@ public class StopDetailsActivity extends ListActivity {
 
 		// Automatically done on worker thread (separate from UI thread)
 		@Override
-		protected Vector<NextTram> doInBackground(final NextTram... params) {
+		protected List<NextTram> doInBackground(final NextTram... params) {
 			TramTrackerService ttService = new TramTrackerServiceSOAP(getBaseContext());
 			
 			try {
@@ -287,7 +282,7 @@ public class StopDetailsActivity extends ListActivity {
 
 		// Can use UI thread here
 		@Override
-		protected void onPostExecute(Vector<NextTram> nextTrams) {
+		protected void onPostExecute(List<NextTram> nextTrams) {
 			
 			if(nextTrams.size() > 0) {
 				// Sort trams by minutesAway
@@ -299,7 +294,7 @@ public class StopDetailsActivity extends ListActivity {
 				
 				dateStringText.setText("Last updated: " + sdf.format(today.getTime()));
 				
-				setListAdapter(new NextTramsListAdapter(StopDetailsActivity.this));	
+				setListAdapter(new NextTramsListAdapter());	
 			}
 			else {
 				// If we've not had a loading error already
@@ -325,13 +320,6 @@ public class StopDetailsActivity extends ListActivity {
 	
 
 	private class NextTramsListAdapter extends BaseAdapter {
-		
-		private Context context;		
-		private int usenameHeight;
-
-		public NextTramsListAdapter(Context context) {
-			this.context = context;
-		}
 
 		public int getCount() {
 			return nextTrams.size();

@@ -1,35 +1,27 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.Vector;
-
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.R.id;
-import com.andybotting.tramhunter.R.layout;
-import com.andybotting.tramhunter.dao.TramHunterDB;
+import java.util.List;
 
 import android.app.ListActivity;
-
-import android.content.Context;
 import android.content.Intent;
-
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.dao.TramHunterDB;
+
 public class RoutesListActivity extends ListActivity {
 
-	ListView listView;
-	Route selectedRoute;
-	Vector<Route> routes;
+	private ListView listView;
+	private List<Route> routes;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -64,17 +56,11 @@ public class RoutesListActivity extends ListActivity {
 		});
 
 		
-		setListAdapter(new RoutesListAdapter(this));
+		setListAdapter(new RoutesListAdapter());
 	}
   
 	
 	private class RoutesListAdapter extends BaseAdapter {
-		
-		private Context mContext;		
-
-		public RoutesListAdapter(Context context) {
-			mContext = context;
-		}
 
 		public int getCount() {
 			return routes.size();

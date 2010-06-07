@@ -1,21 +1,16 @@
 package com.andybotting.tramhunter.activity;
 
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.R.id;
-import com.andybotting.tramhunter.R.layout;
-import com.andybotting.tramhunter.R.string;
-import com.andybotting.tramhunter.dao.TramHunterDB;
-
 import android.app.Activity;
-
 import android.content.Context;
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class EnterTTIDActivity extends Activity {
 

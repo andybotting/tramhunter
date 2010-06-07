@@ -1,10 +1,9 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.Vector;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,10 +23,10 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class StopsListActivity extends ListActivity {
 
-	ListView listView;
-	Vector<Stop> stops;
-	TramHunterDB db;
-	Route route;
+	private ListView listView;
+	private List<Stop> stops;
+	private TramHunterDB db;
+	private Route route;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -126,18 +125,12 @@ public class StopsListActivity extends ListActivity {
 
 		});		
 
-		setListAdapter(new StopsListAdapter(this));
+		setListAdapter(new StopsListAdapter());
 	}
 
 	
 	  
 	private class StopsListAdapter extends BaseAdapter {
-			
-		private Context context;		
-
-		public StopsListAdapter(Context _context) {
-			context = _context;
-		}
 
 		public int getCount() {
 			return stops.size();

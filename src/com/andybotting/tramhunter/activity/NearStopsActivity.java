@@ -1,8 +1,9 @@
 package com.andybotting.tramhunter.activity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.Map.Entry;
 
 import android.app.ListActivity;
@@ -30,11 +31,11 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
-	ListView listView;
-	Vector<Stop> stops = new Vector<Stop>();
-	Vector<Stop> sortedStops = new Vector<Stop>();
-	SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
-	TramHunterDB db;
+	private ListView listView;
+	private List<Stop> stops = new ArrayList<Stop>();
+	private List<Stop> sortedStops = new ArrayList<Stop>();
+	private SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
+	private TramHunterDB db;
 
 	private LocationManager locationManager;
 	private Location location;
@@ -105,13 +106,13 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		});		
 
-		setListAdapter(new StopsListAdapter(this));
+		setListAdapter(new StopsListAdapter());
 	}
 
 	
 	
 	
-	private class GetNearStops extends AsyncTask<Vector, Void, Vector> {
+	private class GetNearStops extends AsyncTask<Stop, Void, List<Stop>> {
 		private final ProgressDialog dialog = new ProgressDialog(NearStopsActivity.this);
 
 		// Can use UI thread here
@@ -125,7 +126,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		}
 
 		// Automatically done on worker thread (separate from UI thread)
-		protected Vector doInBackground(final Vector... params) {
+		protected List<Stop> doInBackground(final Stop... params) {
 		
 	    	for(Stop stop : stops){
 	    		double distance = location.distanceTo(stop.getLocation());
@@ -147,7 +148,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		
 		// Can use UI thread here
-		protected void onPostExecute(final Vector sortedStops) {
+		protected void onPostExecute(final List<Stop> sortedStops) {
 
 			if (location != null) {
 			
@@ -168,7 +169,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 				});		
 	
-				setListAdapter(new StopsListAdapter(NearStopsActivity.this));
+				setListAdapter(new StopsListAdapter());
 			}
 			else {
 				Context context = getApplicationContext();
@@ -190,13 +191,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	  
 	private class StopsListAdapter extends BaseAdapter {
-			
-		private Context mContext;		
-		private int usenameHeight;
-
-		public StopsListAdapter(Context context) {
-			mContext = context;
-		}
 
 		public int getCount() {
 			return sortedStops.size();

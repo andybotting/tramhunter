@@ -1,6 +1,6 @@
 package com.andybotting.tramhunter.service;
 
-import java.util.Vector;
+import java.util.List;
 
 import com.andybotting.tramhunter.NextTram;
 import com.andybotting.tramhunter.Stop;
@@ -12,6 +12,6 @@ public interface TramTrackerService {
 
 	Stop getStopInformation(int tramTrackerID);
 
-	Vector<NextTram> getNextPredictedRoutesCollection(Stop stop);
+	List<NextTram> getNextPredictedRoutesCollection(Stop stop);
 
 }

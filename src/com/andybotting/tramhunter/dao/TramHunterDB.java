@@ -562,10 +562,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put("starred", starred);
 		
-		boolean returnValue = db.update(TABLE_STOPS, 
-				  						values, 
-				  						StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'", 
-				  						null) > 0;
+		db.update(TABLE_STOPS, 
+				values, 
+				StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'", 
+				null);
 		
 		db.close();
 	}
@@ -576,7 +576,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 		values.put("id", 0);
 		values.put("read", 1);
-		boolean returnValue = db.insert(TABLE_FIRST_LAUNCH, null, values) > 0;
+		db.insert(TABLE_FIRST_LAUNCH, null, values);
 		db.close();
 	}
 	
@@ -616,7 +616,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		values.put("id", 0);
 		values.put("guid", guid);
 	
-		boolean returnValue = db.insert(TABLE_GUID, null, values) > 0;
+		db.insert(TABLE_GUID, null, values);
 		
 		Log.d("Testing", "Storing GUID in DB: " + guid);
 		

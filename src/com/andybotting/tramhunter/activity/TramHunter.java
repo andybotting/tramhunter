@@ -1,15 +1,7 @@
 package com.andybotting.tramhunter.activity;
 
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.R.drawable;
-import com.andybotting.tramhunter.R.id;
-import com.andybotting.tramhunter.R.layout;
-import com.andybotting.tramhunter.R.string;
-import com.andybotting.tramhunter.dao.TramHunterDB;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,6 +15,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class TramHunter extends ListActivity {
 
@@ -125,17 +120,11 @@ public class TramHunter extends ListActivity {
 		});
 
 		
-		setListAdapter(new MenuListAdapter(this));
+		setListAdapter(new MenuListAdapter());
 	}
   
 	
 	private class MenuListAdapter extends BaseAdapter {
-		
-		private Context mContext;		
-
-		public MenuListAdapter(Context context) {
-			mContext = context;
-		}
 
 		public int getCount() {
 			return menuItems.length;

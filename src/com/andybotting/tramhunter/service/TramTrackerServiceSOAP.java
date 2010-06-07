@@ -1,22 +1,22 @@
 package com.andybotting.tramhunter.service;
 
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
-
 import org.xmlpull.v1.XmlPullParserException;
+
+import android.content.Context;
+import android.util.Log;
 
 import com.andybotting.tramhunter.NextTram;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
-
-import android.content.Context;
-import android.util.Log;
 
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
@@ -72,14 +72,14 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		return null;
 	}
 
-	public Vector<NextTram> getNextPredictedRoutesCollection (Stop stop) {
+	public List<NextTram> getNextPredictedRoutesCollection (Stop stop) {
 		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedRoutesCollection");
 		request.addProperty("stopNo", stop.getTramTrackerID());
 		request.addProperty("routeNo", "0");
 		request.addProperty("lowFloor", "false");
 	   
 		SoapObject result = null;
-		Vector<NextTram> collection = new Vector<NextTram>();
+		final List<NextTram> nextTrams = new ArrayList<NextTram>();
 			
 		try {
 			result = (SoapObject) makeTramTrackerRequest(request);
@@ -114,7 +114,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
 					tram.setRequestDateTime(nextPredicted.getProperty(13).toString());
 						
-					collection.add(tram);
+					nextTrams.add(tram);
 			}
 						
 		}
@@ -122,7 +122,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 			Log.d("Testing", "result is null");
 		}
 			
-		return collection;
+		return nextTrams;
 
 	}	
 	
