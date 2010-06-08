@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import com.andybotting.tramhunter.Preferences;
 import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 
@@ -34,6 +35,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Existing
 	private static final String TABLE_ROUTES = "routes";
+	private static final String TABLE_PREFERENCES = "preferences";
 	private static final String TABLE_STOPS = "stops";
 	private static final String TABLE_STOPS_JOIN_ROUTES = "stops "
 		+ "JOIN route_stops ON route_stops.stop_id = stops._id "
@@ -188,7 +190,50 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		// Do nothing here
 	}
 
+	// Get the first preferences row
+	public Preferences getPreferences() {
+		db = getDatabase();
+		final Cursor c = db.query(TABLE_PREFERENCES, 
+				new String[] {PreferencesColumns.ID, PreferencesColumns.IS_WELCOME_MESSAGE, PreferencesColumns.IS_FAVOURITE_ON_LAUNCH}, 
+				null, 
+				null, 
+				null, 
+				null, 
+				null);
 
+		try {			
+			if (c.moveToFirst()) {
+				final int idCol = c.getColumnIndexOrThrow(PreferencesColumns.ID);
+				final int isWelcomeMessageCol = c.getColumnIndexOrThrow(PreferencesColumns.IS_WELCOME_MESSAGE);
+				final int isFaveOnLaunchCol = c.getColumnIndexOrThrow(PreferencesColumns.IS_FAVOURITE_ON_LAUNCH);
+				
+				final Preferences preferences = new Preferences(c.getInt(idCol));
+				preferences.setDisplayWelcomeMessage(getBoolean(c, isWelcomeMessageCol));
+				preferences.setGoToFavouriteOnLaunch(getBoolean(c, isFaveOnLaunchCol));
+				return preferences;
+			}
+			throw new RuntimeException("Preferences are not setup correctly");			
+		}
+		finally {
+			c.close();
+			db.close();
+		}
+	}
+	
+	public void updatePreferences(final Preferences preferences)
+	{
+		db = getDatabase();
+		final ContentValues contentValues = new ContentValues();
+		contentValues.put(PreferencesColumns.IS_FAVOURITE_ON_LAUNCH, getShort(preferences.isGoToFavouriteOnLaunch()));
+		contentValues.put(PreferencesColumns.IS_WELCOME_MESSAGE, getShort(preferences.isDisplayWelcomeMessage()));
+		
+		try {
+			db.update(TABLE_PREFERENCES, contentValues, "id = " + preferences.getId(), null);
+		}
+		finally {
+			db.close();
+		}
+	}
 
 	// Get a List list of our routes
 	public List<Route> getRoutes() {
@@ -654,8 +699,25 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return guid;
 	}
 	
+	private boolean getBoolean(final Cursor cursor, final int columnIndex) {
+		final short value = cursor.getShort(columnIndex);
+		return (value == 1);
+	}
+	
+	private short getShort(final boolean booleanValue)
+	{
+		return (booleanValue) ? (short) 1 : 0;
+	}
+	
 
 	// Database column definitions
+	public static interface PreferencesColumns {
+		public static final String ID = "id";
+		public static final String IS_WELCOME_MESSAGE = "is_welcome_message";
+		public static final String IS_FAVOURITE_ON_LAUNCH = "is_favourite_on_launch";
+		
+	}
+	
 	 public static interface StopsColumns {
 			public static final String ID = "_id";
 			public static final String TRAMTRACKER_ID = "tramtracker_id";
