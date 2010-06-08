@@ -18,7 +18,7 @@ public class PreferencesActivity extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
+		setTitle("Preferences");
 		tramHunterDB = new TramHunterDB(this);
 		preferences = tramHunterDB.getPreferences();
 
