@@ -28,14 +28,16 @@ public class TramHunter extends ListActivity {
 			 "Favourite Stops",
 			 "Browse for a Stop",
 			 "Enter a TramTracker ID",
-			 "Nearby Stops" 
+			 "Nearby Stops",
+			 "Preferences"
 	};
 
 	String[] menuDesc = {
 			 "Find your favourite stops fast",
 			 "Pick your stop from the list",
 			 "Use the TramTracker ID from the tram stop sign post",
-			 "Use location services to find the nearest stops"
+			 "Use location services to find the nearest stops",
+			 "Customise how the app works"
 	};
 
 
@@ -113,6 +115,12 @@ public class TramHunter extends ListActivity {
 						startActivityForResult(intent, 1);
 						break;
 					}
+					case 4: {
+						Intent intent = new Intent(TramHunter.this, PreferencesActivity.class);
+						startActivityForResult(intent, 1);
+						break;
+					}
+
 				}
   
 			}
