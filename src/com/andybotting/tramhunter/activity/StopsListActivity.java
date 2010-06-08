@@ -23,6 +23,7 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class StopsListActivity extends ListActivity {
 
+	private boolean isFavouritesView;
 	private ListView listView;
 	private List<Stop> stops;
 	private TramHunterDB db;
@@ -54,18 +55,31 @@ public class StopsListActivity extends ListActivity {
 			displayStopsForRoute(routeId);
 		}
 		else {
+			isFavouritesView = true;
 			title = "Favourite Stops";
 			setTitle(title);
-			displayFavStops();
+			displayFavStops(true);
 		}
 		
 	}
 	  
-	
-	public void displayFavStops() {
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		// Refresh favourites if the back button is pressed
+		if (isFavouritesView)
+		{
+			displayFavStops(false);
+		}
+	}
+
+
+
+	public void displayFavStops(boolean alertIfNoStops) {
 		stops = db.getFavouriteStops();
 		
-		if (stops.size() == 0) {
+		if (alertIfNoStops && stops.size() == 0) {
 			alertNoFavourites();		
 		}
 		displayStops();
