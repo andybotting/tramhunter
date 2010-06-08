@@ -1,12 +1,12 @@
 package com.andybotting.tramhunter;
 
-import java.util.Vector;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.android.maps.GeoPoint;
-
 import android.location.Location;
+
+import com.google.android.maps.GeoPoint;
 
 
 public class Stop { 
@@ -22,7 +22,7 @@ public class Stop {
 	private double longitude;
 	private String suburb;
 	private boolean starred = false;
-	private Vector<Route> routes;
+	private List<Route> routes;
 
 	
 	
@@ -253,12 +253,12 @@ public class Stop {
 	}
 	
 	
-	public void setRoutes(Vector<Route> _routes) {
+	public void setRoutes(List<Route> _routes) {
 		routes = _routes;
 	}
 	
 	
-	public Vector<Route> getRoutes() {
+	public List<Route> getRoutes() {
 	   return routes;
 	}   	
 	

@@ -4,10 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Vector;
-
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.Stop;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,6 +17,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import com.andybotting.tramhunter.Route;
+import com.andybotting.tramhunter.Stop;
 
 public class TramHunterDB extends SQLiteOpenHelper {
 	 
@@ -189,11 +190,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 
 
-	// Get a Vector list of our routes
-	public Vector<Route> getRoutes() {
+	// Get a List list of our routes
+	public List<Route> getRoutes() {
 		db = getDatabase();
 
-		Vector<Route> routes = new Vector<Route>();
+		List<Route> routes = new ArrayList<Route>();
 		
 		Cursor c = db.query(TABLE_ROUTES, 
 							new String[] { "_id", "number", "destination", "direction"}, 
@@ -259,11 +260,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	
 	
-	// Get a Vector list of our routes
-	public Vector<Route> getRoutesForStop(int tramTrackerId) {
+	// Get a List list of our routes
+	public List<Route> getRoutesForStop(int tramTrackerId) {
 		db = getDatabase();
 
-		Vector<Route> routes = new Vector<Route>();
+		List<Route> routes = new ArrayList<Route>();
 		
 		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
 							new String[] { "routes._id", "number", "destination", "direction"}, 
@@ -301,11 +302,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	
 	
-	// Get a Vector list of our 'starred' stops
-	public Vector<Stop> getAllStops() {
+	// Get a List list of our 'starred' stops
+	public List<Stop> getAllStops() {
 		db = getDatabase();
 		
-		Vector<Stop> stops = new Vector<Stop>();
+		List<Stop> stops = new ArrayList<Stop>();
 		
 		Cursor c = db.query(TABLE_STOPS, 
 							null, 
@@ -360,11 +361,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	
 	
-	// Get a Vector list of our 'starred' stops
-	public Vector<Stop> getFavouriteStops() {
+	// Get a List list of our 'starred' stops
+	public List<Stop> getFavouriteStops() {
 		db = getDatabase();
 		
-		Vector<Stop> stops = new Vector<Stop>();
+		List<Stop> stops = new ArrayList<Stop>();
 		
 		Cursor c = db.query(TABLE_STOPS, 
 							null, 
@@ -409,11 +410,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return stops;
 	}	
 
-	// Get a Vector list of Stops for a particular route
-	public Vector<Stop> getStopsForRoute(long routeId) {
+	// Get a List list of Stops for a particular route
+	public List<Stop> getStopsForRoute(long routeId) {
 		db = getDatabase();
 		
-		Vector<Stop> stops = new Vector<Stop>();
+		List<Stop> stops = new ArrayList<Stop>();
 		
 		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
 							null, 
