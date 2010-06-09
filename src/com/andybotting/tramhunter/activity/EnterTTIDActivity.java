@@ -27,9 +27,8 @@ public class EnterTTIDActivity extends Activity {
  		setTitle(title);
 
 		// Show soft keyboard right away
-		InputMethodManager imm = (InputMethodManager) EnterTTIDActivity.this.getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY);
-
+		final InputMethodManager imm = (InputMethodManager) EnterTTIDActivity.this.getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
 		final Button button = (Button) findViewById(R.id.buttonGo);
 		button.setOnClickListener(new View.OnClickListener() {
@@ -52,6 +51,8 @@ public class EnterTTIDActivity extends Activity {
 				
 				// Check to make sure we get 1 result for our TramTrackerID search
 				if (db.checkStop(tramTrackerId)) {
+					// Hide our soft keyboard
+					imm.hideSoftInputFromWindow(textTramTrackerId.getWindowToken(), 0);
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", tramTrackerId);
 					Intent stopsListIntent = new Intent(EnterTTIDActivity.this, StopDetailsActivity.class);
