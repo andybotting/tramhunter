@@ -1,53 +1,38 @@
 package com.andybotting.tramhunter.activity;
-
-import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.CheckBox;
+import android.preference.CheckBoxPreference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
 
-import com.andybotting.tramhunter.Preferences;
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.dao.TramHunterDB;
+public class PreferencesActivity extends PreferenceActivity {
 
-public class PreferencesActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        setPreferenceScreen(createPreferenceHierarchy());
+    }
 
-	private TramHunterDB tramHunterDB;
-	private Preferences preferences;
-
-	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
-		setTitle("Preferences");
-		tramHunterDB = new TramHunterDB(this);
-		preferences = tramHunterDB.getPreferences();
-
-		setContentView(R.layout.preferences);
-
-		final CheckBox displayWelcomeMessage = (CheckBox) findViewById(R.id.displayWelcomeMessage);
-		displayWelcomeMessage.setChecked(preferences.isDisplayWelcomeMessage());
-		displayWelcomeMessage.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				preferences.setDisplayWelcomeMessage(((CheckBox) v).isChecked());
-			}
-		});
-		
-		final CheckBox goToFavouriteOnLaunch = (CheckBox) findViewById(R.id.goToFavouriteOnLaunch);
-		goToFavouriteOnLaunch.setChecked(preferences.isGoToFavouriteOnLaunch());
-		goToFavouriteOnLaunch.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				preferences.setGoToFavouriteOnLaunch(((CheckBox) v).isChecked());
-			}
-		});
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		tramHunterDB.updatePreferences(preferences);
-	}
-	
-	
-	
-	
+    private PreferenceScreen createPreferenceHierarchy() {
+        PreferenceScreen root = getPreferenceManager().createPreferenceScreen(this);
+        
+        PreferenceCategory inlinePrefCat = new PreferenceCategory(this);
+        inlinePrefCat.setTitle("Preferences");
+        root.addPreference(inlinePrefCat);
+        
+        CheckBoxPreference displayWelcomeMessage = new CheckBoxPreference(this);
+        displayWelcomeMessage.setKey("displayWelcomeMessage");
+        displayWelcomeMessage.setTitle("Welcome Message");
+        displayWelcomeMessage.setSummary("Display the welcome message on the home page");
+        inlinePrefCat.addPreference(displayWelcomeMessage);
+                
+        CheckBoxPreference goToFavouriteOnLaunch = new CheckBoxPreference(this);
+        goToFavouriteOnLaunch.setKey("goToFavouriteOnLaunch");
+        goToFavouriteOnLaunch.setTitle("Favourite On Launch");
+        goToFavouriteOnLaunch.setSummary("Go straight to your favourite stop upon launching the application");
+        inlinePrefCat.addPreference(goToFavouriteOnLaunch);
+        
+        return root;
+    }
 }
