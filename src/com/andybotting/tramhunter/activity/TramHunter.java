@@ -34,11 +34,11 @@ public class TramHunter extends ListActivity {
 								    "Nearby Stops",
 								    "Preferences"};
 
-	private String[] m_menuDesc = {"Find your favourite stops fast",
-								   "Pick your stop from the list",
-								   "Use the TramTracker ID from the tram stop sign post",
-								   "Use location services to find the nearest stops",
-								   "Customise how the app works"};
+	private String[] m_menuDesc = {"Get the details for your favourite stops, fast",
+								   "Browse for your stop by route and stop lists",
+								   "Get the details for your stop by TramTracker ID",
+								   "Use your location to find stops nearest to you",
+								   "Set your Tram Hunter preferences"};
 
 	private static String[] m_welcomeMessages = {"Dude, wheres my tram?",
 												 "My milkshakes bring all the trams to the stop",
