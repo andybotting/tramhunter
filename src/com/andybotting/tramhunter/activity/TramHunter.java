@@ -1,15 +1,18 @@
 package com.andybotting.tramhunter.activity;
 
+import java.util.List;
 import java.util.Random;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,12 +24,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class TramHunter extends ListActivity {
 
 	private ListView m_listView;
-
+	private SharedPreferences sharedPref;
+	private TramHunterDB db;
 	
 	private String[] m_menuItems = {"Favourite Stops",
 								    "Browse for a Stop",
@@ -114,19 +119,34 @@ public class TramHunter extends ListActivity {
 												 "Absence makes the tram grow fonder",
 												 "Float like a butterfly, ding like a tram"};
                                     
-	private static String getRandomWelcomeMessage(){
-		Random r = new Random(System.currentTimeMillis());
-		return m_welcomeMessages[r.nextInt(m_welcomeMessages.length - 1)];
-	}
+
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		// Get shared prefs
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		// Create db instance
+		db = new TramHunterDB(this);
+		
+		
 		boolean firstLaunch = checkFirstLaunch();
 		if (firstLaunch == false) {
 			showAbout();
-		} else {
+		} 
+		else {
+			if (sharedPref.getBoolean("goToFavouriteOnLaunch", true)) {
+				// If go to fav on launch is set in prefs, and we have some favs set
+				List<Stop> stops = db.getFavouriteStops();
+				if (stops.size() > 0) {
+					// Go to favourite stops
+					Intent intent = new Intent(TramHunter.this, StopsListActivity.class);
+					startActivityForResult(intent, 1);
+				}
+				
+			}
 			displayMenu();
 		}
 	}
@@ -145,10 +165,12 @@ public class TramHunter extends ListActivity {
 
 	}
 
+	private static String getRandomWelcomeMessage(){
+		Random r = new Random(System.currentTimeMillis());
+		return m_welcomeMessages[r.nextInt(m_welcomeMessages.length - 1)];
+	}
 	
 	public void showAbout() {
-		
-
 		// Get the package name
 		String heading = getResources().getText(R.string.app_name) + "\n";
 		
@@ -178,19 +200,23 @@ public class TramHunter extends ListActivity {
 		dialogBuilder.setIcon(R.drawable.icon);
 		dialogBuilder.show();
 	}
-	
+
 	private void setRandomWelcomeMessage() {
-        TextView welcomeMessageTextView = (TextView)findViewById(R.id.welcomeMessage);
-        if(welcomeMessageTextView!=null)
-        	welcomeMessageTextView.setText("\"" + getRandomWelcomeMessage() + "\"");	
-	
-// TODO: Use this and enable setting by default        
-//		TramHunterDB db = new TramHunterDB(this);
-//		
-//		if(db.getPreferences().isDisplayWelcomeMessage()){
-//
-//		}
+		
+		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
+		String welcomeText;
+		
+        if (sharedPref.getBoolean("displayWelcomeMessage", true)) {
+        	welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
+        }
+        else {
+        	welcomeText = "";
+        }
+        
+        welcomeMessageTextView.setText(welcomeText);
+        
 	}
+	
 	
 	public void displayMenu() {   
 		setContentView(R.layout.home);

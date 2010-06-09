@@ -23,14 +23,14 @@ public class PreferencesActivity extends PreferenceActivity {
         
         CheckBoxPreference displayWelcomeMessage = new CheckBoxPreference(this);
         displayWelcomeMessage.setKey("displayWelcomeMessage");
-        displayWelcomeMessage.setTitle("Welcome Message");
-        displayWelcomeMessage.setSummary("Display the welcome message on the home page");
+        displayWelcomeMessage.setTitle("Welcome Quote");
+        displayWelcomeMessage.setSummary("Display a tram quote in the Tram Hunter menu");
         inlinePrefCat.addPreference(displayWelcomeMessage);
                 
         CheckBoxPreference goToFavouriteOnLaunch = new CheckBoxPreference(this);
         goToFavouriteOnLaunch.setKey("goToFavouriteOnLaunch");
-        goToFavouriteOnLaunch.setTitle("Favourite On Launch");
-        goToFavouriteOnLaunch.setSummary("Go straight to your favourite stop upon launching the application");
+        goToFavouriteOnLaunch.setTitle("Favourites On Launch");
+        goToFavouriteOnLaunch.setSummary("Go directly to your favourite stops on launch");
         inlinePrefCat.addPreference(goToFavouriteOnLaunch);
         
         return root;
