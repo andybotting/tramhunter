@@ -23,8 +23,17 @@ public class Stop {
 	private String suburb;
 	private boolean starred = false;
 	private List<Route> routes;
-
-	
+	@Override
+	public boolean equals(Object o) {
+		
+		if(o instanceof Stop){
+			Stop oStop = (Stop)o;
+			return this.getTramTrackerID()==oStop.getTramTrackerID();
+		}else{
+			return false;
+		}
+		
+	}
 	
 	private static final String NAME_PATTERN =
 		"(.+) & (.+)";
@@ -180,7 +189,7 @@ public class Stop {
     		distance = distance / 1000;
     		result = (int)roundToDecimals(distance, 0) + "km";
     	}
-    	else if(distance > 700) {
+    	else if(distance > 999) {
     		distance = distance / 1000;
     		result = roundToDecimals(distance, 1) + "km";
     	}
