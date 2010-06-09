@@ -6,6 +6,9 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,18 +57,18 @@ public class TramHunter extends ListActivity {
 												 "There is no tram",
 												 "Here's looking at you, tram",
 												 "Snakes on a tram!",
-												 "I’m on a tram",
+												 "I'm on a tram",
 												 "I see your tram is as late as mine",
 												 "Tram-a-lama-ding-dong",
-												 "I see trams, they’re everywhere...",
+												 "I see trams, they're everywhere...",
 												 "I can haz my tramz time",
 												 "Time stops for no tram",
 												 "One small step for trams",
 												 "One small step for man, one giant leap for tram times",
-												 "You can’t handle the tram",
+												 "You can't handle the tram",
 												 "Show me the trolley",
-												 "If a tram arrives in a forest and there’s no one to board it, does it make a 'ding'?",
-												 "Swanston Street is like a box of trams, you never know which one you’re gonna get...",
+												 "If a tram arrives in a forest and there's no one to board it, does it make a 'ding'?",
+												 "Swanston Street is like a box of trams, you never know which one you're gonna get...",
 												 "Houston, we have a tram",
 												 "Tram on, tram off",
 												 "Who let the trams out?",
@@ -79,9 +82,9 @@ public class TramHunter extends ListActivity {
 												 "He said 'Let there be light rail', and there were trams...",
 												 "Catch me if you can...",
 												 "A tram for all seasons",
-												 "We’re going to need a bigger tram",
+												 "We're going to need a bigger tram",
 												 "Do or do not, there is no tram",
-												 "Crikey it’s a tram, I’ll catch it if I can",
+												 "Crikey it's a tram, I'll catch it if I can",
 												 "Are the trams still screaming",
 												 "Silence of the trams",
 												 "Wham bam thank you tram",
@@ -144,23 +147,36 @@ public class TramHunter extends ListActivity {
 
 	
 	public void showAbout() {
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(TramHunter.this);
 		
-		dialogBuilder.setTitle("About");
-		dialogBuilder.setMessage(R.string.change_log);
-		
-		dialogBuilder.setPositiveButton("OK",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						TramHunterDB db = new TramHunterDB(TramHunter.this);
-						db.setFirstLaunch();
-						displayMenu();
-						db.close();
-					}
-				});
 
+		// Get the package name
+		String heading = getResources().getText(R.string.app_name) + "\n";
+		
+        // Get the package version
+        PackageManager pm = getPackageManager();
+        try {
+			PackageInfo pi = pm.getPackageInfo("org.wordpress.android", 0);
+			heading += pi.versionName + "\n\n";
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		// Build alert dialog
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setTitle(heading);
+		dialogBuilder.setMessage(getResources().getText(R.string.about_msg));
+		dialogBuilder.setPositiveButton("OK",
+			new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					TramHunterDB db = new TramHunterDB(TramHunter.this);
+					db.setFirstLaunch();
+					displayMenu();
+					db.close();
+				}
+			});
 		dialogBuilder.setCancelable(false);
-		dialogBuilder.create().show();		
+		dialogBuilder.setIcon(R.drawable.icon);
+		dialogBuilder.show();
 	}
 	
 	private void setRandomWelcomeMessage() {

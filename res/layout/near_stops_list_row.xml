@@ -31,6 +31,7 @@
 				android:shadowRadius="1"
 				android:layout_marginBottom="-2dip"
 				android:paddingRight="8dip"
+				android:textColor="@drawable/white"
 				android:text="Route Number"/>
 				
 				<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -45,7 +46,7 @@
 				        android:layout_alignParentTop="true"
 						android:textSize="12dip"
 				        android:gravity="center_vertical"
-				        android:textColor="#666666"
+				        android:textColor="@drawable/gray"
 				        android:text="Distance" />
 				
 				    <TextView  
@@ -58,7 +59,7 @@
 				        android:textSize="12dip"
 				        android:singleLine="true"
 				        android:ellipsize="marquee"
-				        android:textColor="#666666"
+				        android:textColor="@drawable/gray"
 				        android:text="Direction" />
 				
 				</RelativeLayout>

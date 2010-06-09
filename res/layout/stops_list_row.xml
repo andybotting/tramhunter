@@ -30,6 +30,7 @@
 				android:shadowRadius="1"
 				android:layout_marginBottom="-2dip"
 				android:paddingRight="8dip"
+				android:textColor="@drawable/white"
 				android:text="Route Number"/>
 				
 			<TextView android:id="@+id/textLabel2"
@@ -41,22 +42,8 @@
 				android:ellipsize="end"
 				android:padding="0px"
 				android:textSize="12dip"
-				android:textColor="#666666"
-				android:textColorLink="#21759b"
+				android:textColor="@drawable/gray"
 				android:text="Route Destination"/>
-				
-			<!--- <TextView android:id="@+id/textLabel3"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:gravity="left"
-				android:singleLine="true"
-				android:ellipsize="end"
-				android:padding="0px"
-				android:textSize="12dip"
-				android:textColor="#666666"
-				android:textColorLink="#21759b"
-				android:text="Routes List"/> -->
 				
 		</LinearLayout>
 	</LinearLayout>
