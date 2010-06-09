@@ -92,7 +92,7 @@ public class TramHunter extends ListActivity {
 												 "I'm sorry inspector, I left my tram ticket at home",
 												 "Shaken not tramed",
 												 "Tram, James Tram",
-												 "You dingin at me? Are you dining at me?",
+												 "You dingin' at me? Are you dingin' at me?",
 												 "I know what you're thinking, has he missed 6 trams or only 5?",
 												 "Toto I've got a feeling were not on a tram anymore",
 												 "What we have here, is a failure to catch a tram",
