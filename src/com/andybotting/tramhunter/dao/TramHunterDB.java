@@ -43,19 +43,12 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Create first_launch table
 	private static final String CREATE_TABLE_FIRST_LAUNCH  = "create table if not exists '" + TABLE_FIRST_LAUNCH + "' "
-		+ "(id integer primary key autoincrement, read integer not null);";
+		+ "(id integer primary key autoincrement, read SHORT);";
 	
 	// Create guid table
 	private static final String CREATE_TABLE_GUID  = "create table if not exists '" + TABLE_GUID + "' "
-		+ "(id integer primary key autoincrement, guid integer not null);";
-	
-	// Create preferences table
-	private static final String CREATE_TABLE_PREFERENCES = "CREATE TABLE IF NOT EXISTS '" + TABLE_PREFERENCES + 
-		"' (id INTEGER PRIMARY KEY AUTOINCREMENT, is_welcome_message SHORT, is_favourite_on_launch SHORT);";
- 
-	// Default preferences
-	private static final String INSERT_DEFAULT_PREFERENCES = "INSERT INTO preferences (is_welcome_message, is_favourite_on_launch) VALUES (1, 0);";
-	
+		+ "(id integer primary key autoincrement, guid integer);";
+
 	private SQLiteDatabase db; 
 	private Context context;
 
@@ -89,28 +82,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		// Create extra tables in our DB
 		db.execSQL(CREATE_TABLE_FIRST_LAUNCH);
 		db.execSQL(CREATE_TABLE_GUID);
-		db.execSQL(CREATE_TABLE_PREFERENCES);
-		
-		//TODO: We should find a better way to setup and prime db initially
-		if (getPreferencesCount(db) < 1) {
-			db.execSQL(INSERT_DEFAULT_PREFERENCES);
-		}		
+	
 		
 		return db;
-	}
-
-	
-	private int getPreferencesCount(SQLiteDatabase db) {
-		Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PREFERENCES, null);
-		int count = 0;
-		try {
-			if (cursor.moveToFirst()) {
-				count = cursor.getInt(0);
-			}
-		} finally {
-			cursor.close();
-		}
-		return count;
 	}
 	
 	public void createDataBase() throws IOException{

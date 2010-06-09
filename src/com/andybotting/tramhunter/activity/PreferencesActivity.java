@@ -25,12 +25,14 @@ public class PreferencesActivity extends PreferenceActivity {
         displayWelcomeMessage.setKey("displayWelcomeMessage");
         displayWelcomeMessage.setTitle("Welcome Quote");
         displayWelcomeMessage.setSummary("Display a tram quote in the Tram Hunter menu");
+        //displayWelcomeMessage.setDefaultValue(True); // String cast exception
         inlinePrefCat.addPreference(displayWelcomeMessage);
                 
         CheckBoxPreference goToFavouriteOnLaunch = new CheckBoxPreference(this);
         goToFavouriteOnLaunch.setKey("goToFavouriteOnLaunch");
         goToFavouriteOnLaunch.setTitle("Favourites On Launch");
         goToFavouriteOnLaunch.setSummary("Go directly to your favourite stops on launch");
+        //goToFavouriteOnLaunch.setDefaultValue(False); // String cast exception
         inlinePrefCat.addPreference(goToFavouriteOnLaunch);
         
         return root;

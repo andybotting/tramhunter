@@ -90,7 +90,7 @@ public class StopsListActivity extends ListActivity {
 		final Intent routeListIntent = new Intent(this, RoutesListActivity.class);
 		
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-		dialogBuilder.setMessage("You currently have no favourite tram stops. To add favourite tram stops simply click the favourite star when browsing tram stops.\nDo you want to browse some now?")
+		dialogBuilder.setMessage("You currently have no favourite tram stops.\n\nTo add favourite tram stops simply click the favourite star when browsing tram stops.\n\nDo you want to browse some now?")
 			.setCancelable(false)
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {

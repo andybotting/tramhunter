@@ -125,6 +125,8 @@ public class TramHunter extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		setContentView(R.layout.home);
+		
 		// Get shared prefs
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		
@@ -177,8 +179,8 @@ public class TramHunter extends ListActivity {
         // Get the package version
         PackageManager pm = getPackageManager();
         try {
-			PackageInfo pi = pm.getPackageInfo("org.wordpress.android", 0);
-			heading += pi.versionName + "\n\n";
+			PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
+			heading += "v" + pi.versionName + "\n\n";
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -204,23 +206,17 @@ public class TramHunter extends ListActivity {
 	private void setRandomWelcomeMessage() {
 		
 		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
-		String welcomeText;
+		String welcomeText = "";
+
+		if (sharedPref.getBoolean("displayWelcomeMessage", true))
+			welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
 		
-        if (sharedPref.getBoolean("displayWelcomeMessage", true)) {
-        	welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
-        }
-        else {
-        	welcomeText = "";
-        }
-        
         welcomeMessageTextView.setText(welcomeText);
         
 	}
 	
 	
-	public void displayMenu() {   
-		setContentView(R.layout.home);
-        		
+	public void displayMenu() { 		
 		setRandomWelcomeMessage();
 		
 		m_listView = (ListView)this.findViewById(android.R.id.list);
