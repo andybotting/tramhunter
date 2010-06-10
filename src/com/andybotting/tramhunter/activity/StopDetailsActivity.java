@@ -209,7 +209,7 @@ public class StopDetailsActivity extends ListActivity {
 		}
 		secondLineText += " - " + stop.getCityDirection();
 		
-		initialiseDatabase();
+		//initialiseDatabase();
 		stop.setRoutes(db.getRoutesForStop(tramTrackerId));
 		
 		String thirdLineText = stop.getRoutesString();

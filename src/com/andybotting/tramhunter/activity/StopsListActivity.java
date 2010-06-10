@@ -16,8 +16,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.andybotting.tramhunter.Destination;
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 
@@ -27,12 +27,13 @@ public class StopsListActivity extends ListActivity {
 	private ListView listView;
 	private List<Stop> stops;
 	private TramHunterDB db;
+	private Destination destination;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 		
-		long routeId = -1;
+		long destinationId = -1;
 		
 		setContentView(R.layout.stops_list);
 		listView = (ListView)this.findViewById(android.R.id.list);
@@ -42,16 +43,16 @@ public class StopsListActivity extends ListActivity {
 		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
-		  routeId = extras.getLong("routeId");
+		  destinationId = extras.getLong("destinationId");
+		  
 		}  
-		
-				
+						
 		// Are we looking for stops for a route, or fav stops?
-		if (routeId > -1) {
-			final Route route = db.getRoute(routeId);
-			title = "Stops for Route " + route.getNumber();
+		if (destinationId > -1) {
+			destination = db.getDestination(destinationId);
+			title = "Stops for Route " + destination.getRouteNumber() + " to " + destination.getDestination();
 			setTitle(title);
-			displayStopsForRoute(routeId);
+			displayStopsForDestination(destinationId);
 		}
 		else {
 			isFavouritesView = true;
@@ -114,8 +115,8 @@ public class StopsListActivity extends ListActivity {
 		alert.show();
 	}
 	
-	public void displayStopsForRoute(long routeId) {
-		stops = db.getStopsForRoute(routeId);
+	public void displayStopsForDestination(long destinationId) {
+		stops = db.getStopsForDestination(destinationId);
 		displayStops();
 	}
 

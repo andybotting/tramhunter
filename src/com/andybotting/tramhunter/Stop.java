@@ -1,7 +1,6 @@
 package com.andybotting.tramhunter;
 
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -282,8 +281,8 @@ public class Stop {
 		}
 		
 		for(int i=0; i < routes.size(); i++) {
-			Route route = routes.get(i);
-			routesString += route.getNumber();
+			Route r = routes.get(i);
+			routesString += r.getNumber();
 		
 			if (i < routes.size() -2) {
 				routesString += ", ";

@@ -18,7 +18,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.andybotting.tramhunter.Preferences;
+import com.andybotting.tramhunter.Destination;
 import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 
@@ -35,11 +35,21 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Existing
 	private static final String TABLE_ROUTES = "routes";
-	private static final String TABLE_PREFERENCES = "preferences";
+	private static final String TABLE_DESTINATIONS = "destinations";
 	private static final String TABLE_STOPS = "stops";
+	
+	private static final String TABLE_STOPS_JOIN_DESTINATIONS = "stops "
+		+ "JOIN destination_stops ON destination_stops.stop_id = stops._id "
+		+ "JOIN destinations ON destination_stops.destination_id = destinations._id";
+
 	private static final String TABLE_STOPS_JOIN_ROUTES = "stops "
-		+ "JOIN route_stops ON route_stops.stop_id = stops._id "
-		+ "JOIN routes ON route_stops.route_id = routes._id";
+		+ "JOIN destination_stops ON destination_stops.stop_id = stops._id "
+		+ "JOIN destinations ON destination_stops.destination_id = destinations._id "
+		+ "JOIN routes ON destinations.route_id = routes._id";
+	
+	private static final String TABLE_DESTINATIONS_JOIN_ROUTES = "destinations "
+		+ "JOIN destination_stops ON destination_stops.destination_id = destinations._id "
+		+ "JOIN routes ON destinations.route_id = routes._id";
 	
 	// Create first_launch table
 	private static final String CREATE_TABLE_FIRST_LAUNCH  = "create table if not exists '" + TABLE_FIRST_LAUNCH + "' "
@@ -188,78 +198,64 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Do nothing here
 	}
-
-	// Get the first preferences row
-	public Preferences getPreferences() {
+	
+	// Get a list of destinations
+	public List<Route> getRoutes() {
 		db = getDatabase();
-		final Cursor c = db.query(TABLE_PREFERENCES, 
-				new String[] {PreferencesColumns.ID, PreferencesColumns.IS_WELCOME_MESSAGE, PreferencesColumns.IS_FAVOURITE_ON_LAUNCH}, 
+	
+		List<Route> routes = new ArrayList<Route>();
+		
+		Cursor c = db.query(TABLE_ROUTES, 
+				new String[] { "_id", "number" }, 
 				null, 
 				null, 
 				null, 
 				null, 
 				null);
-
-		try {			
-			if (c.moveToFirst()) {
-				final int idCol = c.getColumnIndexOrThrow(PreferencesColumns.ID);
-				final int isWelcomeMessageCol = c.getColumnIndexOrThrow(PreferencesColumns.IS_WELCOME_MESSAGE);
-				final int isFaveOnLaunchCol = c.getColumnIndexOrThrow(PreferencesColumns.IS_FAVOURITE_ON_LAUNCH);
-				
-				final Preferences preferences = new Preferences(c.getInt(idCol));
-				preferences.setDisplayWelcomeMessage(getBoolean(c, isWelcomeMessageCol));
-				preferences.setGoToFavouriteOnLaunch(getBoolean(c, isFaveOnLaunchCol));
-				return preferences;
-			}
-			throw new DatabaseConfigurationException("Preferences are not setup correctly");			
-		}
-		finally {
-			c.close();
-			db.close();
-		}
-	}
-	
-	public void updatePreferences(final Preferences preferences)
-	{
-		db = getDatabase();
-		final ContentValues contentValues = new ContentValues();
-		contentValues.put(PreferencesColumns.IS_FAVOURITE_ON_LAUNCH, getShort(preferences.isGoToFavouriteOnLaunch()));
-		contentValues.put(PreferencesColumns.IS_WELCOME_MESSAGE, getShort(preferences.isDisplayWelcomeMessage()));
-		
-		try {
-			db.update(TABLE_PREFERENCES, contentValues, "id = " + preferences.getId(), null);
-		}
-		finally {
-			db.close();
-		}
-	}
-
-	// Get a List list of our routes
-	public List<Route> getRoutes() {
-		db = getDatabase();
-
-		List<Route> routes = new ArrayList<Route>();
-		
-		Cursor c = db.query(TABLE_ROUTES, 
-							new String[] { "_id", "number", "destination", "direction"}, 
-							null, 
-							null, 
-							null, 
-							null, 
-							null);
 		
 		if (c.moveToFirst()) {		
 			do {	
 				Route route = new Route();
 
-				int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
-				int col_destination = c.getColumnIndexOrThrow(RoutesColumns.DESTINATION);
-				int col_direction = c.getColumnIndexOrThrow(RoutesColumns.DIRECTION);
-
+				int col_id = c.getColumnIndexOrThrow(Routes.ID);
+				int col_number = c.getColumnIndexOrThrow(Routes.NUMBER);
+				
+				int routeId = c.getInt(col_id);
 				route.setNumber(c.getString(col_number));
-				route.setDestination(c.getString(col_destination));
-				route.setUp(c.getInt(col_direction));
-			
+				
+				// TODO: We should call this as another method, but doing it here
+				// until we get out db create/close stuff sorted
+				Cursor d = db.query(TABLE_DESTINATIONS, 
+									null,
+									DestinationsColumns.ROUTE_ID + " = '" + routeId + "'",
+									null, 
+									null, 
+									null, 
+									null);
+				
+				if (d.moveToFirst()) {		
+					do {	
+						Destination dest = new Destination();
+
+						int d_col_destination = d.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
+						int d_col_direction = d.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
+
+						dest.setRouteNumber(route.getNumber());
+						dest.setDestination(d.getString(d_col_destination));
+						dest.setUp(d.getInt(d_col_direction));
+						
+						if (dest.getUp()) {
+							route.setDestinationDown(dest);
+						}
+						else {
+							route.setDestinationUp(dest);
+						}
+					} 
+					while(d.moveToNext());
+				}
+				
+				d.close();				
+
 				routes.add(route);
 			} 
 			while(c.moveToNext());
@@ -267,53 +263,91 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		
 		c.close();
 		db.close();
+		
 		return routes;
 	}
 	
 	
-	// Get a stop object from a given TramTracker ID
-	public Route getRoute(long routeId) {
+
+
+	// Get a list of destinations
+	public List<Destination> getDestinations() {
 		db = getDatabase();
 
+		List<Destination> destinations = new ArrayList<Destination>();
 		
+		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, 
+							new String[] { "destinations._id", "number", "destinations.destination", "direction"},
+							null, 
+							null, 
+							"destinations._id", 
+							null, 
+							null);
 		
-		Cursor c = db.query(TABLE_ROUTES, 
-				new String[] { "_id", "number", "destination", "direction"}, 
-				String.format("%s = %s", RoutesColumns.ID, routeId), 
+		if (c.moveToFirst()) {		
+			do {	
+				Destination dest = new Destination();
+
+				int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
+				int col_destination = c.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
+				int col_direction = c.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
+
+				dest.setRouteNumber(c.getString(col_number));
+				dest.setDestination(c.getString(col_destination));
+				dest.setUp(c.getInt(col_direction));
+			
+				destinations.add(dest);
+			} 
+			while(c.moveToNext());
+		}
+		
+		c.close();
+		db.close();
+		return destinations;
+	}
+	
+	
+	// Get a stop from a given TramTracker ID
+	public Destination getDestination(long destinationId) {
+		db = getDatabase();
+
+		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, 
+				new String[] { "destinations._id", "number", "destination", "direction"}, 
+				"destinations._id = '"  + destinationId + "'", 
 				null, 
 				null, 
 				null, 
 				null);
 	
-		Route route = new Route();
+		Destination dest = new Destination();
 		
 		if (c.moveToFirst()) {		
 			int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
-			int col_destination = c.getColumnIndexOrThrow(RoutesColumns.DESTINATION);
-			int col_direction = c.getColumnIndexOrThrow(RoutesColumns.DIRECTION);
+			int col_destination = c.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
+			int col_direction = c.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
 
-			route.setNumber(c.getString(col_number));
-			route.setDestination(c.getString(col_destination));
-			route.setUp(c.getInt(col_direction));
+			dest.setRouteNumber(c.getString(col_number));
+			dest.setDestination(c.getString(col_destination));
+			dest.setUp(c.getInt(col_direction));
 
 		}
 		c.close();
 		db.close();
 		
-		return route;
+		return dest;
 	}
 	
 	
 	
 	
-	// Get a List list of our routes
+	// Get a list of destinations for a given TramTracker ID
 	public List<Route> getRoutesForStop(int tramTrackerId) {
 		db = getDatabase();
 
 		List<Route> routes = new ArrayList<Route>();
 		
 		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
-							new String[] { "routes._id", "number", "destination", "direction"}, 
+							new String[] { "routes._id", "number"}, 
 							StopsColumns.TRAMTRACKER_ID + " = '"  + tramTrackerId + "'", 
 							null, 
 							"routes._id", 
@@ -324,15 +358,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		if (c.moveToFirst()) {		
 			do {	
 				Route route = new Route();
-
-				int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
-				int col_destination = c.getColumnIndexOrThrow(RoutesColumns.DESTINATION);
-				int col_direction = c.getColumnIndexOrThrow(RoutesColumns.DIRECTION);
-
+				
+				int col_number = c.getColumnIndexOrThrow(Routes.NUMBER);
 				route.setNumber(c.getString(col_number));
-				route.setDestination(c.getString(col_destination));
-				route.setUp(c.getInt(col_direction));
-			
+
 				routes.add(route);
 			} 
 			while(c.moveToNext());
@@ -345,10 +374,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	
 	
-	
-	
-	
-	// Get a List list of our 'starred' stops
+	// Get a list of our 'starred' stops
 	public List<Stop> getAllStops() {
 		db = getDatabase();
 		
@@ -387,8 +413,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 				stop.setSuburb(c.getString(col_suburb));
 				stop.setStarred(c.getInt(col_starred));
 				
-				//stop.setRoutes(getRoutesForStop(stop.getTramTrackerID()));
-				
 				stops.add(stop);
 				
 			} while(c.moveToNext());
@@ -400,14 +424,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	// Get a List list of our 'starred' stops
+	// Get a list of our 'starred' stops
 	public List<Stop> getFavouriteStops() {
 		db = getDatabase();
 		
@@ -456,19 +473,19 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return stops;
 	}	
 
-	// Get a List list of Stops for a particular route
-	public List<Stop> getStopsForRoute(long routeId) {
+	// Get a list of Stops for a particular destination
+	public List<Stop> getStopsForDestination(long destinationId) {
 		db = getDatabase();
 		
 		List<Stop> stops = new ArrayList<Stop>();
 		
-		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
+		Cursor c = db.query(TABLE_STOPS_JOIN_DESTINATIONS, 
 							null, 
-							"routes._id = '"  + routeId + "'", 
-							null, 
-							"stops._id", 
+							"destinations._id = '"  + destinationId + "'", 
 							null, 
 							"stops._id", 
+							null, 
+							DestinationsStopsColumns.STOP_ORDER, 
 							null);
 
 		if (c.moveToFirst()) {		
@@ -504,7 +521,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		db.close();
 		return stops;
 	}
-	
 	
 	
 	// Get a stop object from a given TramTracker ID
@@ -700,48 +716,36 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return guid;
 	}
 	
-	private boolean getBoolean(final Cursor cursor, final int columnIndex) {
-		final short value = cursor.getShort(columnIndex);
-		return (value == 1);
-	}
-	
-	private short getShort(final boolean booleanValue)
-	{
-		return (booleanValue) ? (short) 1 : 0;
-	}
-	
 
 	// Database column definitions
-	public static interface PreferencesColumns {
-		public static final String ID = "id";
-		public static final String IS_WELCOME_MESSAGE = "is_welcome_message";
-		public static final String IS_FAVOURITE_ON_LAUNCH = "is_favourite_on_launch";
-		
-	}
-	
 	 public static interface StopsColumns {
-			public static final String ID = "_id";
-			public static final String TRAMTRACKER_ID = "tramtracker_id";
-			public static final String FLAG_NUMBER = "flag_number";
-			public static final String PRIMARY_NAME = "primary_name";
-			public static final String SECONDARY_NAME = "secondary_name";
-			public static final String CITY_DIRECTION = "city_direction";
-			public static final String LATITUDE = "latitude";
-			public static final String LONGITUDE = "longitude";
-			public static final String SUBURB = "suburb";
-			public static final String STARRED = "starred";
+		public static final String ID = "_id";
+		public static final String TRAMTRACKER_ID = "tramtracker_id";
+		public static final String FLAG_NUMBER = "flag_number";
+		public static final String PRIMARY_NAME = "primary_name";
+		public static final String SECONDARY_NAME = "secondary_name";
+		public static final String CITY_DIRECTION = "city_direction";
+		public static final String LATITUDE = "latitude";
+		public static final String LONGITUDE = "longitude";
+		public static final String SUBURB = "suburb";
+		public static final String STARRED = "starred";
 	 }
 
-	 public static interface RoutesColumns {
-			public static final String ID = "_id";
-			public static final String DESTINATION = "destination";
-			public static final String NUMBER = "number";
-			public static final String DIRECTION = "direction";
+	 public static interface DestinationsColumns {
+		public static final String ID = "_id";
+		public static final String DESTINATION = "destination";
+		public static final String ROUTE_ID = "route_id";
+		public static final String DIRECTION = "direction";
 	 }
 		
-	 public static interface RouteStopsColumns {
+	 public static interface RoutesColumns {
+		public static final String ID = "_id";
+		public static final String NUMBER = "number";
+	 }	 
+	 
+	 public static interface DestinationsStopsColumns {
 		 public static final String ID = "_id";
-		 public static final String ROUTE_ID = "route_id";
+		 public static final String DESTINATION_ID = "route_id";
 		 public static final String STOP_ID = "stop_id";
 		 public static final String STOP_ORDER = "stop_order";
 	}

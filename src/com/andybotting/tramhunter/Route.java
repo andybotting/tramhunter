@@ -4,9 +4,8 @@ package com.andybotting.tramhunter;
 public class Route { 
 	
 	private String number;
-	private String destination;
-	private Boolean up;
-
+	private Destination destinationUp;
+	private Destination destinationDown;
 	
 	public void setNumber(String _number) {
 		number = _number;
@@ -14,40 +13,31 @@ public class Route {
 	public String getNumber() {
 		return number;
 	} 
-	
-	
-	public void setDestination(String _destination) {
-		destination = _destination;
+		
+	public void setDestinationUp(Destination _destination) {
+		destinationUp = _destination;
 	}
-	public String getDestination() {
-		return destination;
+	public Destination getDestinationUp() {
+		return destinationUp;
 	}	
 
-	
-	// Set 'up' via int from database
-	public void setUp(int _up) {
-		up = false;
-		if (_up == 1) {
-			up = true;
-		}		
+	public void setDestinationDown(Destination _destination) {
+		destinationDown = _destination;
 	}
-	
-	// Set 'up' from boolean
-	public void setUp(boolean _up) {
-		up = _up;
-	}
-	
-	public boolean getUp() {
-		return up;
+	public Destination getDestinationDown() {
+		return destinationDown;
 	}	
-
+	
+	public String getDestinationString() {
+		return getDestinationUp().getDestination() 
+			+ " to " 
+			+ getDestinationDown().getDestination();
+	}
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Route ");
 		buffer.append(number);
-		buffer.append(":");
-		buffer.append(destination);
 		return buffer.toString();
 	}
 
