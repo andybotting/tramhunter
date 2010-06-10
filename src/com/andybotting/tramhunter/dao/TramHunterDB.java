@@ -275,9 +275,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public Route getRoute(long routeId) {
 		db = getDatabase();
 
+		
+		
 		Cursor c = db.query(TABLE_ROUTES, 
 				new String[] { "_id", "number", "destination", "direction"}, 
-				null, 
+				String.format("%s = %s", RoutesColumns.ID, routeId), 
 				null, 
 				null, 
 				null, 
