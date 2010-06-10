@@ -1,6 +1,7 @@
 package com.andybotting.tramhunter;
 
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,34 +178,32 @@ public class Stop {
 		return distance;
 	}
 	
-	
     public String formatDistanceTo(Location location){
     	
     	double distance = this.distanceTo(location);
-    	
+
     	String result = "0m";
     	
     	if(distance > 10000) {
     		// More than 10kms
     		distance = distance / 1000;
-    		result = (int)roundToDecimals(distance, 0) + "km";
+    		result = (int)distance + "km";
     	}
     	else if(distance > 999) {
     		distance = distance / 1000;
     		result = roundToDecimals(distance, 1) + "km";
     	}
     	else {
-    		result = (int)roundToDecimals(distance, 0) + "m";
+    		result = (int)distance + "m";
     	}
     	
     	return result;
     }
-    
-    private static double roundToDecimals(double value, int decimalPlaces) {
+	
+	private static double roundToDecimals(double value, int decimalPlaces) {
     	int intValue = (int)((value * Math.pow(10, decimalPlaces)));
     	return (((double)intValue) / Math.pow(10, decimalPlaces));
     }
-
 	
 	/**
 	 * @return the GeoPoint of the stop

@@ -95,14 +95,14 @@ public class TramHunter extends ListActivity {
 												 "Wham bam thank you tram",
 												 "It ate my tram ticket, doh!",
 												 "I'm sorry inspector, I left my tram ticket at home",
-												 "Shaken not tramed",
+												 "Shaken, not tramed",
 												 "Tram, James Tram",
 												 "You dingin' at me? Are you dingin' at me?",
 												 "I know what you're thinking, has he missed 6 trams or only 5?",
 												 "Toto I've got a feeling were not on a tram anymore",
 												 "What we have here, is a failure to catch a tram",
 												 "Play it again tram",
-												 "Please tram I'd like some more",
+												 "Please tram, I'd like some more",
 												 "I like dem french fried trams, mmmmHHhhhmmmm",
 												 "You call that a tram? Thats not a tram. This is tram!",
 												 "It's going straight to the tram room",
@@ -117,7 +117,15 @@ public class TramHunter extends ListActivity {
 												 "Give me liberty or give me trams!",
 												 "I am the tram king, I can do anything...",
 												 "Absence makes the tram grow fonder",
-												 "Float like a butterfly, ding like a tram"};
+												 "Float like a butterfly, ding like a tram",
+												 "A tram, a tram, my kingdom for a tram",
+												 "Hey boy, you're looking mighty cute in that tram",
+												 "I pity the tram",
+												 "All right, Mr. DeMille, I'm ready for my tram",
+												 "Luke, I am your tram",
+												 "You’ll never know the dark side of the tram",
+												 "I ding, therefore I tram",
+												 "I had a tram, where all men were created equal"};
                                     
 
 	

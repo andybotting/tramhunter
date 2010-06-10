@@ -10,22 +10,14 @@
 		android:layout_below="@+id/heading"/>
 		
 		
-	<RelativeLayout 
-        android:id="@+id/InnerRelativeLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dip"
-  		android:layout_centerHorizontal="true"        
-        android:layout_alignParentBottom="true" >
-
-
   		<TextView android:id="@+id/welcomeMessage"
-        	android:layout_width="fill_parent"
-        	android:layout_height="wrap_content"
+  			android:layout_width="wrap_content"
+  			android:layout_height="wrap_content"
+  			android:layout_alignParentBottom="true"
+  			android:layout_centerHorizontal="true"
+        	android:padding="5dip"  			
 			android:textSize="12dip"
 			android:textColor="@drawable/gray"
   			android:text="" />
-
-    </RelativeLayout>		
 
 </RelativeLayout>

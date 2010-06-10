@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
@@ -34,25 +34,27 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private List<Stop> m_allStops;
 	private LocationManager m_locationManager;
 	private Location m_lastKnownLocation;
-	
+		
 	// Maximum stops to list
-	final static int MAXSTOPS = 20;
+	private final int MAXSTOPS = 20;
+	private final String m_title = "Nearest Stops";//±	
  
 	// Only show loading dialog at first load
 	private boolean m_showBusy = true;
-	private boolean m_listeningForNetworkLocation;
+	private boolean m_isListeningForNetworkLocation;
+	private boolean m_isCalculatingStopDistances;
 	
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	 
 			
-		m_listeningForNetworkLocation = true;
+		m_isListeningForNetworkLocation = true;
+		m_isCalculatingStopDistances = false;
 		
 		setContentView(R.layout.stops_list);
 		listView = (ListView)this.findViewById(android.R.id.list);
 		
 		// Set the title
-		String title = "Nearest Stops";
-		setTitle(title);
+		setTitle(m_title);
 		
 		// Get our stops from the DB
 		TramHunterDB db = new TramHunterDB(this);
@@ -61,9 +63,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Get the location
 		m_locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 	  	Location location = m_locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-	  	if (location != null) { 
-    		new GetNearStops(location).execute();
+  	
+	  	if (location != null) {
+	  		new StopDistanceCalculator(location).execute();			
     	}else{
     		// TODO: This should a nicer dialog explaining that no location services
     		// e.g. GPS or network are available and to enable them. 		
@@ -77,11 +79,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			this.finish();
     	}
 	}
-
-    private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
+	
+	private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)adapterView.getAdapter();
-			
 			Stop thisStop = stopsListAdapter.getStops().get(position);
 			int tramTrackerId = thisStop.getTramTrackerID();
 						
@@ -93,16 +94,20 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		}
     };
 	
-	private class GetNearStops extends AsyncTask<Stop, Void, ArrayList<Stop>> {
+	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
 		private final ProgressDialog dialog = new ProgressDialog(NearStopsActivity.this);
 		private final Location m_location;
-				
-		public GetNearStops(Location location){
+		private boolean m_refreshListOnly;
+		
+		public StopDistanceCalculator(Location location){
 			m_location = location;
 		}
 		
 		// Can use UI thread here
 		protected void onPreExecute() {
+			m_isCalculatingStopDistances = true;
+			m_refreshListOnly = !m_showBusy;
+			
 			if (m_showBusy) {
 				// Show the dialog window
 				this.dialog.setMessage("Finding tram stops...");
@@ -126,7 +131,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    		Stop stop = item.getValue();
 	    		sortedStops.add(stop);
 	
-	    		if(sortedStops.size() > MAXSTOPS)
+	    		if(sortedStops.size() >= MAXSTOPS)
 	    			break;
 	    	}
 			
@@ -137,12 +142,21 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
 			listView.setOnItemClickListener(listView_OnItemClickListener);
 			
-			// TODO: Update the current stops if the list items haven't change and just the distance has, so the user can scroll without being inturrupted
-			setListAdapter(new StopsListAdapter(sortedStops, m_location));
+			if(m_refreshListOnly){
+				// Just update the list
+				StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
+				stopsListAdapter.updateStopList(sortedStops, m_location);
+			}else{
+				// Refresh the entire list
+				StopsListAdapter stopsListAdapter = new StopsListAdapter(sortedStops, m_location);
+				setListAdapter(stopsListAdapter);	
+			}
 			
 			// Hide dialog
 			if (this.dialog.isShowing())
-				this.dialog.dismiss();		
+				this.dialog.dismiss();	
+			
+			m_isCalculatingStopDistances = false;
 		}
 	}
 		  
@@ -156,85 +170,81 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			m_location = location;
 		}
 		
+		public void updateStopList(ArrayList<Stop> stops, Location location){
+			m_stops = stops;
+			m_location = location;
+			this.notifyDataSetChanged();			
+		}
+		
+		public ArrayList<Stop> getStops() {
+			return m_stops;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View inflatedView = getLayoutInflater().inflate(R.layout.near_stops_list_row, parent, false);
+			ViewWrapper viewWrapper = new ViewWrapper(inflatedView);
+			inflatedView.setTag(viewWrapper);
+			fillViewWrapper(viewWrapper, m_stops.get(position));
+			
+			return inflatedView;
+		}
+
+		private void fillViewWrapper(ViewWrapper viewWrapper, Stop stop){
+			String stopNameLabel = stop.getStopName();
+			String directionLabel = "Stop " + stop.getFlagStopNumber();
+
+			// If the stop has a secondary name, add it 
+			if (stop.getSecondaryName().length() > 0)
+				directionLabel += ": " + stop.getSecondaryName();
+			
+			directionLabel += " - " + stop.getCityDirection();
+			String distanceLabel = "" + stop.formatDistanceTo(m_location);
+			
+			viewWrapper.getStopNameTextView().setText(stopNameLabel);
+			viewWrapper.getDirectionTextView().setText(directionLabel);
+			viewWrapper.getDistanceTextView().setText(distanceLabel);	
+		}
+		
 		public int getCount() {
 			return m_stops.size();
 		}
 
-		public Object getItem(int position) {
-			return position;
-		}
-
-		public ArrayList<Stop> getStops() {
-			return m_stops;
-		}
+		// TODO: LUKEK: Determine what these are meant to do and implement them properly...
+		public Object getItem(int position) {return position;}
+		public long getItemId(int position) {return position;}
 		
-		public long getItemId(int position) {
-			return position;
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-			View pv = convertView;
-			ViewWrapper wrapper = null;
-
-			LayoutInflater inflater = getLayoutInflater();
-			pv = inflater.inflate(R.layout.near_stops_list_row, parent, false);
-				
-			wrapper = new ViewWrapper(pv);
-			pv.setTag(wrapper);
-			
-			Stop thisStop = m_stops.get(position);
-			String textLabel1 = thisStop.getStopName();
-			String textLabel2 = "Stop " + thisStop.getFlagStopNumber();
-
-			// If the stop has a secondary name, add it
-			if (thisStop.getSecondaryName().length() > 0) {
-				textLabel2 += ": " + thisStop.getSecondaryName();
-			}
-			
-			textLabel2 += " - " + thisStop.getCityDirection();
-
-			String textLabel3 = "" + thisStop.formatDistanceTo(m_location);
-			
-			wrapper.getTextLabel1().setText(textLabel1);
-			wrapper.getTextLabel2().setText(textLabel2);
-			wrapper.getTextLabel3().setText(textLabel3);
-			
-			return pv;
-		}
-
 	}
 
 	class ViewWrapper {
 		View base;
 				
-		TextView textLabel1 = null;
-		TextView textLabel2 = null;
-		TextView textLabel3 = null;
+		TextView m_stopNameTextView = null;
+		TextView m_directionTextView = null;
+		TextView m_distanceTextView = null;
 
 		ViewWrapper(View base) {
 			this.base = base;
 		}
 
-		TextView getTextLabel1() {
-			if (textLabel1 == null) {
-				textLabel1 = (TextView) base.findViewById(R.id.stopNameText);
+		TextView getStopNameTextView() {
+			if (m_stopNameTextView == null) {
+				m_stopNameTextView = (TextView) base.findViewById(R.id.stopNameText);
 			}
-			return (textLabel1);
+			return (m_stopNameTextView);
 		}
 
-		TextView getTextLabel2() {
-			if (textLabel2 == null) {
-				textLabel2 = (TextView) base.findViewById(R.id.directionText);
+		TextView getDirectionTextView() {
+			if (m_directionTextView == null) {
+				m_directionTextView = (TextView) base.findViewById(R.id.directionText);
 			}
-			return (textLabel2);
+			return (m_directionTextView);
 		}
 
-		TextView getTextLabel3() {
-			if (textLabel3 == null) {
-				textLabel3 = (TextView) base.findViewById(R.id.distanceText);
+		TextView getDistanceTextView() {
+			if (m_distanceTextView == null) {
+				m_distanceTextView = (TextView) base.findViewById(R.id.distanceText);
 			}
-			return (textLabel3);
+			return (m_distanceTextView);
 		}
 		
 	}	
@@ -260,27 +270,40 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     public void onLocationChanged(Location location) {
 
     	if (location != null)
-    	{
+    	{	
         	// If this is a GPS location then ignore and unsubscribe from network location updates.
-        	if(location.getProvider().equals("gps")&&m_listeningForNetworkLocation){
+        	if(location.getProvider().equals("gps")&&m_isListeningForNetworkLocation){
         		stopLocationListening();
         		startLocationListening(false);
         	}
         	
-        	// TODO: Remove this when the list items are updated instead of changed (when only distance has changed and the same 20 stops are listed)
-        	if(m_lastKnownLocation!=null&&m_lastKnownLocation.distanceTo(location)>2)
-        	{
-        		new GetNearStops(location).execute();	
-        	}else if(m_lastKnownLocation==null){
-        		new GetNearStops(location).execute();
-        	}      	
+        	if(shouldCalculateNewDistance(location)){       		
+        		new StopDistanceCalculator(location).execute();
+        		m_lastKnownLocation = location;
+        	}
         	
-        	m_lastKnownLocation = location;
+        	if(location.hasAccuracy()){
+        		setTitle(m_title + "   ±" + (int)location.getAccuracy() + "m");	
+        	}else{
+        		setTitle(m_title);
+        	}
         	
     	}
-
     }
-        
+    
+    private boolean shouldCalculateNewDistance(Location location){
+		boolean result = false;
+		
+    	if(m_lastKnownLocation!=null&&m_lastKnownLocation.distanceTo(location)>1)
+    	{
+    		result = true;	
+    	}else if(m_lastKnownLocation==null){
+    		result = true;
+    	}
+    	
+    	return result && (!m_isCalculatingStopDistances);
+    }
+                
     private void stopLocationListening() {
         if (m_locationManager != null)
         	m_locationManager.removeUpdates(this);
@@ -289,7 +312,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     private void startLocationListening(boolean subscribeToNetworkLocation) {
     	if (m_locationManager!=null){
     		m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        	m_listeningForNetworkLocation = subscribeToNetworkLocation;
+        	m_isListeningForNetworkLocation = subscribeToNetworkLocation;
         	
         	if(subscribeToNetworkLocation)       		
         		m_locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);    		
@@ -304,5 +327,5 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {}
-
+	
 }
