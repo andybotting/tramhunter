@@ -265,13 +265,13 @@ public class StopDetailsActivity extends ListActivity {
 			try {
 				nextTrams = ttService.getNextPredictedRoutesCollection(stop);
 
-//				// We'll remove all NextTrams which are longer than
-//				// 99 minutes away
-//				for(int i=0; i < nextTrams.size(); i++) {
-//					if (nextTrams.get(i).minutesAway() > 99) {
-//						nextTrams.remove(i);
-//					}
-//				}
+				// We'll remove all NextTrams which are longer than
+				// 300 minutes away - e.g. not running on weekend
+				for(int i=0; i < nextTrams.size(); i++) {
+					if (nextTrams.get(i).minutesAway() > 300) {
+						nextTrams.remove(i);
+					}
+				}
 				
 			} catch (Exception e) {
 				// TODO: Put something here
@@ -358,9 +358,15 @@ public class StopDetailsActivity extends ListActivity {
 			
 			NextTram thisTram = (NextTram) nextTrams.get(position);
 			
+			
+			
 			wrapper.getNextTramRouteNumber().setText(thisTram.getRouteNo());
 			wrapper.getNextTramDestination().setText(thisTram.getDestination());
-			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());   		
+			
+			if (thisTram.minutesAway() < 5)
+				wrapper.getNextTramTime().setTextColor(0xFFFF0000);
+			
+			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());   
 
 			return pv;
 		}
