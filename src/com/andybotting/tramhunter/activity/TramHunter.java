@@ -123,12 +123,30 @@ public class TramHunter extends ListActivity {
 												 "I pity the tram",
 												 "All right, Mr. DeMille, I'm ready for my tram",
 												 "Luke, I am your tram",
-												 "Youâ€™ll never know the dark side of the tram",
+												 "You'll never know the dark side of the tram",
 												 "I ding, therefore I tram",
-												 "I had a tram, where all men were created equal"};
-                                    
-
-	
+												 "I had a tram, where all men were created equal",
+												 "I really shouldn't have written all of those tram programs",
+												 "I'm just a sweet tramsvestite from tramsilvania",
+												 "Your daughter came into my yard and kicked my tram",
+												 "I always relied on the kindness of passengers",
+												 "Trams like turtles",
+												 "Loltram",
+												 "Because we tram, tram, tram...",
+												 "Leave Tramney alone!",
+												 "Tramomenom... do doo do do do",
+												 "If you cut me, do I not ding?",
+												 "Everybody knows, those Trams don’t work on water",
+												 "I’d ride that for a dollar",
+												 "Step away from the tram. You have 20 seconds to comply",
+												 "Of all the trams in all the world, you had to walk onto mine",
+												 "Yes we tram",
+												 "Shot through the heart, and you’re to blame, you give trams a bad name",
+												 "He's not the messiah, he's a very naughty tram",
+												 "Stop, Trammer time",
+												 "Trams, no here chopper",
+												 "To tram or not to tram, that is the question"};
+                                    	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
