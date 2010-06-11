@@ -154,7 +154,7 @@ public class TramHunter extends ListActivity {
 		setContentView(R.layout.home);
 		
 		// Get shared prefs
-		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);	
 		
 		// Create db instance
 		db = new TramHunterDB(this);
@@ -165,7 +165,7 @@ public class TramHunter extends ListActivity {
 			showAbout();
 		} 
 		else {
-			if (sharedPref.getBoolean("goToFavouriteOnLaunch", true)) {
+			if (sharedPref.getBoolean("fav_on_launch", false)) {
 				// If go to fav on launch is set in prefs, and we have some favs set
 				List<Stop> stops = db.getFavouriteStops();
 				if (stops.size() > 0) {
@@ -234,7 +234,7 @@ public class TramHunter extends ListActivity {
 		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
 		String welcomeText = "";
 
-		if (sharedPref.getBoolean("displayWelcomeMessage", true))
+		if (sharedPref.getBoolean("welcome_quote", false))
 			welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
 		
         welcomeMessageTextView.setText(welcomeText);
