@@ -27,7 +27,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DB_NAME = "tramhunter.db";
 	private static final String DB_PATH = "/data/data/"+ AUTHORITY + "/databases/";
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 3;
 	
 	// Create
 	private static final String TABLE_FIRST_LAUNCH = "first_launch";
@@ -102,7 +102,19 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		boolean dbExist = checkDataBase();
  
 		if(dbExist){
-			// do nothing - database already exist
+			// Test for upgrade
+			String myPath = DB_PATH + DB_NAME;
+			db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+			int thisDBVersion = db.getVersion();
+			db.close();
+			
+			if (thisDBVersion < DB_VERSION) {
+				try {
+					copyDataBase();
+				} catch (IOException e) {
+					throw new Error("Error copying database");
+				}
+			}	
 		}
 		else{
 			// By calling this method and empty database will be created into the default system path
@@ -129,7 +141,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		try {
 			String myPath = DB_PATH + DB_NAME;
 			checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
- 
 		}
 		catch(SQLiteException e){
 			//database does't exist yet.
