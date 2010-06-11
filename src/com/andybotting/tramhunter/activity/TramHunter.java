@@ -37,7 +37,7 @@ public class TramHunter extends ListActivity {
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
 								    "Nearby Stops",
-								    "Preferences"};
+								    "Settings"};
 
 	private String[] m_menuDesc = {"Get the details for your favourite stops, fast",
 								   "Browse for your stop by route and stop lists",
@@ -274,7 +274,7 @@ public class TramHunter extends ListActivity {
 						break;
 					}
 					case 4: {
-						Intent intent = new Intent(TramHunter.this, PreferencesActivity.class);
+						Intent intent = new Intent(TramHunter.this, SettingsActivity.class);
 						startActivityForResult(intent, 1);
 						break;
 					}

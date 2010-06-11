@@ -113,8 +113,7 @@
 	
 		<ListView android:id="@android:id/list"
 		   	android:layout_width="fill_parent"
-		   	android:layout_height="wrap_content"
-			android:cacheColorHint="#00000000"/>
+		   	android:layout_height="wrap_content"/>
 	</LinearLayout>
 			
 		
@@ -132,7 +131,7 @@
   			android:layout_alignParentBottom="true"
   			android:layout_centerHorizontal="true"
 			android:textSize="12dip"
-			android:textColor="#989898"
+			android:textColor="@drawable/gray"
 			android:text="" />
 
     </RelativeLayout>	

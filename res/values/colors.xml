@@ -3,6 +3,6 @@
 <resources>
 	<drawable name="white">#ffffffff</drawable>
 	<drawable name="black">#ff000000</drawable>
-	<drawable name="gray">#ffaaaaaa</drawable>
+	<drawable name="gray">#ff606060</drawable>
 	<drawable name="aqua">#007bff</drawable>
 </resources>

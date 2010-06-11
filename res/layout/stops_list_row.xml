@@ -30,7 +30,6 @@
 				android:shadowRadius="1"
 				android:layout_marginBottom="-2dip"
 				android:paddingRight="8dip"
-				android:textColor="@drawable/white"
 				android:text="Route Number"/>
 				
 			<TextView android:id="@+id/textLabel2"
