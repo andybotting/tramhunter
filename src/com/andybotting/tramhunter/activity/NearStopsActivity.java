@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
  
@@ -32,6 +33,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private List<Stop> m_allStops;
 	private LocationManager m_locationManager;
 	private Location m_lastKnownLocation;
+	
+	private TramHunterDB db;
 		
 	// Maximum stops to list
 	private final int MAXSTOPS = 20;
@@ -55,7 +58,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		setTitle(m_title);
 		
 		// Get our stops from the DB
-		TramHunterDB db = new TramHunterDB(this);
+		db = new TramHunterDB(this);
 		m_allStops = db.getAllStops();
 
 		// Get the location
@@ -132,6 +135,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    		if(sortedStops.size() >= MAXSTOPS)
 	    			break;
 	    	}
+	    	
+			// Find the routes for our nearest stops
+			for(Stop stop: sortedStops) {
+				List<Route> routes = db.getRoutesForStop(stop.getTramTrackerID());
+				stop.setRoutes(routes);
+			}
 			
 			return sortedStops;
 		}
@@ -197,10 +206,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			
 			directionLabel += " - " + stop.getCityDirection();
 			String distanceLabel = "" + stop.formatDistanceTo(m_location);
+			String routesLabel = stop.getRoutesString();
 			
 			viewWrapper.getStopNameTextView().setText(stopNameLabel);
 			viewWrapper.getDirectionTextView().setText(directionLabel);
-			viewWrapper.getDistanceTextView().setText(distanceLabel);	
+			viewWrapper.getDistanceTextView().setText(distanceLabel);
+			viewWrapper.getRoutesTextView().setText(routesLabel);
 		}
 		
 		public int getCount() {
@@ -219,6 +230,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		TextView m_stopNameTextView = null;
 		TextView m_directionTextView = null;
 		TextView m_distanceTextView = null;
+		TextView m_routesTextView = null;
 
 		ViewWrapper(View base) {
 			this.base = base;
@@ -244,6 +256,14 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			}
 			return (m_distanceTextView);
 		}
+		
+		TextView getRoutesTextView() {
+			if (m_routesTextView == null) {
+				m_routesTextView = (TextView) base.findViewById(R.id.routesText);
+			}
+			return (m_routesTextView);
+		}		
+		
 		
 	}	
 	
@@ -281,7 +301,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
         	}
         	
         	if(location.hasAccuracy()){
-        		setTitle(m_title + "   ±" + (int)location.getAccuracy() + "m");	
+        		setTitle(m_title + " ±" + (int)location.getAccuracy() + "m");	
         	}else{
         		setTitle(m_title);
         	}

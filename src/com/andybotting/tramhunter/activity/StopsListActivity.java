@@ -18,6 +18,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import com.andybotting.tramhunter.Destination;
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 
@@ -78,6 +79,12 @@ public class StopsListActivity extends ListActivity {
 
 	public void displayFavStops(boolean alertIfNoStops) {
 		stops = db.getFavouriteStops();
+		
+		// Find the routes for our nearest stops
+		for(Stop stop: stops) {
+			List<Route> routes = db.getRoutesForStop(stop.getTramTrackerID());
+			stop.setRoutes(routes);
+		}
 		
 		if (alertIfNoStops && stops.size() == 0) {
 			alertNoFavourites();		
@@ -173,14 +180,14 @@ public class StopsListActivity extends ListActivity {
 			
 			String textLabel1 = thisStop.getPrimaryName();
 						
-			String textLabel2 = "Stop " + thisStop.getFlagStopNumber();
+			String textLabel2 = "Stop " + thisStop.getFlagStopNumber() + ": ";
 
 			// If the stop has a secondary name, add it
 			if (thisStop.getSecondaryName().length() > 0) {
-				textLabel2 += ": " + thisStop.getSecondaryName();
+				textLabel2 += thisStop.getSecondaryName() + " - ";
 			}
 			
-			textLabel2 += " - " + thisStop.getCityDirection();
+			textLabel2 += thisStop.getCityDirection();
 			
 			wrapper.getTextLabel1().setText(textLabel1);
 			wrapper.getTextLabel2().setText(textLabel2);
