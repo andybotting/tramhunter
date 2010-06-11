@@ -136,12 +136,12 @@ public class TramHunter extends ListActivity {
 												 "Leave Tramney alone!",
 												 "Tramomenom... do doo do do do",
 												 "If you cut me, do I not ding?",
-												 "Everybody knows, those Trams don’t work on water",
-												 "I’d ride that for a dollar",
+												 "Everybody knows, those Trams donï¿½t work on water",
+												 "Iï¿½d ride that for a dollar",
 												 "Step away from the tram. You have 20 seconds to comply",
 												 "Of all the trams in all the world, you had to walk onto mine",
 												 "Yes we tram",
-												 "Shot through the heart, and you’re to blame, you give trams a bad name",
+												 "Shot through the heart, and youï¿½re to blame, you give trams a bad name",
 												 "He's not the messiah, he's a very naughty tram",
 												 "Stop, Trammer time",
 												 "Trams, no here chopper",
@@ -360,6 +360,10 @@ public class TramHunter extends ListActivity {
 		menu.add(0, 0, 0, "About");
 		MenuItem menuItem1 = menu.findItem(0);
 		menuItem1.setIcon(R.drawable.ic_menu_info_details);
+		
+		menu.add(0, 1, 0, "Settings");
+		MenuItem menuItem2 = menu.findItem(1);
+		menuItem2.setIcon(android.R.drawable.ic_menu_preferences);
 
 		return true;
 	}
@@ -371,6 +375,10 @@ public class TramHunter extends ListActivity {
 		switch (item.getItemId()) {
 		case 0:
 			showAbout();
+			return true;
+		case 1:
+			Intent intent = new Intent(TramHunter.this, SettingsActivity.class);
+			startActivityForResult(intent, 1);
 			return true;
 		}
 		return false;
