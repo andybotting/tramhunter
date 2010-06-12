@@ -7,7 +7,6 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -23,14 +22,15 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.andybotting.tramhunter.PreferenceHelper;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 
-public class TramHunter extends ListActivity {
-
+public class TramHunter extends ListActivity {	
 	private ListView m_listView;
-	private SharedPreferences sharedPref;
+	private PreferenceHelper preferenceHelper;
 	private TramHunterDB db;
 	
 	private String[] m_menuItems = {"Favourite Stops",
@@ -154,7 +154,7 @@ public class TramHunter extends ListActivity {
 		setContentView(R.layout.home);
 		
 		// Get shared prefs
-		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);	
+		preferenceHelper = new PreferenceHelper(PreferenceManager.getDefaultSharedPreferences(this));	
 		
 		// Create db instance
 		db = new TramHunterDB(this);
@@ -165,7 +165,7 @@ public class TramHunter extends ListActivity {
 			showAbout();
 		} 
 		else {
-			if (sharedPref.getBoolean("fav_on_launch", false)) {
+			if (preferenceHelper.isFavouriteOnLaunchEnabled()) {
 				// If go to fav on launch is set in prefs, and we have some favs set
 				List<Stop> stops = db.getFavouriteStops();
 				if (stops.size() > 0) {
@@ -234,7 +234,7 @@ public class TramHunter extends ListActivity {
 		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
 		String welcomeText = "";
 
-		if (sharedPref.getBoolean("welcome_quote", false))
+		if (preferenceHelper.isWelcomeQuoteEnabled())
 			welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
 		
         welcomeMessageTextView.setText(welcomeText);
