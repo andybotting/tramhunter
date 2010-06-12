@@ -11,7 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -154,7 +153,7 @@ public class TramHunter extends ListActivity {
 		setContentView(R.layout.home);
 		
 		// Get shared prefs
-		preferenceHelper = new PreferenceHelper(PreferenceManager.getDefaultSharedPreferences(this));	
+		preferenceHelper = new PreferenceHelper(this);	
 		
 		// Create db instance
 		db = new TramHunterDB(this);

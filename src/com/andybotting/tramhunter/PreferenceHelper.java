@@ -1,6 +1,8 @@
 package com.andybotting.tramhunter;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class PreferenceHelper {
 	private static final String FAV_ON_LAUNCH = "goToFavouriteOnLaunch";
@@ -8,8 +10,8 @@ public class PreferenceHelper {
 	
 	private final SharedPreferences preferences;
 
-	public PreferenceHelper(SharedPreferences preferences) {
-		this.preferences = preferences;
+	public PreferenceHelper(final Context context) {
+		this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 	
 	public boolean isWelcomeQuoteEnabled()
