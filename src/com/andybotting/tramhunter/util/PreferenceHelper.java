@@ -1,4 +1,4 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

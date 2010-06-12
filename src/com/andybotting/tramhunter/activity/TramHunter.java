@@ -2,6 +2,8 @@ package com.andybotting.tramhunter.activity;
 
 import java.util.List;
 import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -10,6 +12,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,10 +26,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.andybotting.tramhunter.PreferenceHelper;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramHunter extends ListActivity {	
 	private ListView m_listView;
@@ -168,8 +172,24 @@ public class TramHunter extends ListActivity {
 				// If go to fav on launch is set in prefs, and we have some favs set
 				List<Stop> stops = db.getFavouriteStops();
 				if (stops.size() > 0) {
-					// Go to favourite stops
-					Intent intent = new Intent(TramHunter.this, StopsListActivity.class);
+					// Get the location
+					final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+					Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+					// Order favourites by location
+					SortedMap<Double, Stop> sortedStopMap = new TreeMap<Double, Stop>();
+
+					for(Stop stop : stops){
+						double distance = location.distanceTo(stop.getLocation());
+						sortedStopMap.put(distance, stop);
+					}
+					
+					// Go to the closest favourite stop
+					Bundle bundle = new Bundle();
+					Stop closestFavourite = sortedStopMap.values().iterator().next();
+					bundle.putInt("tramTrackerId", closestFavourite.getTramTrackerID());
+					Intent intent = new Intent(this, StopDetailsActivity.class);
+					intent.putExtras(bundle);
 					startActivityForResult(intent, 1);
 				}
 				
