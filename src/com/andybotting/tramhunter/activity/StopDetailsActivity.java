@@ -15,14 +15,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -340,20 +338,6 @@ public class StopDetailsActivity extends ListActivity {
 			View pv = convertView;
 			ViewWrapper wrapper = null;
 				
-			NextTram thisTram = (NextTram) nextTrams.get(position);
-
-			// If we have a special event message
-			if (thisTram.getSpecialEventMessage().length() > 0) {
-				AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-				TextView textView = new TextView(StopDetailsActivity.this);
-				textView.setLayoutParams(lp);
-				textView.setPadding(5, 5, 5, 5);
-				textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-				textView.setTextSize(20);
-				textView.setText(thisTram.getSpecialEventMessage());
-				return textView;
-			}
-			
 			if (pv == null) {
 				LayoutInflater inflater = getLayoutInflater();
 				pv = inflater.inflate(R.layout.stop_details_row, parent, false);
@@ -370,6 +354,11 @@ public class StopDetailsActivity extends ListActivity {
 			}
 				
 			pv.setId(0);
+			
+			
+			NextTram thisTram = (NextTram) nextTrams.get(position);
+			
+			
 			
 			wrapper.getNextTramRouteNumber().setText(thisTram.getRouteNo());
 			wrapper.getNextTramDestination().setText(thisTram.getDestination());
