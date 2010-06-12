@@ -3,31 +3,43 @@ package com.andybotting.tramhunter;
 
 public class Route { 
 	
+	private int id;
 	private String number;
 	private Destination destinationUp;
 	private Destination destinationDown;
 	
-	public void setNumber(String _number) {
-		number = _number;
+	public int getId() {
+		return id;
 	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getNumber() {
 		return number;
-	} 
-		
-	public void setDestinationUp(Destination _destination) {
-		destinationUp = _destination;
 	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+
 	public Destination getDestinationUp() {
 		return destinationUp;
-	}	
-
-	public void setDestinationDown(Destination _destination) {
-		destinationDown = _destination;
 	}
+
+	public void setDestinationUp(Destination destinationUp) {
+		this.destinationUp = destinationUp;
+	}
+
 	public Destination getDestinationDown() {
 		return destinationDown;
-	}	
-	
+	}
+
+	public void setDestinationDown(Destination destinationDown) {
+		this.destinationDown = destinationDown;
+	}
+
 	public String getDestinationString() {
 		return getDestinationUp().getDestination() 
 			+ " to " 

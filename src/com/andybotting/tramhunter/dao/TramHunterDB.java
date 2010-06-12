@@ -232,6 +232,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 				int col_number = c.getColumnIndexOrThrow(Routes.NUMBER);
 				
 				int routeId = c.getInt(col_id);
+				route.setId(routeId);
 				route.setNumber(c.getString(col_number));
 				
 				// TODO: We should call this as another method, but doing it here
@@ -358,7 +359,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		List<Route> routes = new ArrayList<Route>();
 		
 		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
-							new String[] { "routes._id", "number"}, 
+							new String[] { "routes._id AS route_id", "number"}, 
 							StopsColumns.TRAMTRACKER_ID + " = '"  + tramTrackerId + "'", 
 							null, 
 							"routes._id", 
@@ -370,7 +371,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			do {	
 				Route route = new Route();
 				
+				int col_id = c.getColumnIndexOrThrow("route_id");
 				int col_number = c.getColumnIndexOrThrow(Routes.NUMBER);
+				route.setId(c.getInt(col_id));
 				route.setNumber(c.getString(col_number));
 
 				routes.add(route);
@@ -382,6 +385,56 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		db.close();
 		return routes;
 	}	
+	
+	
+	// Get a list of destinations for a given route
+	public List<Stop> getFavouriteStopsOnRoute(Stop origin, Route route) {
+		db = getDatabase();
+
+		final List<Stop> stops = new ArrayList<Stop>();
+		
+		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, 
+							new String[] { 
+								"stops._id AS _id", 
+								"stops.tramtracker_id AS tramtracker_id", 
+								"stops.flag_number AS flag_number", 
+								"stops.primary_name AS primary_name", 
+								"stops.secondary_name AS secondary_name", 
+								"stops.city_direction AS city_direction", 
+								"stops.latitude AS latitude", 
+								"stops.longitude AS longitude", 
+								"stops.suburb AS suburb", 
+								"stops.starred AS starred"
+							}, 
+							String.format("stops.%s = 1 AND routes.%s = %s AND stops.%s <> %s", 
+									StopsColumns.STARRED,
+									RoutesColumns.ID, route.getId(), 
+									StopsColumns.ID, origin.getId()),
+							null, 
+							null, 
+							null, 
+							"destination_stops." + DestinationsStopsColumns.STOP_ORDER, 
+							null);
+		
+		if (c.moveToFirst()) {		
+			do {	
+				stops.add(getStopFromCursor(c));
+			} 
+			while(c.moveToNext());
+		}
+		
+		c.close();
+		db.close();
+		return stops;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -402,27 +455,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 		if (c.moveToFirst()) {		
 			do {
-				Stop stop = new Stop();
-			
-				int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
-				int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
-				int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
-				int col_secondaryName = c.getColumnIndexOrThrow(StopsColumns.SECONDARY_NAME);
-				int col_cityDirection = c.getColumnIndexOrThrow(StopsColumns.CITY_DIRECTION);
-				int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
-				int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
-				int col_suburb = c.getColumnIndexOrThrow(StopsColumns.SUBURB);
-				int col_starred = c.getColumnIndexOrThrow(StopsColumns.STARRED);
-
-				stop.setTramTrackerID(c.getInt(col_tramTrackerID));
-				stop.setFlagStopNumber(c.getString(col_flagStopNumber));
-				stop.setPrimaryName(c.getString(col_primaryName));
-				stop.setSecondaryName(c.getString(col_secondaryName));
-				stop.setCityDirection(c.getString(col_cityDirection));
-				stop.setLatitude(c.getFloat(col_latitude));
-				stop.setLongitude(c.getFloat(col_longitude));
-				stop.setSuburb(c.getString(col_suburb));
-				stop.setStarred(c.getInt(col_starred));
+				Stop stop = getStopFromCursor(c);
 				
 				stops.add(stop);
 				
@@ -432,7 +465,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		c.close();
 		db.close();
 		return stops;
-	}	
+	}
 	
 	
 	// Get a list of our 'starred' stops
@@ -452,27 +485,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 		if (c.moveToFirst()) {		
 			do {
-				Stop stop = new Stop();
-			
-				int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
-				int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
-				int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
-				int col_secondaryName = c.getColumnIndexOrThrow(StopsColumns.SECONDARY_NAME);
-				int col_cityDirection = c.getColumnIndexOrThrow(StopsColumns.CITY_DIRECTION);
-				int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
-				int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
-				int col_suburb = c.getColumnIndexOrThrow(StopsColumns.SUBURB);
-				int col_starred = c.getColumnIndexOrThrow(StopsColumns.STARRED);
-
-				stop.setTramTrackerID(c.getInt(col_tramTrackerID));
-				stop.setFlagStopNumber(c.getString(col_flagStopNumber));
-				stop.setPrimaryName(c.getString(col_primaryName));
-				stop.setSecondaryName(c.getString(col_secondaryName));
-				stop.setCityDirection(c.getString(col_cityDirection));
-				stop.setLatitude(c.getFloat(col_latitude));
-				stop.setLongitude(c.getFloat(col_longitude));
-				stop.setSuburb(c.getString(col_suburb));
-				stop.setStarred(c.getInt(col_starred));
+				Stop stop = getStopFromCursor(c);
 				
 				stops.add(stop);
 				
@@ -501,27 +514,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 		if (c.moveToFirst()) {		
 			do {
-				Stop stop = new Stop();
-			
-				int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
-				int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
-				int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
-				int col_secondaryName = c.getColumnIndexOrThrow(StopsColumns.SECONDARY_NAME);
-				int col_cityDirection = c.getColumnIndexOrThrow(StopsColumns.CITY_DIRECTION);
-				int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
-				int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
-				int col_suburb = c.getColumnIndexOrThrow(StopsColumns.SUBURB);
-				int col_starred = c.getColumnIndexOrThrow(StopsColumns.STARRED);
-
-				stop.setTramTrackerID(c.getInt(col_tramTrackerID));
-				stop.setFlagStopNumber(c.getString(col_flagStopNumber));
-				stop.setPrimaryName(c.getString(col_primaryName));
-				stop.setSecondaryName(c.getString(col_secondaryName));
-				stop.setCityDirection(c.getString(col_cityDirection));
-				stop.setLatitude(c.getFloat(col_latitude));
-				stop.setLongitude(c.getFloat(col_longitude));
-				stop.setSuburb(c.getString(col_suburb));
-				stop.setStarred(c.getInt(col_starred));
+				Stop stop = getStopFromCursor(c);
 				
 				stops.add(stop);
 				
@@ -697,6 +690,30 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		db.close();
 	}
 	
+	private Stop getStopFromCursor(Cursor c) {
+		Stop stop = new Stop();
+
+		int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
+		int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
+		int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
+		int col_secondaryName = c.getColumnIndexOrThrow(StopsColumns.SECONDARY_NAME);
+		int col_cityDirection = c.getColumnIndexOrThrow(StopsColumns.CITY_DIRECTION);
+		int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
+		int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
+		int col_suburb = c.getColumnIndexOrThrow(StopsColumns.SUBURB);
+		int col_starred = c.getColumnIndexOrThrow(StopsColumns.STARRED);
+
+		stop.setTramTrackerID(c.getInt(col_tramTrackerID));
+		stop.setFlagStopNumber(c.getString(col_flagStopNumber));
+		stop.setPrimaryName(c.getString(col_primaryName));
+		stop.setSecondaryName(c.getString(col_secondaryName));
+		stop.setCityDirection(c.getString(col_cityDirection));
+		stop.setLatitude(c.getFloat(col_latitude));
+		stop.setLongitude(c.getFloat(col_longitude));
+		stop.setSuburb(c.getString(col_suburb));
+		stop.setStarred(c.getInt(col_starred));
+		return stop;
+	}	
 	
 	// Return a String of the GUID value generated from TramTracker
 	public String getGUID(){
