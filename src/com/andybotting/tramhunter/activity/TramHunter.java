@@ -1,9 +1,6 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.List;
 import java.util.Random;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -12,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,23 +25,27 @@ import android.widget.AdapterView.OnItemClickListener;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramHunter extends ListActivity {	
 	private ListView m_listView;
 	private PreferenceHelper preferenceHelper;
 	private TramHunterDB db;
+	private FavouriteStopUtil favouriteStopUtil;
 	
 	private String[] m_menuItems = {"Favourite Stops",
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
 								    "Nearby Stops",
+								    "My Trips",
 								    "Settings"};
 
 	private String[] m_menuDesc = {"Get the details for your favourite stops, fast",
 								   "Browse for your stop by route and stop lists",
 								   "Get the details for your stop by TramTracker ID",
 								   "Use your location to find stops nearest to you",
+								   "Predictions based on closest favourite stops",
 								   "Set your Tram Hunter preferences"};
 
 	private static String[] m_welcomeMessages = {"Dude, wheres my tram?",
@@ -160,8 +160,9 @@ public class TramHunter extends ListActivity {
 		preferenceHelper = new PreferenceHelper(this);	
 		
 		// Create db instance
+		final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		db = new TramHunterDB(this);
-		
+		favouriteStopUtil = new FavouriteStopUtil(db, locationManager);
 		
 		boolean firstLaunch = checkFirstLaunch();
 		if (firstLaunch == false) {
@@ -170,24 +171,13 @@ public class TramHunter extends ListActivity {
 		else {
 			if (preferenceHelper.isFavouriteOnLaunchEnabled()) {
 				// If go to fav on launch is set in prefs, and we have some favs set
-				List<Stop> stops = db.getFavouriteStops();
-				if (stops.size() > 0) {
-					// Get the location
-					final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-					Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+				final Stop closestFavouriteStop = favouriteStopUtil.getClosestFavouriteStop();
 
-					// Order favourites by location
-					SortedMap<Double, Stop> sortedStopMap = new TreeMap<Double, Stop>();
-
-					for(Stop stop : stops){
-						double distance = location.distanceTo(stop.getLocation());
-						sortedStopMap.put(distance, stop);
-					}
+				if (closestFavouriteStop != null) {
 					
 					// Go to the closest favourite stop
 					Bundle bundle = new Bundle();
-					Stop closestFavourite = sortedStopMap.values().iterator().next();
-					bundle.putInt("tramTrackerId", closestFavourite.getTramTrackerID());
+					bundle.putInt("tramTrackerId", closestFavouriteStop.getTramTrackerID());
 					Intent intent = new Intent(this, StopDetailsActivity.class);
 					intent.putExtras(bundle);
 					startActivityForResult(intent, 1);
@@ -293,10 +283,16 @@ public class TramHunter extends ListActivity {
 						break;
 					}
 					case 4: {
+						Intent intent = new Intent(TramHunter.this, PredictionActivity.class);
+						startActivityForResult(intent, 1);
+						break;
+					}
+					case 5: {
 						Intent intent = new Intent(TramHunter.this, SettingsActivity.class);
 						startActivityForResult(intent, 1);
 						break;
 					}
+					
 
 				}
   

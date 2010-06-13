@@ -4,10 +4,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 
 public class NextTram implements Comparable<NextTram> { 
 	
+	private Stop originStop;
 	private String internalRouteNo;
 	private String routeNo;
 	private String headboardRouteNo;
@@ -22,9 +24,16 @@ public class NextTram implements Comparable<NextTram> {
 	private String specialEventMessage;
 	private Date predictedArrivalDateTime;
 	private Date requestDateTime;
-
-
+	private List<Stop> favouritesOnRoute;
 	
+	public Stop getOriginStop() {
+		return originStop;
+	}
+
+	public void setOriginStop(Stop originStop) {
+		this.originStop = originStop;
+	}
+
 	// Internal Route Number
 	public void setInternalRouteNo(String _internalRouteNo) {
 		internalRouteNo = _internalRouteNo;
@@ -152,9 +161,16 @@ public class NextTram implements Comparable<NextTram> {
 	
 	public Date getRequestDateTime() {
 		return requestDateTime;
-	}  	 
-	 
+	}  	
 	
+	public List<Stop> getFavouritesOnRoute() {
+		return favouritesOnRoute;
+	}
+
+	public void setFavouritesOnRoute(List<Stop> favouritesOnRoute) {
+		this.favouritesOnRoute = favouritesOnRoute;
+	}
+
 	// Parse the dates
 	public Date parseDate(String dateString) {
 		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ssZ");

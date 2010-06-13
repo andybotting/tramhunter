@@ -39,6 +39,10 @@
 		<activity android:name="com.andybotting.tramhunter.activity.StopMapActivity" 
 				  android:label="@string/app_name" 
 				  android:configChanges="orientation|keyboardHidden"/>
+
+		<activity android:name="com.andybotting.tramhunter.activity.PredictionActivity" 
+				  android:label="@string/app_name" 
+				  android:configChanges="orientation|keyboardHidden"/>
 		
 		<activity android:name="com.andybotting.tramhunter.activity.SettingsActivity" 
 				  android:label="@string/app_name" 

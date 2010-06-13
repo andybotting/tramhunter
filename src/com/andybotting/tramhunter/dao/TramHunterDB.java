@@ -409,7 +409,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 							String.format("stops.%s = 1 AND routes.%s = %s AND stops.%s <> %s", 
 									StopsColumns.STARRED,
 									RoutesColumns.ID, route.getId(), 
-									StopsColumns.ID, origin.getId()),
+									StopsColumns.TRAMTRACKER_ID, origin.getTramTrackerID()),
 							null, 
 							null, 
 							null, 
