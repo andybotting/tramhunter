@@ -38,14 +38,14 @@ public class TramHunter extends ListActivity {
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
 								    "Nearby Stops",
-								    "My Trips",
+								    "Hunt Down My Trips",
 								    "Settings"};
 
 	private String[] m_menuDesc = {"Get the details for your favourite stops, fast",
 								   "Browse for your stop by route and stop lists",
 								   "Get the details for your stop by TramTracker ID",
 								   "Use your location to find stops nearest to you",
-								   "Predictions based on closest favourite stops",
+								   "Find trams I am likely to want to catch",
 								   "Set your Tram Hunter preferences"};
 
 	private static String[] m_welcomeMessages = {"Dude, wheres my tram?",

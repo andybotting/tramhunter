@@ -33,24 +33,26 @@ public class FavouriteStopUtil {
 		if (!stops.isEmpty()) {
 			// Get the location
 			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-	
-			// Order favourites by location
-			SortedMap<Double, Stop> sortedStopMap = new TreeMap<Double, Stop>();
-	
-			for(Stop stop : stops){
-				double distance = location.distanceTo(stop.getLocation());
-				if (maxMetresAway == UNLIMITED_METRES_AWAY || distance <= maxMetresAway)
-				{
-					sortedStopMap.put(distance, stop);
+			
+			if (location != null) {
+				// Order favourites by location
+				SortedMap<Double, Stop> sortedStopMap = new TreeMap<Double, Stop>();
+		
+				for(Stop stop : stops){
+					double distance = location.distanceTo(stop.getLocation());
+					if (maxMetresAway == UNLIMITED_METRES_AWAY || distance <= maxMetresAway)
+					{
+						sortedStopMap.put(distance, stop);
+					}
 				}
-			}
-			
-			final List<Stop> sortedStopList = new ArrayList<Stop>(sortedStopMap.values());
-			int numToReturn = (maxNumberOfStops <= sortedStopList.size()) ? maxNumberOfStops : sortedStopList.size();
-			closestFavourites = sortedStopList.subList(0, numToReturn);
-			
-			for (Stop stop : closestFavourites) {
-				stop.setRoutes(db.getRoutesForStop(stop.getTramTrackerID()));
+				
+				final List<Stop> sortedStopList = new ArrayList<Stop>(sortedStopMap.values());
+				int numToReturn = (maxNumberOfStops <= sortedStopList.size()) ? maxNumberOfStops : sortedStopList.size();
+				closestFavourites = sortedStopList.subList(0, numToReturn);
+				
+				for (Stop stop : closestFavourites) {
+					stop.setRoutes(db.getRoutesForStop(stop.getTramTrackerID()));
+				}
 			}
 		}
 		return closestFavourites;
