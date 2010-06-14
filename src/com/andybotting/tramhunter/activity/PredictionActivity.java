@@ -254,7 +254,7 @@ public class PredictionActivity extends ListActivity {
 				// If we've not had a loading error already
 				if (!loadingError) {
 					Context context = getApplicationContext();
-					CharSequence text = "No Trips could be hunted. Hunting Hint: You need 2 or more favourites stops on the same route favourited. And be within at 1 km of a favourite stop.";
+					CharSequence text = "No Trips could be hunted. Hunting Hint: You need 2 or more favourite stops on the same route. And be within 1 km of 1 or more favourite stops when using the Hunt Trips funtion.";
 					int duration = Toast.LENGTH_LONG;
 					Toast toast = Toast.makeText(context, text, duration);
 					toast.show();
