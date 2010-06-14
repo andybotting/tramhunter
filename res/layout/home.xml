@@ -17,6 +17,7 @@
         	android:padding="5dip"  			
 			android:textSize="12dip"
 			android:textColor="@drawable/gray"
+			android:background="@drawable/white"
   			android:text="" />
 
 </RelativeLayout>

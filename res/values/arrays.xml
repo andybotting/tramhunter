@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="defaultActivityEntries">
+		<item>Home</item>
+		<item>Favourite Stops</item>
+		<item>Closest Favourite Stop</item>
+		<item>Nearby Stops</item>
+		<item>Hunt Down My Trips</item>
+	</string-array>
+	<string-array name="defaultActivityEntryValues">
+		<item>HomeActivity</item>
+		<item>StopsListActivity</item>
+		<item>ClosestStopsListActivity</item>
+		<item>NearStopsActivity</item>
+		<item>PredictionActivity</item>
+	</string-array>
+</resources>

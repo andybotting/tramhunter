@@ -17,7 +17,7 @@
 			android:gravity="center_vertical"
 			android:layout_marginLeft="8dip">
 			
-			<TextView android:id="@+id/textLabel1"
+			<TextView android:id="@+id/nameText"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
@@ -32,7 +32,7 @@
 				android:paddingRight="8dip"
 				android:text="Menu Item"/>
 				
-			<TextView android:id="@+id/textLabel2"
+			<TextView android:id="@+id/descriptionText"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"

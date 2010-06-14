@@ -1,12 +1,12 @@
 package com.andybotting.tramhunter.util;
 
+import com.andybotting.tramhunter.activity.SettingsActivity;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class PreferenceHelper {
-	private static final String FAV_ON_LAUNCH = "goToFavouriteOnLaunch";
-	private static final String WELCOME_QUOTE = "displayWelcomeMessage";
 	
 	private final SharedPreferences preferences;
 
@@ -16,11 +16,11 @@ public class PreferenceHelper {
 	
 	public boolean isWelcomeQuoteEnabled()
 	{
-		return preferences.getBoolean(WELCOME_QUOTE, false);
+		return preferences.getBoolean(SettingsActivity.KEY_WELCOME_MESSAGE, SettingsActivity.KEY_WELCOME_MESSAGE_DEFAULT_VALUE);
 	}
 	
-	public boolean isFavouriteOnLaunchEnabled()
+	public String defaultLaunchActivity()
 	{
-		return preferences.getBoolean(FAV_ON_LAUNCH, false);
+		return preferences.getString(SettingsActivity.KEY_DEFAULT_LAUNCH_ACTIVITY, "HomeActivity");
 	}
 }

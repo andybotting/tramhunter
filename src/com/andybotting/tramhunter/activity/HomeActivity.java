@@ -1,7 +1,6 @@
 package com.andybotting.tramhunter.activity;
 
 import java.util.Random;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
@@ -26,27 +25,29 @@ import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
+import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
-public class TramHunter extends ListActivity {	
-	private ListView m_listView;
-	private PreferenceHelper preferenceHelper;
-	private TramHunterDB db;
-	private FavouriteStopUtil favouriteStopUtil;
+public class HomeActivity extends ListActivity {	
+	private ListView mListView;
+	private PreferenceHelper mPreferenceHelper;
+	private TramHunterDB mDB;
+	private FavouriteStopUtil mFavouriteStopUtil;
+	private static String mLastUsedIntentUUID;
 	
 	private String[] m_menuItems = {"Favourite Stops",
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
 								    "Nearby Stops",
-								    "Hunt Down My Trips",
-								    "Settings"};
+								    "Hunt Down My Trips"/*,
+								    "Settings"*/};
 
-	private String[] m_menuDesc = {"Get the details for your favourite stops, fast",
-								   "Browse for your stop by route and stop lists",
-								   "Get the details for your stop by TramTracker ID",
-								   "Use your location to find stops nearest to you",
-								   "Find trams I am likely to want to catch",
-								   "Set your Tram Hunter preferences"};
+	private String[] m_menuItemDescriptions = {"Get the details for your favourite stops, fast",
+											   "Browse for your stop by route and stop lists",
+											   "Get the details for your stop by TramTracker ID",
+											   "Use your location to find stops nearest to you",
+											   "Find trams I am likely to want to catch"/*,
+											   "Set your Tram Hunter preferences"*/};
 
 	private static String[] m_welcomeMessages = {"Dude, wheres my tram?",
 												 "My milkshakes bring all the trams to the stop",
@@ -153,39 +154,71 @@ public class TramHunter extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setContentView(R.layout.home);
 		
 		// Get shared prefs
-		preferenceHelper = new PreferenceHelper(this);	
+		mPreferenceHelper = new PreferenceHelper(this);	
 		
 		// Create db instance
+		mDB = new TramHunterDB(this);
 		final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		db = new TramHunterDB(this);
-		favouriteStopUtil = new FavouriteStopUtil(db, locationManager);
+		mFavouriteStopUtil = new FavouriteStopUtil(mDB, locationManager);
 		
-		boolean firstLaunch = checkFirstLaunch();
-		if (firstLaunch == false) {
+		if (isFirstLaunch()) {
 			showAbout();
-		} 
-		else {
-			if (preferenceHelper.isFavouriteOnLaunchEnabled()) {
-				// If go to fav on launch is set in prefs, and we have some favs set
-				final Stop closestFavouriteStop = favouriteStopUtil.getClosestFavouriteStop();
+		} else {
+			goDefaultLaunchActivity();	
+		}
+	}
+	
+	private void goDefaultLaunchActivity(){
+		Bundle extras = getIntent().getExtras();
+		boolean isNewIntentUUID = false;
+		
+		// Check to make sure we have not already used the UUID for a default activity launch
+		if(extras != null && extras.containsKey(LaunchActivity.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH)){
+			String currentIntentUUID = extras.getString(LaunchActivity.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH);
+			isNewIntentUUID = !currentIntentUUID.equals(mLastUsedIntentUUID); 
+			mLastUsedIntentUUID = currentIntentUUID;
+		}
+		
+		if(isNewIntentUUID) {
+			String activityName = mPreferenceHelper.defaultLaunchActivity();
+			Intent intent = null;
+			
+			// TODO: We really need unit testing for this stuff
+			if(activityName.equals("HomeActivity")){
+				intent = null;
+				
+			}else if(activityName.equals("StopsListActivity")){
+				intent = new Intent(HomeActivity.this, StopsListActivity.class);
+				
+			}else if(activityName.equals("ClosestStopsListActivity")){
+				Stop closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
 
 				if (closestFavouriteStop != null) {
-					
 					// Go to the closest favourite stop
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", closestFavouriteStop.getTramTrackerID());
-					Intent intent = new Intent(this, StopDetailsActivity.class);
+					intent = new Intent(HomeActivity.this, StopDetailsActivity.class);
 					intent.putExtras(bundle);
-					startActivityForResult(intent, 1);
+				}else{
+					GenericUtil.popToast(this, "Unable to determine closest favorite stop!");
 				}
 				
+			}else if(activityName.equals("NearStopsActivity")){
+				intent = new Intent(HomeActivity.this, NearStopsActivity.class);
+				
+			}else if(activityName.equals("PredictionActivity")){
+				intent = new Intent(HomeActivity.this, PredictionActivity.class);
 			}
-			displayMenu();
+			
+			if(intent!=null)
+				startActivityForResult(intent, 1);
 		}
+		
+		// Business as usual on return
+		showHomeMenu();
 	}
 	
 	@Override
@@ -195,11 +228,9 @@ public class TramHunter extends ListActivity {
 		setRandomWelcomeMessage();
 	}
 	
-	public boolean checkFirstLaunch() {
+	public boolean isFirstLaunch() {
 		TramHunterDB db = new TramHunterDB(this);
-		boolean firstLaunch = db.checkFirstLaunch();
-		return firstLaunch;
-
+		return !db.checkFirstLaunch();
 	}
 
 	private static String getRandomWelcomeMessage(){
@@ -227,9 +258,9 @@ public class TramHunter extends ListActivity {
 		dialogBuilder.setPositiveButton("OK",
 			new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					TramHunterDB db = new TramHunterDB(TramHunter.this);
+					TramHunterDB db = new TramHunterDB(HomeActivity.this);
 					db.setFirstLaunch();
-					displayMenu();
+					showHomeMenu();
 					db.close();
 				}
 			});
@@ -242,59 +273,54 @@ public class TramHunter extends ListActivity {
 		
 		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
 		String welcomeText = "";
-
-		if (preferenceHelper.isWelcomeQuoteEnabled())
+		
+		if (mPreferenceHelper.isWelcomeQuoteEnabled())
 			welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
 		
         welcomeMessageTextView.setText(welcomeText);
         
 	}
-	
-	
-	public void displayMenu() { 		
+		
+	public void showHomeMenu() { 		
 		setRandomWelcomeMessage();
 		
-		m_listView = (ListView)this.findViewById(android.R.id.list);
+		mListView = (ListView)this.findViewById(android.R.id.list);
 		setTitle(getResources().getText(R.string.app_name));
 
-		m_listView.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> arg0, View row, int position, long id) {
-				
+				Intent intent = null;
+								
 				switch ( (int)id ) {
 					case 0: {
-						Intent intent = new Intent(TramHunter.this, StopsListActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, StopsListActivity.class);
 						break;
 					}
 					case 1: {
-						Intent intent = new Intent(TramHunter.this, RoutesListActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, RoutesListActivity.class);
 						break;
 					}
 					case 2: {
-						Intent intent = new Intent(TramHunter.this, EnterTTIDActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, EnterTTIDActivity.class);
 						break;
 					}
 					case 3: {
-						Intent intent = new Intent(TramHunter.this, NearStopsActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, NearStopsActivity.class);
 						break;
 					}
 					case 4: {
-						Intent intent = new Intent(TramHunter.this, PredictionActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, PredictionActivity.class);
 						break;
 					}
 					case 5: {
-						Intent intent = new Intent(TramHunter.this, SettingsActivity.class);
-						startActivityForResult(intent, 1);
+						intent = new Intent(HomeActivity.this, SettingsActivity.class);
 						break;
-					}
-					
-
+					}			
 				}
+				
+				if(intent!=null)
+					startActivityForResult(intent, 1);
   
 			}
 								
@@ -303,8 +329,7 @@ public class TramHunter extends ListActivity {
 		
 		setListAdapter(new MenuListAdapter());
 	}
-  
-	
+
 	private class MenuListAdapter extends BaseAdapter {
 
 		public int getCount() {
@@ -330,42 +355,40 @@ public class TramHunter extends ListActivity {
 			wrapper = new ViewWrapper(pv);
 			pv.setTag(wrapper);
 				
-			wrapper.getTextLabel1().setText(m_menuItems[position]);
-			wrapper.getTextLabel2().setText(m_menuDesc[position]);
+			wrapper.getNameText().setText(m_menuItems[position]);
+			wrapper.getDescriptionText().setText(m_menuItemDescriptions[position]);
 
 			return pv;
 		}
 
 	}
-
 	
 	class ViewWrapper {
 		View base;
 				
-		TextView textLabel1 = null;
-		TextView textLabel2 = null;
+		TextView m_nameText = null;
+		TextView m_descriptionText = null;
 		
 
 		ViewWrapper(View base) {
 			this.base = base;
 		}
 
-		TextView getTextLabel1() {
-			if (textLabel1 == null) {
-				textLabel1 = (TextView) base.findViewById(R.id.textLabel1);
+		TextView getNameText() {
+			if (m_nameText == null) {
+				m_nameText = (TextView) base.findViewById(R.id.nameText);
 			}
-			return (textLabel1);
+			return (m_nameText);
 		}
 
-		TextView getTextLabel2() {
-			if (textLabel2 == null) {
-				textLabel2 = (TextView) base.findViewById(R.id.textLabel2);
+		TextView getDescriptionText() {
+			if (m_descriptionText == null) {
+				m_descriptionText = (TextView) base.findViewById(R.id.descriptionText);
 			}
-			return (textLabel2);
+			return (m_descriptionText);
 		}
 
 	}	 
-	
 	
 	// Add settings to menu
 	@Override
@@ -382,7 +405,6 @@ public class TramHunter extends ListActivity {
 
 		return true;
 	}
-
 	
 	// Menu actions
 	@Override
@@ -392,7 +414,7 @@ public class TramHunter extends ListActivity {
 			showAbout();
 			return true;
 		case 1:
-			Intent intent = new Intent(TramHunter.this, SettingsActivity.class);
+			Intent intent = new Intent(HomeActivity.this, SettingsActivity.class);
 			startActivityForResult(intent, 1);
 			return true;
 		}

@@ -26,6 +26,7 @@ import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.util.GenericUtil;
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
@@ -69,13 +70,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	  		new StopDistanceCalculator(location).execute();			
     	}else{
     		// TODO: This should a nicer dialog explaining that no location services
-    		// e.g. GPS or network are available and to enable them. 		
-			Context context = getApplicationContext();
-			CharSequence text = "Failed to get location!";
-			int duration = Toast.LENGTH_SHORT;
-			Toast toast = Toast.makeText(context, text, duration);
-			toast.show();
-			
+    		GenericUtil.popToast(this, "Unable to determine location!");			
 			// Finish the activity, and go back to the main menu
 			this.finish();
     	}

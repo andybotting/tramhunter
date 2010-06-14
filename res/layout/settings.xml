@@ -1,11 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
-
-<CheckBoxPreference android:key="goToFavouriteOnLaunch"
-android:title="Favourites On Launch" android:summary="Go to favourites page on launch" />
-
-<CheckBoxPreference android:key="displayWelcomeMessage"
-android:title="Welcome Message" android:summary="Show welcome message" />
+	<CheckBoxPreference android:key="displayWelcomeMessage"
+		android:title="Welcome Message" android:defaultValue="true" />
+		
+	<ListPreference android:key="defaultLaunchActivity" android:title="Default Launch Screen"
+		android:defaultValue="HomeActivity" 
+		android:entries="@array/defaultActivityEntries" android:entryValues="@array/defaultActivityEntryValues">
+	</ListPreference>
 
 </PreferenceScreen>
