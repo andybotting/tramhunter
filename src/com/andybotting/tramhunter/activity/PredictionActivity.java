@@ -79,7 +79,7 @@ public class PredictionActivity extends ListActivity {
 		final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		favouriteStopUtil = new FavouriteStopUtil(db, locationManager);
 
-		String title = "My Trips";
+		String title = "Hunted Trips";
 		setTitle(title);
 
 		// Our thread for updating the stops every 60 secs
@@ -323,9 +323,6 @@ public class PredictionActivity extends ListActivity {
 			// wrapper.getNextTramDestination().setText(thisTram.getDestination());
 			final String label = String.format("From: %s%nTo: %s", thisTram.getOriginStop().getPrimaryName(), sb.toString());
 			wrapper.getNextTramDestination().setText(label);
-
-			if (thisTram.minutesAway() < 5)
-				wrapper.getNextTramTime().setTextColor(0xFFFF0000);
 
 			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());
 
