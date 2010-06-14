@@ -39,7 +39,7 @@ public class HomeActivity extends ListActivity {
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
 								    "Nearby Stops",
-								    "Hunt Down My Trips"/*,
+								    "Hunt Down My Trips (Beta)"/*,
 								    "Settings"*/};
 
 	private String[] m_menuItemDescriptions = {"Get the details for your favourite stops, fast",

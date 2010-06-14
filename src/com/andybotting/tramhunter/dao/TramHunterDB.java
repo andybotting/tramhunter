@@ -102,15 +102,26 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		boolean dbExist = checkDataBase();
  
 		if(dbExist){
+			List<Stop> favoriteStops = new ArrayList<Stop>();
+
 			// Test for upgrade
 			String myPath = DB_PATH + DB_NAME;
 			db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
 			int thisDBVersion = db.getVersion();
+			// Get the favorite stops if the version is changing
+			if (thisDBVersion < DB_VERSION)
+				favoriteStops = getFavouriteStops(db);
 			db.close();
 			
-			if (thisDBVersion < DB_VERSION) {
+			if (thisDBVersion < DB_VERSION) {							
 				try {
+					// Upgrade the DB
 					copyDataBase();
+					// Set the favorite stops
+					for(Stop stop: favoriteStops){
+						setStopStar(stop.getTramTrackerID(), true);
+					}
+					
 				} catch (IOException e) {
 					throw new Error("Error copying database");
 				}
@@ -471,7 +482,13 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// Get a list of our 'starred' stops
 	public List<Stop> getFavouriteStops() {
 		db = getDatabase();
+		List<Stop> stops = getFavouriteStops(db);
+		db.close();
 		
+		return stops;
+	}	
+	
+	private List<Stop> getFavouriteStops(SQLiteDatabase db) {
 		List<Stop> stops = new ArrayList<Stop>();
 		
 		Cursor c = db.query(TABLE_STOPS, 
@@ -493,9 +510,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		}
 		
 		c.close();
-		db.close();
+		
 		return stops;
 	}	
+	
 
 	// Get a list of Stops for a particular destination
 	public List<Stop> getStopsForDestination(long destinationId) {
