@@ -254,8 +254,8 @@ public class PredictionActivity extends ListActivity {
 				// If we've not had a loading error already
 				if (!loadingError) {
 					Context context = getApplicationContext();
-					CharSequence text = "Failed to fetch tram times";
-					int duration = Toast.LENGTH_SHORT;
+					CharSequence text = "No Trips could be hunted. Hunting Hint: You need 2 or more favourites stops on the same route favourited. And be within at 1 km of a favourite stop.";
+					int duration = Toast.LENGTH_LONG;
 					Toast toast = Toast.makeText(context, text, duration);
 					toast.show();
 				}
