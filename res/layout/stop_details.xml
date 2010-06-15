@@ -27,7 +27,7 @@
 	
 	
 			<TextView
-				android:id="@+id/firstLine"
+				android:id="@+id/stopNameTextView"
 				
 				android:textSize="20dip"
 				
@@ -41,38 +41,35 @@
 				android:layout_alignWithParentIfMissing="true"
 		
 				android:ellipsize="marquee"
-				android:gravity="center_vertical"
-				android:text="FirstLine" />
+				android:gravity="center_vertical" />
 	
 	
 	
 			<TextView
-				android:id="@+id/secondLine"
+				android:id="@+id/stopDetailsTextView"
 				
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content" 
 	
 				android:layout_toRightOf="@+id/stopStar"
-				android:layout_below="@+id/firstLine"
+				android:layout_below="@+id/stopNameTextView"
 	
 				android:singleLine="true"
-				android:ellipsize="marquee"
-				android:text="SecondLine" />
+				android:ellipsize="marquee" />
 				
 			<TextView
-				android:id="@+id/thirdLine"
+				android:id="@+id/stopRoutesTextView"
 				
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content" 
 	
 				android:layout_toRightOf="@+id/stopStar"
-				android:layout_below="@+id/secondLine"
+				android:layout_below="@+id/stopDetailsTextView"
 				
 				android:layout_alignParentRight="true"
 	
 				android:singleLine="true"
-				android:ellipsize="marquee"
-				android:text="ThirdLine" />
+				android:ellipsize="marquee" />
 	
 		</RelativeLayout>
 	

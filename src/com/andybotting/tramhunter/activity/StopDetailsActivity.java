@@ -36,28 +36,21 @@ import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 
 public class StopDetailsActivity extends ListActivity {
 	
-	private TramHunterDB db;
+	private TramHunterDB mDB;
+	private TextView mStopNameTextView;
+	private TextView mStopDetailsTextView;
+	private TextView mStopRoutesTextView;
+	private CompoundButton mStarButton;
+	private TramTrackerService mTTService;
 
-	private TextView firstLineField;
-	private TextView secondLineField;
-	private TextView thirdLineField;
-
-	private List<NextTram> nextTrams = new ArrayList<NextTram>();
-	private Stop stop;
-	private int tramTrackerId;
-	
-	CompoundButton starButton;
-	TramTrackerService ttService;
-
-    protected boolean running = false;
-   
-    private volatile Thread refreshThread;
+	private List<NextTram> mNextTrams = new ArrayList<NextTram>();
+	private Stop mStop;
+	private int mTramTrackerId;
+    private volatile Thread mRefreshThread;
     
-    boolean loadingError = false;
-    boolean showDialog = true;
- 
-    Date melbourneTime;
-    
+    boolean mLoadingError = false;
+    boolean mShowDialog = true;
+     
     // Handle the timer
     Handler UpdateHandler = new Handler() {
     	public void handleMessage(Message msg) {
@@ -77,58 +70,56 @@ public class StopDetailsActivity extends ListActivity {
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
-			tramTrackerId = extras.getInt("tramTrackerId");	
+			mTramTrackerId = extras.getInt("tramTrackerId");	
 		}  
 		
 		// Create out DB instance
 		initialiseDatabase();
-		stop = db.getStop(tramTrackerId);
+		mStop = mDB.getStop(mTramTrackerId);
 
-		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
+		String title = "Stop " + mStop.getFlagStopNumber() + ": " + mStop.getStopName();
 		setTitle(title);
 
 		// Display stop data from DB
-		displayStop(stop);
+		displayStop(mStop);
 		
 		
-		starButton = (CompoundButton)findViewById(R.id.stopStar);
-		starButton.setChecked(stop.isStarred());
+		mStarButton = (CompoundButton)findViewById(R.id.stopStar);
+		mStarButton.setChecked(mStop.isStarred());
 
-		starButton.setOnClickListener(new View.OnClickListener() {
+		mStarButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				db.setStopStar(tramTrackerId, starButton.isChecked());
-				stop.setStarred(starButton.isChecked());
+				mDB.setStopStar(mTramTrackerId, mStarButton.isChecked());
+				mStop.setStarred(mStarButton.isChecked());
 			}
 		});
 
 		// Our thread for updating the stops every 60 secs
-        refreshThread = new Thread(new CountDown());
-        refreshThread.setDaemon(true);
-        refreshThread.start();	
+        mRefreshThread = new Thread(new CountDown());
+        mRefreshThread.setDaemon(true);
+        mRefreshThread.start();	
 
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (db != null) {
-			db.close();
+		if (mDB != null) {
+			mDB.close();
 		}
 	}
-
-
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		refreshThread.interrupt();
+		mRefreshThread.interrupt();
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		if(refreshThread.isInterrupted()) {
-			refreshThread.start();
+		if(mRefreshThread.isInterrupted()) {
+			mRefreshThread.start();
 		}
 	}
 
@@ -140,8 +131,8 @@ public class StopDetailsActivity extends ListActivity {
 		menu.add(0, 0, 0, "Refresh");
 		MenuItem menuItem1 = menu.findItem(0);
 		menuItem1.setIcon(R.drawable.ic_menu_refresh);
-		
-		menu.add(0, 1, 0, "Favourite");
+
+		menu.add(0, 1, 0, ""); // Title set in onMenuOpened()
 		MenuItem menuItem2 = menu.findItem(1);
 		menuItem2.setIcon(R.drawable.ic_menu_star);
 		
@@ -151,35 +142,48 @@ public class StopDetailsActivity extends ListActivity {
 		
 		return true;
 	}
-	
+
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		// Ensure the 'Favorite' menu item has the correct text
+		MenuItem favoriteMenuItem =  menu.getItem(1).setTitle((mStop.isStarred() ? "Unfavorite" : "Favorite"));
+
+		return super.onMenuOpened(featureId, menu);
+	}
+
 	// Menu actions
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
 		case 0:
 			// Refresh
-			showDialog = true;
+			mShowDialog = true;
 			new GetNextTramTimes().execute();
 			return true;
 		case 1:
 			// Star/Favourite
-			starButton = (CompoundButton)findViewById(R.id.stopStar);
-			
-			if (stop.isStarred()) {
-				db.setStopStar(tramTrackerId, false);
-				starButton.setChecked(false);
-				stop.setStarred(false);
-			}	
-			else {
-				db.setStopStar(tramTrackerId, true);
-				starButton.setChecked(true);
-				stop.setStarred(true);
-			}
+			mStarButton = (CompoundButton)findViewById(R.id.stopStar);
+			// Toggle starred
+			mDB.setStopStar(mTramTrackerId, !mStop.isStarred());
+			mStarButton.setChecked(!mStop.isStarred());
+			mStop.setStarred(!mStop.isStarred());
+//			
+//			
+//			if (mStop.isStarred()) {
+//				mDB.setStopStar(mTramTrackerId, false);
+//				mStarButton.setChecked(false);
+//				mStop.setStarred(false);
+//			}	
+//			else {
+//				mDB.setStopStar(mTramTrackerId, true);
+//				mStarButton.setChecked(true);
+//				mStop.setStarred(true);
+//			}
 			return true;
 		case 2:
 			// Map view
 			Bundle bundle = new Bundle();
-			bundle.putInt("tramTrackerId", tramTrackerId);
+			bundle.putInt("tramTrackerId", mTramTrackerId);
 			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 			intent.putExtras(bundle);
 			startActivityForResult(intent, 1);
@@ -191,13 +195,13 @@ public class StopDetailsActivity extends ListActivity {
 	}
 	
 	private void initialiseDatabase() {
-		db = new TramHunterDB(this);
+		mDB = new TramHunterDB(this);
 	}
     
 	private void displayStop(Stop stop) {
-		firstLineField = (TextView)findViewById(R.id.firstLine);
-		secondLineField = (TextView)findViewById(R.id.secondLine);
-		thirdLineField = (TextView)findViewById(R.id.thirdLine);
+		mStopNameTextView = (TextView)findViewById(R.id.stopNameTextView);
+		mStopDetailsTextView = (TextView)findViewById(R.id.stopDetailsTextView);
+		mStopRoutesTextView = (TextView)findViewById(R.id.stopRoutesTextView);
 		
 		// Set labels from Stop hash map
 		String firstLineText = stop.getPrimaryName();	
@@ -210,14 +214,13 @@ public class StopDetailsActivity extends ListActivity {
 		secondLineText += " - " + stop.getCityDirection();
 		
 		//initialiseDatabase();
-		stop.setRoutes(db.getRoutesForStop(tramTrackerId));
+		stop.setRoutes(mDB.getRoutesForStop(mTramTrackerId));
 		
 		String thirdLineText = stop.getRoutesString();
 			
-		firstLineField.setText(firstLineText);
-		secondLineField.setText(secondLineText);
-		thirdLineField.setText(thirdLineText);
-		
+		mStopNameTextView.setText(firstLineText);
+		mStopDetailsTextView.setText(secondLineText);
+		mStopRoutesTextView.setText(thirdLineText);
 		
 	}
 	
@@ -246,11 +249,11 @@ public class StopDetailsActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 
-			if (showDialog) {
+			if (mShowDialog) {
 				// Show the dialog window
 				this.dialog.setMessage("Fetching Tram Times...");
 				this.dialog.show();
-				showDialog = false;
+				mShowDialog = false;
 			}
 			// Show the spinner in the title bar
 			setProgressBarIndeterminateVisibility(true);
@@ -263,13 +266,13 @@ public class StopDetailsActivity extends ListActivity {
 			TramTrackerService ttService = new TramTrackerServiceSOAP(getBaseContext());
 			
 			try {
-				nextTrams = ttService.getNextPredictedRoutesCollection(stop);
+				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop);
 
 				// We'll remove all NextTrams which are longer than
 				// 300 minutes away - e.g. not running on weekend
-				for(int i=0; i < nextTrams.size(); i++) {
-					if (nextTrams.get(i).minutesAway() > 300) {
-						nextTrams.remove(i);
+				for(int i=0; i < mNextTrams.size(); i++) {
+					if (mNextTrams.get(i).minutesAway() > 300) {
+						mNextTrams.remove(i);
 					}
 				}
 				
@@ -277,7 +280,7 @@ public class StopDetailsActivity extends ListActivity {
 				// TODO: Put something here
 			}
 			
-			return nextTrams;
+			return mNextTrams;
 		}
 
 		// Can use UI thread here
@@ -287,7 +290,7 @@ public class StopDetailsActivity extends ListActivity {
 			if(nextTrams.size() > 0) {
 				// Sort trams by minutesAway
 				Collections.sort(nextTrams);
-				loadingError = false;
+				mLoadingError = false;
 				
 			    SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy h:mm a");
 			    Calendar today = Calendar.getInstance(); // today				
@@ -298,14 +301,14 @@ public class StopDetailsActivity extends ListActivity {
 			}
 			else {
 				// If we've not had a loading error already
-				if (!loadingError) {				
+				if (!mLoadingError) {				
 					Context context = getApplicationContext();
 					CharSequence text = "Failed to fetch tram times";
 					int duration = Toast.LENGTH_SHORT;
 					Toast toast = Toast.makeText(context, text, duration);
 					toast.show();
 				}
-				loadingError = true;
+				mLoadingError = true;
 			}	
 
 			// Hide our dialog window
@@ -322,7 +325,7 @@ public class StopDetailsActivity extends ListActivity {
 	private class NextTramsListAdapter extends BaseAdapter {
 
 		public int getCount() {
-			return nextTrams.size();
+			return mNextTrams.size();
 		}
 
 		public Object getItem(int position) {
@@ -356,15 +359,14 @@ public class StopDetailsActivity extends ListActivity {
 			pv.setId(0);
 			
 			
-			NextTram thisTram = (NextTram) nextTrams.get(position);
-			
-			
+			NextTram thisTram = (NextTram) mNextTrams.get(position);
 			
 			wrapper.getNextTramRouteNumber().setText(thisTram.getRouteNo());
 			wrapper.getNextTramDestination().setText(thisTram.getDestination());
 			
-			if (thisTram.minutesAway() < 5)
-				wrapper.getNextTramTime().setTextColor(0xFFFF0000);
+			// Show red for 'Now' only
+			if (thisTram.minutesAway() < 1)
+				wrapper.getNextTramTime().setTextColor(R.drawable.red);
 			
 			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());   
 
