@@ -149,7 +149,10 @@ public class HomeActivity extends ListActivity {
 												 "He's not the messiah, he's a very naughty tram",
 												 "Stop, Trammer time",
 												 "Trams, no here chopper",
-												 "To tram or not to tram, that is the question"};
+												 "To tram or not to tram, that is the question",
+												 "Tram with me if you want to live",
+												 "Wham bam thank you tram",
+												 "Yabba tramma doo!"};
                                     	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
