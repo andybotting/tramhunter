@@ -14,8 +14,11 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -30,12 +33,12 @@ import com.andybotting.tramhunter.util.GenericUtil;
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
-	private ListView listView;
-	private List<Stop> m_allStops;
-	private LocationManager m_locationManager;
-	private Location m_lastKnownLocation;
+	private ListView mListView;
+	private List<Stop> mAllStops;
+	private LocationManager mLocationManager;
+	private Location mLastKnownLocation;
 	
-	private TramHunterDB db;
+	private TramHunterDB mDB;
 		
 	// Maximum stops to list
 	private final int MAXSTOPS = 20;
@@ -53,18 +56,21 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		m_isCalculatingStopDistances = false;
 		
 		setContentView(R.layout.stops_list);
-		listView = (ListView)this.findViewById(android.R.id.list);
+		mListView = (ListView)this.findViewById(android.R.id.list);
+		
+		mListView.setOnItemClickListener(listView_OnItemClickListener);
+		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
 		
 		// Set the title
 		setTitle(m_title);
 		
 		// Get our stops from the DB
-		db = new TramHunterDB(this);
-		m_allStops = db.getAllStops();
+		mDB = new TramHunterDB(this);
+		mAllStops = mDB.getAllStops();
 
 		// Get the location
-		m_locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-	  	Location location = m_locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+	  	Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
   	
 	  	if (location != null) {
 	  		new StopDistanceCalculator(location).execute();			
@@ -76,20 +82,62 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     	}
 	}
 	
+	private void viewStop(Stop stop){
+		int tramTrackerId = stop.getTramTrackerID();
+		
+		Bundle bundle = new Bundle();
+		bundle.putInt("tramTrackerId", tramTrackerId);
+		Intent intent = new Intent(NearStopsActivity.this, StopDetailsActivity.class);
+		intent.putExtras(bundle);
+		
+		startActivityForResult(intent, 1);
+	}
+	
 	private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)adapterView.getAdapter();
-			Stop thisStop = stopsListAdapter.getStops().get(position);
-			int tramTrackerId = thisStop.getTramTrackerID();
-						
-			Bundle bundle = new Bundle();
-			bundle.putInt("tramTrackerId", tramTrackerId);
-			Intent intent = new Intent(NearStopsActivity.this, StopDetailsActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, 1);
+			viewStop(stopsListAdapter.getStops().get(position));
 		}
     };
-	
+    
+	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
+		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+			AdapterView.AdapterContextMenuInfo info;
+			try {
+			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+			} catch (ClassCastException e) {
+			    return;
+			}
+
+			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
+			Stop thisStop = stopsListAdapter.getStops().get(info.position);
+			menu.add(0, 0, 0, "View Stop");
+			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavorite" : "Favorite"));
+		}
+    };
+    
+    @Override
+    public boolean onContextItemSelected (MenuItem item){
+    	try {
+    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
+			Stop thisStop = stopsListAdapter.getStops().get(info.position);
+        	
+        	switch (item.getItemId()) {
+    			case 0:
+    				viewStop(thisStop);
+    				return true;
+    			case 1:
+    				// Toggle favorite
+    				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
+    				thisStop.setStarred(!thisStop.isStarred());
+    				return true;
+        	}
+    	} catch (ClassCastException e) {}
+    	    	
+		return super.onContextItemSelected(item);
+    }
+    	
 	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
 		private final ProgressDialog dialog = new ProgressDialog(NearStopsActivity.this);
 		private final Location m_location;
@@ -117,7 +165,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			ArrayList<Stop> sortedStops = new ArrayList<Stop>();
 			SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
 			
-	    	for(Stop stop : m_allStops){
+	    	for(Stop stop : mAllStops){
 	    		double distance = m_location.distanceTo(stop.getLocation());
 	    		sortedStopList.put(distance, stop);
 	    	}  
@@ -133,7 +181,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    	
 			// Find the routes for our nearest stops
 			for(Stop stop: sortedStops) {
-				List<Route> routes = db.getRoutesForStop(stop.getTramTrackerID());
+				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
 				stop.setRoutes(routes);
 			}
 			
@@ -142,8 +190,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		
 		// Can use UI thread here
 		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
-			listView.setOnItemClickListener(listView_OnItemClickListener);
-			
+		
 			if(m_refreshListOnly){
 				// Just update the list
 				StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
@@ -278,6 +325,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     protected void onDestroy() {
         super.onDestroy();
     	stopLocationListening();
+    	mDB.close();
     }
     
     public void onLocationChanged(Location location) {
@@ -292,7 +340,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
         	
         	if(shouldCalculateNewDistance(location)){       		
         		new StopDistanceCalculator(location).execute();
-        		m_lastKnownLocation = location;
+        		mLastKnownLocation = location;
         	}
         	
         	if(location.hasAccuracy()){
@@ -307,10 +355,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     private boolean shouldCalculateNewDistance(Location location){
 		boolean result = false;
 		
-    	if(m_lastKnownLocation!=null&&m_lastKnownLocation.distanceTo(location)>1)
+    	if(mLastKnownLocation!=null&&mLastKnownLocation.distanceTo(location)>1)
     	{
     		result = true;	
-    	}else if(m_lastKnownLocation==null){
+    	}else if(mLastKnownLocation==null){
     		result = true;
     	}
     	
@@ -318,17 +366,17 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     }
                 
     private void stopLocationListening() {
-        if (m_locationManager != null)
-        	m_locationManager.removeUpdates(this);
+        if (mLocationManager != null)
+        	mLocationManager.removeUpdates(this);
 	}
                  
     private void startLocationListening(boolean subscribeToNetworkLocation) {
-    	if (m_locationManager!=null){
-    		m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    	if (mLocationManager!=null){
+    		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         	m_isListeningForNetworkLocation = subscribeToNetworkLocation;
         	
         	if(subscribeToNetworkLocation)       		
-        		m_locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);    		
+        		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);    		
     	}
 	}
 

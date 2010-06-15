@@ -74,7 +74,7 @@ public class StopDetailsActivity extends ListActivity {
 		}  
 		
 		// Create out DB instance
-		initialiseDatabase();
+		mDB = new TramHunterDB(this);
 		mStop = mDB.getStop(mTramTrackerId);
 
 		String title = "Stop " + mStop.getFlagStopNumber() + ": " + mStop.getStopName();
@@ -104,9 +104,7 @@ public class StopDetailsActivity extends ListActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (mDB != null) {
-			mDB.close();
-		}
+		mDB.close();
 	}
 
 	@Override
@@ -167,19 +165,9 @@ public class StopDetailsActivity extends ListActivity {
 			mDB.setStopStar(mTramTrackerId, !mStop.isStarred());
 			mStarButton.setChecked(!mStop.isStarred());
 			mStop.setStarred(!mStop.isStarred());
-//			
-//			
-//			if (mStop.isStarred()) {
-//				mDB.setStopStar(mTramTrackerId, false);
-//				mStarButton.setChecked(false);
-//				mStop.setStarred(false);
-//			}	
-//			else {
-//				mDB.setStopStar(mTramTrackerId, true);
-//				mStarButton.setChecked(true);
-//				mStop.setStarred(true);
-//			}
+			
 			return true;
+			
 		case 2:
 			// Map view
 			Bundle bundle = new Bundle();
@@ -193,11 +181,7 @@ public class StopDetailsActivity extends ListActivity {
 		return false;
 
 	}
-	
-	private void initialiseDatabase() {
-		mDB = new TramHunterDB(this);
-	}
-    
+	   
 	private void displayStop(Stop stop) {
 		mStopNameTextView = (TextView)findViewById(R.id.stopNameTextView);
 		mStopDetailsTextView = (TextView)findViewById(R.id.stopDetailsTextView);

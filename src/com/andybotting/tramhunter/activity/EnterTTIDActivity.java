@@ -68,6 +68,9 @@ public class EnterTTIDActivity extends Activity {
 					toast.show();
 				}
 				
+				// Clean up
+				db.close();
+				
 			 }
 		 });
 	 }

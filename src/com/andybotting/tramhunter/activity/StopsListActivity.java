@@ -78,6 +78,12 @@ public class StopsListActivity extends ListActivity {
 		}
 	}
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    	mDB.close();
+    }
+	
 	public void displayFavStops(boolean alertIfNoStops) {
 		mStops = mDB.getFavouriteStops();
 		
