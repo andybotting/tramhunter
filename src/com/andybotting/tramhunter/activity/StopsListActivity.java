@@ -169,7 +169,7 @@ public class StopsListActivity extends ListActivity {
 
 			Stop thisStop = (Stop)mStops.get(info.position);
 			menu.add(0, 0, 0, "View Stop");
-			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavorite" : "Favorite"));
+			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavourite" : "Favourite"));
 		}
     };
     
