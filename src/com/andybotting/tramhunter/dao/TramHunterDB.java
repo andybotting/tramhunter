@@ -102,23 +102,23 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		boolean dbExist = checkDataBase();
  
 		if(dbExist){
-			List<Stop> favoriteStops = new ArrayList<Stop>();
+			List<Stop> favouriteStops = new ArrayList<Stop>();
 
 			// Test for upgrade
 			String myPath = DB_PATH + DB_NAME;
 			db = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
 			int thisDBVersion = db.getVersion();
-			// Get the favorite stops if the version is changing
+			// Get the favourite stops if the version is changing
 			if (thisDBVersion < DB_VERSION)
-				favoriteStops = getFavouriteStops(db);
+				favouriteStops = getFavouriteStops(db);
 			db.close();
 			
 			if (thisDBVersion < DB_VERSION) {							
 				try {
 					// Upgrade the DB
 					copyDataBase();
-					// Set the favorite stops
-					for(Stop stop: favoriteStops){
+					// Set the favourite stops
+					for(Stop stop: favouriteStops){
 						setStopStar(stop.getTramTrackerID(), true);
 					}
 					

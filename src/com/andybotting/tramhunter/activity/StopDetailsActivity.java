@@ -143,8 +143,8 @@ public class StopDetailsActivity extends ListActivity {
 
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
-		// Ensure the 'Favorite' menu item has the correct text
-		MenuItem favoriteMenuItem =  menu.getItem(1).setTitle((mStop.isStarred() ? "Unfavorite" : "Favorite"));
+		// Ensure the 'Favourite' menu item has the correct text
+		MenuItem favouriteMenuItem =  menu.getItem(1).setTitle((mStop.isStarred() ? "Unfavourite" : "Favourite"));
 
 		return super.onMenuOpened(featureId, menu);
 	}

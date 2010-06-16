@@ -207,7 +207,7 @@ public class HomeActivity extends ListActivity {
 					intent = new Intent(HomeActivity.this, StopDetailsActivity.class);
 					intent.putExtras(bundle);
 				}else{
-					GenericUtil.popToast(this, "Unable to determine closest favorite stop!");
+					GenericUtil.popToast(this, "Unable to determine closest favourite stop!");
 				}
 				
 			}else if(activityName.equals("NearStopsActivity")){

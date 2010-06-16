@@ -128,7 +128,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     				viewStop(thisStop);
     				return true;
     			case 1:
-    				// Toggle favorite
+    				// Toggle favourite
     				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
     				thisStop.setStarred(!thisStop.isStarred());
     				return true;

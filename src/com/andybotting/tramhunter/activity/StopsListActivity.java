@@ -192,10 +192,10 @@ public class StopsListActivity extends ListActivity {
     				viewStop(thisStop);
     				return true;
     			case 1:
-    				// Toggle favorite
+    				// Toggle favourite
     				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
     				thisStop.setStarred(!thisStop.isStarred());
-    				// Refresh the favorites stops list
+    				// Refresh the favourites stops list
     				if(mIsFavouritesView)
     					displayFavStops(false);
     				return true;
@@ -245,7 +245,7 @@ public class StopsListActivity extends ListActivity {
 			wrapper.getStopNameTextView().setText(stopName);
 			wrapper.getStopDetailsTextView().setText(stopDetails);
 			
-			// Only show the routes if this is the favorites view, it's too slow with LOTS of stops
+			// Only show the routes if this is the favourites view, it's too slow with LOTS of stops
 			if(mIsFavouritesView){
 				wrapper.getStopRoutesTextView().setText(thisStop.getRoutesString());	
 			}else{
