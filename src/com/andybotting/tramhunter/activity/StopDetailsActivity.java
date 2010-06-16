@@ -214,8 +214,8 @@ public class StopDetailsActivity extends ListActivity {
         		Message m = new Message();
         		UpdateHandler.sendMessage(m);
         		try {
-        			// 60 Seconds
-        			Thread.sleep(60 * 1000);
+        			// 30 Seconds
+        			Thread.sleep(30 * 1000);
         		} 
         		catch (InterruptedException e) {
         			Thread.currentThread().interrupt();

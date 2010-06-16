@@ -41,6 +41,17 @@
 				android:padding="0px"
 				android:textSize="12dip"
 				android:textColor="@drawable/gray"/>
+
+			<TextView
+			   	android:id="@+id/stopRoutesTextView"
+			    android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_below="@+id/stopDetailsTextView"
+				android:textSize="12dip"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:textColor="@drawable/gray"
+				android:text="Routes" />				
 				
 		</LinearLayout>
 	</LinearLayout>

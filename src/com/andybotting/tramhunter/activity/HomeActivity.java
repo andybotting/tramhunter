@@ -152,7 +152,8 @@ public class HomeActivity extends ListActivity {
 												 "To tram or not to tram, that is the question",
 												 "Tram with me if you want to live",
 												 "Wham bam thank you tram",
-												 "Yabba tramma doo!"};
+												 "Yabba tramma doo!",
+												 "Error 404. Tram not found"};
                                     	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

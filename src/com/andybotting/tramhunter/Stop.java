@@ -272,24 +272,26 @@ public class Stop {
 	
 	public String getRoutesString() {
 		String routesString = "";
-		
-		if(routes.size() < 2) {
-			routesString = "Route ";
-		}
-		else {
-			routesString = "Routes ";
-		}
-		
-		for(int i=0; i < routes.size(); i++) {
-			Route r = routes.get(i);
-			routesString += r.getNumber();
-		
-			if (i < routes.size() -2) {
-				routesString += ", ";
+
+		if(routes!=null&&routes.size()>0){
+			if(routes.size() < 2) {
+				routesString = "Route ";
 			}
-			else if (i == routes.size() -2){
-				routesString += " and ";
+			else {
+				routesString = "Routes ";
 			}
+			
+			for(int i=0; i < routes.size(); i++) {
+				Route r = routes.get(i);
+				routesString += r.getNumber();
+			
+				if (i < routes.size() -2) {
+					routesString += ", ";
+				}
+				else if (i == routes.size() -2){
+					routesString += " and ";
+				}
+			}	
 		}
 
 		return routesString;

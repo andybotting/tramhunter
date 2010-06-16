@@ -87,14 +87,14 @@ public class StopsListActivity extends ListActivity {
 	public void displayFavStops(boolean alertIfNoStops) {
 		mStops = mDB.getFavouriteStops();
 		
-		// Find the routes for our nearest stops
-		for(Stop stop: mStops) {
-			List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
-			stop.setRoutes(routes);
-		}
-		
 		if (alertIfNoStops && mStops.size() == 0) {
 			alertNoFavourites();		
+		}else{
+			// Find the routes for our stops
+			for(Stop stop: mStops) {
+				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
+				stop.setRoutes(routes);
+			}
 		}
 		displayStops();
 	}
@@ -130,6 +130,14 @@ public class StopsListActivity extends ListActivity {
 	
 	public void displayStopsForDestination(long destinationId) {
 		mStops = mDB.getStopsForDestination(destinationId);
+
+// Slows things down a bit!
+//		// Find the routes for our stops
+//		for(Stop stop: mStops) {
+//			List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
+//			stop.setRoutes(routes);
+//		}
+		
 		displayStops();
 	}
 	
@@ -236,7 +244,14 @@ public class StopsListActivity extends ListActivity {
 			
 			wrapper.getStopNameTextView().setText(stopName);
 			wrapper.getStopDetailsTextView().setText(stopDetails);
-
+			
+			// Only show the routes if this is the favorites view, it's too slow with LOTS of stops
+			if(mIsFavouritesView){
+				wrapper.getStopRoutesTextView().setText(thisStop.getRoutesString());	
+			}else{
+				wrapper.getStopRoutesTextView().setVisibility(View.GONE);
+			}
+						
 			return pv;
 
 		}
@@ -248,6 +263,7 @@ public class StopsListActivity extends ListActivity {
 				
 		TextView stopNameTextView = null;
 		TextView stopDetailsTextView = null;
+		TextView stopRoutesTextView = null;
 
 		ViewWrapper(View base) {
 			this.base = base;
@@ -267,6 +283,13 @@ public class StopsListActivity extends ListActivity {
 			return (stopDetailsTextView);
 		}
 
+		TextView getStopRoutesTextView() {
+			if (stopRoutesTextView == null) {
+				stopRoutesTextView = (TextView) base.findViewById(R.id.stopRoutesTextView);
+			}
+			return (stopRoutesTextView);
+		}
+		
 	}	  
 	  
 	

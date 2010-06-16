@@ -5,7 +5,7 @@
 	android:padding="8dip">
 	
 
-	<TextView android:id="@+id/stopNameText"
+	<TextView android:id="@+id/stopNameTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
@@ -20,10 +20,10 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
-		android:layout_below="@+id/stopNameText">
+		android:layout_below="@+id/stopNameTextView">
 		
 		<TextView  
-			android:id="@+id/directionText"
+			android:id="@+id/stopDetailsTextView"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content" 
 			android:layout_alignParentTop="true"
@@ -35,7 +35,7 @@
 			android:text="Direction" />
 			
 		<TextView
-		   	android:id="@+id/distanceText"
+		   	android:id="@+id/stopDistanceTextView"
 		    android:layout_width="50dip"
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
@@ -46,10 +46,10 @@
 			android:text="Distance" />		
 			
 		<TextView
-		   	android:id="@+id/routesText"
+		   	android:id="@+id/stopRoutesTextView"
 		    android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_below="@+id/directionText"
+			android:layout_below="@+id/stopDetailsTextView"
 			android:textSize="12dip"
 			android:singleLine="true"
 			android:ellipsize="marquee"

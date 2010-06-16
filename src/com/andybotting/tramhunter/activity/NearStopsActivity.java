@@ -239,7 +239,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		}
 
 		private void fillViewWrapper(ViewWrapper viewWrapper, Stop stop){
-			String stopNameLabel = stop.getStopName();
+			String stopNameLabel = stop.getPrimaryName();
 			String directionLabel = "Stop " + stop.getFlagStopNumber();
 
 			// If the stop has a secondary name, add it 
@@ -251,9 +251,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			String routesLabel = stop.getRoutesString();
 			
 			viewWrapper.getStopNameTextView().setText(stopNameLabel);
-			viewWrapper.getDirectionTextView().setText(directionLabel);
-			viewWrapper.getDistanceTextView().setText(distanceLabel);
-			viewWrapper.getRoutesTextView().setText(routesLabel);
+			viewWrapper.getStopDetailsTextView().setText(directionLabel);
+			viewWrapper.getStopDistanceTextView().setText(distanceLabel);
+			viewWrapper.getStopRoutesTextView().setText(routesLabel);
 		}
 		
 		public int getCount() {
@@ -270,9 +270,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		View base;
 				
 		TextView m_stopNameTextView = null;
-		TextView m_directionTextView = null;
-		TextView m_distanceTextView = null;
-		TextView m_routesTextView = null;
+		TextView m_stopDetailsTextView = null;
+		TextView m_stopDistanceTextView = null;
+		TextView m_stopRoutesTextView = null;
 
 		ViewWrapper(View base) {
 			this.base = base;
@@ -280,30 +280,30 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		TextView getStopNameTextView() {
 			if (m_stopNameTextView == null) {
-				m_stopNameTextView = (TextView) base.findViewById(R.id.stopNameText);
+				m_stopNameTextView = (TextView) base.findViewById(R.id.stopNameTextView);
 			}
 			return (m_stopNameTextView);
 		}
 
-		TextView getDirectionTextView() {
-			if (m_directionTextView == null) {
-				m_directionTextView = (TextView) base.findViewById(R.id.directionText);
+		TextView getStopDetailsTextView() {
+			if (m_stopDetailsTextView == null) {
+				m_stopDetailsTextView = (TextView) base.findViewById(R.id.stopDetailsTextView);
 			}
-			return (m_directionTextView);
+			return (m_stopDetailsTextView);
 		}
 
-		TextView getDistanceTextView() {
-			if (m_distanceTextView == null) {
-				m_distanceTextView = (TextView) base.findViewById(R.id.distanceText);
+		TextView getStopDistanceTextView() {
+			if (m_stopDistanceTextView == null) {
+				m_stopDistanceTextView = (TextView) base.findViewById(R.id.stopDistanceTextView);
 			}
-			return (m_distanceTextView);
+			return (m_stopDistanceTextView);
 		}
 		
-		TextView getRoutesTextView() {
-			if (m_routesTextView == null) {
-				m_routesTextView = (TextView) base.findViewById(R.id.routesText);
+		TextView getStopRoutesTextView() {
+			if (m_stopRoutesTextView == null) {
+				m_stopRoutesTextView = (TextView) base.findViewById(R.id.stopRoutesTextView);
 			}
-			return (m_routesTextView);
+			return (m_stopRoutesTextView);
 		}		
 		
 		
@@ -344,7 +344,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
         	}
         	
         	if(location.hasAccuracy()){
-        		setTitle(m_title + " Â±" + (int)location.getAccuracy() + "m");	
+        		setTitle(m_title + "    ±" + (int)location.getAccuracy() + "m");	
         	}else{
         		setTitle(m_title);
         	}
