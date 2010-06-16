@@ -112,7 +112,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
 			Stop thisStop = stopsListAdapter.getStops().get(info.position);
 			menu.add(0, 0, 0, "View Stop");
-			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavorite" : "Favorite"));
+			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavourite" : "Favourite"));
 		}
     };
     
