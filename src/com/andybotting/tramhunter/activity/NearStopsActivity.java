@@ -344,7 +344,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
         	}
         	
         	if(location.hasAccuracy()){
-        		setTitle(m_title + "    ±" + (int)location.getAccuracy() + "m");	
+        		setTitle(m_title + "    Â±" + (int)location.getAccuracy() + "m");	
         	}else{
         		setTitle(m_title);
         	}
