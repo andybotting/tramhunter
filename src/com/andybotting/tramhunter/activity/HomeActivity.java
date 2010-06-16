@@ -38,15 +38,15 @@ public class HomeActivity extends ListActivity {
 	private String[] m_menuItems = {"Favourite Stops",
 								    "Browse for a Stop",
 								    "Enter a TramTracker ID",
-								    "Nearby Stops",
-								    "Hunt Down My Trips (Beta)"/*,
+								    "Nearby Stops"/*,
+								    "Hunt Down My Trips (Beta)",
 								    "Settings"*/};
 
 	private String[] m_menuItemDescriptions = {"Get the details for your favourite stops, fast",
 											   "Browse for your stop by route and stop lists",
 											   "Get the details for your stop by TramTracker ID",
-											   "Use your location to find stops nearest to you",
-											   "Find trams I am likely to want to catch"/*,
+											   "Use your location to find stops nearest to you"/*,
+											   "Find trams I am likely to want to catch",
 											   "Set your Tram Hunter preferences"*/};
 
 	private static String[] m_welcomeMessages = {"Dude, wheres my tram?",
@@ -313,14 +313,14 @@ public class HomeActivity extends ListActivity {
 						intent = new Intent(HomeActivity.this, NearStopsActivity.class);
 						break;
 					}
-					case 4: {
-						intent = new Intent(HomeActivity.this, PredictionActivity.class);
-						break;
-					}
-					case 5: {
-						intent = new Intent(HomeActivity.this, SettingsActivity.class);
-						break;
-					}			
+//					case 4: {
+//						intent = new Intent(HomeActivity.this, PredictionActivity.class);
+//						break;
+//					}
+//					case 5: {
+//						intent = new Intent(HomeActivity.this, SettingsActivity.class);
+//						break;
+//					}			
 				}
 				
 				if(intent!=null)
