@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Tram Hunter</string>
+	<string name="about_msg">A simple Android client to Yarra Trams tramTRACKER® Web Service.\n\nPlease file bug reports and feature requests at the Tram Hunter project website at:\nhttp://tramhunter.googlecode.com\n\nFor Terms of Use of the tramTRACKER® Web Service, see:\nhttp://ws.tramtracker.com.au/pidsservice/Terms.aspx\n\nThis application is provided with no warranty, and is licensed under GPL v2.</string>
+</resources>
