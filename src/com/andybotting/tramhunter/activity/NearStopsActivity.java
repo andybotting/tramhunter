@@ -1,8 +1,9 @@
 package com.andybotting.tramhunter.activity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.Map.Entry;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -209,9 +210,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	}
 		  
 	private class StopsListAdapter extends BaseAdapter {
-			
-		private Context mContext;		
-		private int usenameHeight;
 
 		private ArrayList<Stop> m_stops;
 		private Location m_location;

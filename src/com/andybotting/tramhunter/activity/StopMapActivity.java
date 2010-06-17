@@ -2,18 +2,13 @@ package com.andybotting.tramhunter.activity;
 
 import java.util.List;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import com.andybotting.tramhunter.MapItemizedOverlay;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
-import com.andybotting.tramhunter.R.drawable;
-import com.andybotting.tramhunter.R.id;
-import com.andybotting.tramhunter.R.layout;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -21,10 +16,6 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-
-import com.google.android.maps.MapView.LayoutParams;  
-import android.view.View;
-import android.widget.LinearLayout;
 
 public class StopMapActivity extends MapActivity 
 {    

@@ -1,6 +1,6 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.Vector;
+import java.util.List;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
@@ -9,10 +9,7 @@ import com.andybotting.tramhunter.Destination;
 
 import android.app.ExpandableListActivity;
 import android.content.Context;
-
-import android.content.Context;
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -69,8 +66,6 @@ public class RoutesListActivity extends ExpandableListActivity {
   
 	
     public class MyExpandableListAdapter extends BaseExpandableListAdapter {
-		
-		private Context mContext;		
 
         public Object getChild(int groupPosition, int childPosition) {
         	// Decide if it's routeUp or routeDown

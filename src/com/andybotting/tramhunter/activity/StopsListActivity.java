@@ -1,10 +1,9 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.Vector;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -207,12 +206,6 @@ public class StopsListActivity extends ListActivity {
     }
      
 	private class StopsListAdapter extends BaseAdapter {
-			
-		private Context context;		
-
-		public StopsListAdapter(Context _context) {
-			context = _context;
-		}
 
 		public int getCount() {
 			return mStops.size();
