@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<resources>
-	<drawable name="white">#ffffffff</drawable>
-	<drawable name="black">#ff000000</drawable>
-	<drawable name="gray">#ff606060</drawable>
-	<drawable name="aqua">#ff007bff</drawable>
-	<drawable name="red">#ffff0000</drawable>
-</resources>
