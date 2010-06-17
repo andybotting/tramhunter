@@ -23,6 +23,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.TramHunter;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;

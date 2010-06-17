@@ -1,6 +1,8 @@
-package com.andybotting.tramhunter.activity;
+package com.andybotting.tramhunter;
 
 import java.util.UUID;
+
+import com.andybotting.tramhunter.activity.HomeActivity;
 
 import android.app.Activity;
 import android.content.Intent;

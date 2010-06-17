@@ -7,7 +7,7 @@
 	<application android:icon="@drawable/icon" 
 				 android:label="@string/app_name" android:theme="@android:style/Theme.Light">
 		
-		<activity android:label="@string/app_name" android:name=".activity.TramHunter"> 
+		<activity android:label="@string/app_name" android:name=".TramHunter"> 
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
