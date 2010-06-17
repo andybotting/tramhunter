@@ -13,7 +13,7 @@ import android.os.Bundle;
  * the screen is rotated on the home screen. By using a seperat starting activity we can run this activity and the home in a seperate task
  * therefore ALWAYS starting a NEW home activity when the app icon is clicked.
  */
-public class LaunchActivity extends Activity {
+public class TramHunter extends Activity {
 
 	public static final String KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH = "PDAL"; 
 
@@ -21,7 +21,7 @@ public class LaunchActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         
-		Intent intent = new Intent(LaunchActivity.this, HomeActivity.class);
+		Intent intent = new Intent(TramHunter.this, HomeActivity.class);
 		Bundle bundle = new Bundle();
 		// Use a unique UUID each time we load the home activity from the launcher
 		bundle.putString(KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH, UUID.randomUUID().toString());

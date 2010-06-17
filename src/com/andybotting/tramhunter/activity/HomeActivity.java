@@ -180,8 +180,8 @@ public class HomeActivity extends ListActivity {
 		boolean isNewIntentUUID = false;
 		
 		// Check to make sure we have not already used the UUID for a default activity launch
-		if(extras != null && extras.containsKey(LaunchActivity.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH)){
-			String currentIntentUUID = extras.getString(LaunchActivity.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH);
+		if(extras != null && extras.containsKey(TramHunter.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH)){
+			String currentIntentUUID = extras.getString(TramHunter.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH);
 			isNewIntentUUID = !currentIntentUUID.equals(mLastUsedIntentUUID); 
 			mLastUsedIntentUUID = currentIntentUUID;
 		}
