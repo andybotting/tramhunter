@@ -14,6 +14,8 @@ import android.os.Bundle;
  * Allows the default activity to be launched via the home screen without issues when the user backtracks to the home screen or
  * the screen is rotated on the home screen. By using a seperat starting activity we can run this activity and the home in a seperate task
  * therefore ALWAYS starting a NEW home activity when the app icon is clicked.
+ * 
+ * DO NOT MOVE/RENAME THIS FILE! EVER!!! It will break the app upgrades (i.e. Icon will not work and ALL USERS will need to completely reinstall).
  */
 public class TramHunter extends Activity {
 

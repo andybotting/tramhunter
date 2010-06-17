@@ -7,6 +7,7 @@
 	<application android:icon="@drawable/icon" 
 				 android:label="@string/app_name" android:theme="@android:style/Theme.Light">
 		
+		<!-- Do not touch this element block, do not even LOOK at it. If its changed when the app icon wont work on an upgrade. -->
 		<activity android:label="@string/app_name" android:name=".TramHunter"> 
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
