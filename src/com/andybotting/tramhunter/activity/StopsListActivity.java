@@ -8,15 +8,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.andybotting.tramhunter.Destination;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
@@ -24,60 +28,83 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
 
 public class StopsListActivity extends ListActivity {
 
-	ListView listView;
-	Vector<Stop> stops;
-	TramHunterDB db;
-	Route route;
+	private boolean mIsFavouritesView;
+	private ListView mListView;
+	private List<Stop> mStops;
+	private TramHunterDB mDB;
+	private Destination mDestination;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 		
-		long routeId = -1;
+		long destinationId = -1;
 		
 		setContentView(R.layout.stops_list);
-		listView = (ListView)this.findViewById(android.R.id.list);
+		mListView = (ListView)this.findViewById(android.R.id.list);
 		
 		String title = "";
-		db = new TramHunterDB(this);
+		mDB = new TramHunterDB(this);
 		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
-		  routeId = extras.getLong("routeId");
-		  route = db.getRoute(routeId);
+		  destinationId = extras.getLong("destinationId");
+		  
 		}  
-		
-				
+						
 		// Are we looking for stops for a route, or fav stops?
-		if (routeId > -1) {
-			title = "Stops for Route " + route.getNumber();
+		if (destinationId > -1) {
+			mDestination = mDB.getDestination(destinationId);
+			title = "Stops for Route " + mDestination.getRouteNumber() + " to " + mDestination.getDestination();
 			setTitle(title);
-			displayStopsForRoute(routeId);
+			displayStopsForDestination(destinationId);
 		}
 		else {
+			mIsFavouritesView = true;
 			title = "Favourite Stops";
 			setTitle(title);
-			displayFavStops();
+			displayFavStops(true);
 		}
 		
 	}
 	  
-	
-	public void displayFavStops() {
-		stops = db.getFavouriteStops();
+	@Override
+	protected void onResume() {
+		super.onResume();
 		
-		if (stops.size() == 0) {
+		// Refresh favourites if the back button is pressed
+		if (mIsFavouritesView)
+		{
+			displayFavStops(false);
+		}
+	}
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    	mDB.close();
+    }
+	
+	public void displayFavStops(boolean alertIfNoStops) {
+		mStops = mDB.getFavouriteStops();
+		
+		if (alertIfNoStops && mStops.size() == 0) {
 			alertNoFavourites();		
+		}else{
+			// Find the routes for our stops
+			for(Stop stop: mStops) {
+				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
+				stop.setRoutes(routes);
+			}
 		}
 		displayStops();
 	}
-
 
 	private void alertNoFavourites() {
 		final Intent routeListIntent = new Intent(this, RoutesListActivity.class);
 		
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-		dialogBuilder.setMessage("You currently have no favourite tram stops. To add favourite tram stops simply click the favourite star when browsing tram stops.\nDo you want to browse some now?")
+		dialogBuilder.setMessage("You currently have no favourite tram stops.\n\nTo add favourite tram stops simply click the favourite star when browsing tram stops.\n\nDo you want to browse some now?")
 			.setCancelable(false)
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
@@ -102,35 +129,83 @@ public class StopsListActivity extends ListActivity {
 		alert.show();
 	}
 	
-	public void displayStopsForRoute(long routeId) {
-		stops = db.getStopsForRoute(routeId);
+	public void displayStopsForDestination(long destinationId) {
+		mStops = mDB.getStopsForDestination(destinationId);
+
+// Slows things down a bit!
+//		// Find the routes for our stops
+//		for(Stop stop: mStops) {
+//			List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
+//			stop.setRoutes(routes);
+//		}
+		
 		displayStops();
 	}
-
 	
 	public void displayStops() {
 		
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setOnItemClickListener(mListView_OnItemClickListener);		
+		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
+		
+		setListAdapter(new StopsListAdapter());
+	}
+	
+	private void viewStop(Stop stop){
+		int tramTrackerId = stop.getTramTrackerID();
+		
+		Bundle bundle = new Bundle();
+		bundle.putInt("tramTrackerId", tramTrackerId);
+		Intent intent = new Intent(StopsListActivity.this, StopDetailsActivity.class);
+		intent.putExtras(bundle);
+		
+		startActivityForResult(intent, 1);
+	}
+	
+	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
+		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
+			viewStop((Stop)mStops.get(position));
+		}
+    };
 
-			public void onItemClick(AdapterView<?> arg0, View row, int position, long id) {
-				
-				Stop thisStop = (Stop) stops.get(position);
-				int tramTrackerId = thisStop.getTramTrackerID();
-							
-				Bundle bundle = new Bundle();
-				bundle.putInt("tramTrackerId", tramTrackerId);
-				Intent intent = new Intent(StopsListActivity.this, StopDetailsActivity.class);
-				intent.putExtras(bundle);
-				startActivityForResult(intent, 1);
+	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
+		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+			AdapterView.AdapterContextMenuInfo info;
+			try {
+			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+			} catch (ClassCastException e) {
+			    return;
 			}
 
-		});		
-
-		setListAdapter(new StopsListAdapter(this));
-	}
-
-	
-	  
+			Stop thisStop = (Stop)mStops.get(info.position);
+			menu.add(0, 0, 0, "View Stop");
+			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavourite" : "Favourite"));
+		}
+    };
+    
+    @Override
+    public boolean onContextItemSelected (MenuItem item){
+    	try {
+    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        	Stop thisStop = (Stop)mStops.get(info.position);
+        	
+        	switch (item.getItemId()) {
+    			case 0:
+    				viewStop(thisStop);
+    				return true;
+    			case 1:
+    				// Toggle favourite
+    				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
+    				thisStop.setStarred(!thisStop.isStarred());
+    				// Refresh the favourites stops list
+    				if(mIsFavouritesView)
+    					displayFavStops(false);
+    				return true;
+        	}
+    	} catch (ClassCastException e) {}
+    	    	
+		return super.onContextItemSelected(item);
+    }
+     
 	private class StopsListAdapter extends BaseAdapter {
 			
 		private Context context;		
@@ -140,7 +215,7 @@ public class StopsListActivity extends ListActivity {
 		}
 
 		public int getCount() {
-			return stops.size();
+			return mStops.size();
 		}
 
 		public Object getItem(int position) {
@@ -162,54 +237,66 @@ public class StopsListActivity extends ListActivity {
 			wrapper = new ViewWrapper(pv);
 			pv.setTag(wrapper);
 
-			Stop thisStop = (Stop) stops.get(position);
+			Stop thisStop = (Stop) mStops.get(position);
 			
-			String textLabel1 = thisStop.getPrimaryName();
-						
-			String textLabel2 = "Stop " + thisStop.getFlagStopNumber();
+			String stopName = thisStop.getPrimaryName();
+			String stopDetails = "Stop " + thisStop.getFlagStopNumber() + ": ";
 
 			// If the stop has a secondary name, add it
 			if (thisStop.getSecondaryName().length() > 0) {
-				textLabel2 += ": " + thisStop.getSecondaryName();
+				stopDetails += thisStop.getSecondaryName() + " - ";
 			}
 			
-			textLabel2 += " - " + thisStop.getCityDirection();
+			stopDetails += thisStop.getCityDirection();
 			
-			wrapper.getTextLabel1().setText(textLabel1);
-			wrapper.getTextLabel2().setText(textLabel2);
-
+			wrapper.getStopNameTextView().setText(stopName);
+			wrapper.getStopDetailsTextView().setText(stopDetails);
+			
+			// Only show the routes if this is the favourites view, it's too slow with LOTS of stops
+			if(mIsFavouritesView){
+				wrapper.getStopRoutesTextView().setText(thisStop.getRoutesString());	
+			}else{
+				wrapper.getStopRoutesTextView().setVisibility(View.GONE);
+			}
+						
 			return pv;
 
 		}
 
 	}
 
-
 	class ViewWrapper {
 		View base;
 				
-		TextView textLabel1 = null;
-		TextView textLabel2 = null;
-		
+		TextView stopNameTextView = null;
+		TextView stopDetailsTextView = null;
+		TextView stopRoutesTextView = null;
 
 		ViewWrapper(View base) {
 			this.base = base;
 		}
 
-		TextView getTextLabel1() {
-			if (textLabel1 == null) {
-				textLabel1 = (TextView) base.findViewById(R.id.textLabel1);
+		TextView getStopNameTextView() {
+			if (stopNameTextView == null) {
+				stopNameTextView = (TextView) base.findViewById(R.id.stopNameTextView);
 			}
-			return (textLabel1);
+			return (stopNameTextView);
 		}
 
-		TextView getTextLabel2() {
-			if (textLabel2 == null) {
-				textLabel2 = (TextView) base.findViewById(R.id.textLabel2);
+		TextView getStopDetailsTextView() {
+			if (stopDetailsTextView == null) {
+				stopDetailsTextView = (TextView) base.findViewById(R.id.stopDetailsTextView);
 			}
-			return (textLabel2);
+			return (stopDetailsTextView);
 		}
 
+		TextView getStopRoutesTextView() {
+			if (stopRoutesTextView == null) {
+				stopRoutesTextView = (TextView) base.findViewById(R.id.stopRoutesTextView);
+			}
+			return (stopRoutesTextView);
+		}
+		
 	}	  
 	  
 	

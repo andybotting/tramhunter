@@ -3,51 +3,53 @@ package com.andybotting.tramhunter;
 
 public class Route { 
 	
+	private int id;
 	private String number;
-	private String destination;
-	private Boolean up;
-
+	private Destination destinationUp;
+	private Destination destinationDown;
 	
-	public void setNumber(String _number) {
-		number = _number;
+	public int getId() {
+		return id;
 	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getNumber() {
 		return number;
-	} 
-	
-	
-	public void setDestination(String _destination) {
-		destination = _destination;
 	}
-	public String getDestination() {
-		return destination;
-	}	
 
-	
-	// Set 'up' via int from database
-	public void setUp(int _up) {
-		up = false;
-		if (_up == 1) {
-			up = true;
-		}		
+	public void setNumber(String number) {
+		this.number = number;
 	}
-	
-	// Set 'up' from boolean
-	public void setUp(boolean _up) {
-		up = _up;
-	}
-	
-	public boolean getUp() {
-		return up;
-	}	
 
+	public Destination getDestinationUp() {
+		return destinationUp;
+	}
+
+	public void setDestinationUp(Destination destinationUp) {
+		this.destinationUp = destinationUp;
+	}
+
+	public Destination getDestinationDown() {
+		return destinationDown;
+	}
+
+	public void setDestinationDown(Destination destinationDown) {
+		this.destinationDown = destinationDown;
+	}
+
+	public String getDestinationString() {
+		return getDestinationUp().getDestination() 
+			+ " to " 
+			+ getDestinationDown().getDestination();
+	}
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Route ");
 		buffer.append(number);
-		buffer.append(":");
-		buffer.append(destination);
 		return buffer.toString();
 	}
 

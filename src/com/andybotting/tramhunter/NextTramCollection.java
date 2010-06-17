@@ -1,14 +1,14 @@
 package com.andybotting.tramhunter;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
 public class NextTramCollection {
 	
-	Stop stop;
-	//Vector<NextTram> trams = new Vector();
-	private Vector<NextTram> trams = new Vector<NextTram>();
+	private Stop stop;
+	private List<NextTram> trams = new ArrayList<NextTram>();
 
 	
 	public void setStop(Stop _stop) {
@@ -31,7 +31,7 @@ public class NextTramCollection {
 	 * @return the desired property
 	 */
 	public NextTram getTram(int index) {
-		return trams.elementAt(index);
+		return trams.get(index);
 	}
 	
 	/**
@@ -53,7 +53,7 @@ public class NextTramCollection {
 	 *			the value of the property
 	 */
 	public void addTram(NextTram tram) {
-		trams.addElement(tram);
+		trams.add(tram);
 
 	}
 	

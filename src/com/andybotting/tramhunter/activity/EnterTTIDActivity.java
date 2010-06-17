@@ -13,6 +13,7 @@ import android.content.Intent;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -25,14 +26,18 @@ public class EnterTTIDActivity extends Activity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 
-		 setContentView(R.layout.enter_ttid);
+		setContentView(R.layout.enter_ttid);
 		 
- 		String title = getResources().getText(R.string.app_name) + ": Enter an ID";
-		setTitle(title);
+		String title = getResources().getText(R.string.app_name) + ": Enter an ID";
+ 		setTitle(title);
 
-		 final Button button = (Button) findViewById(R.id.buttonGo);
-		 button.setOnClickListener(new View.OnClickListener() {
-			 public void onClick(View v) {
+		// Show soft keyboard right away
+		final InputMethodManager imm = (InputMethodManager) EnterTTIDActivity.this.getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+		final Button button = (Button) findViewById(R.id.buttonGo);
+		button.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
 				 
 				EditText textTramTrackerId = (EditText)findViewById(R.id.textTramTrackerId);
 				
@@ -51,6 +56,8 @@ public class EnterTTIDActivity extends Activity {
 				
 				// Check to make sure we get 1 result for our TramTrackerID search
 				if (db.checkStop(tramTrackerId)) {
+					// Hide our soft keyboard
+					imm.hideSoftInputFromWindow(textTramTrackerId.getWindowToken(), 0);
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", tramTrackerId);
 					Intent stopsListIntent = new Intent(EnterTTIDActivity.this, StopDetailsActivity.class);
@@ -66,9 +73,10 @@ public class EnterTTIDActivity extends Activity {
 					toast.show();
 				}
 				
+				// Clean up
+				db.close();
+				
 			 }
 		 });
 	 }
-
-		
 }
