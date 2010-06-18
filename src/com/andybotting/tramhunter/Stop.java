@@ -133,7 +133,7 @@ public class Stop {
 	}	
 
 	
-	public void setLatitude(Float _latitude) {
+	public void setLatitude(Double _latitude) {
 		latitude = _latitude;		
 	}
 	
@@ -142,7 +142,7 @@ public class Stop {
 		return longitude;
 	}	 
 	
-	public void setLongitude(Float _longitude) {
+	public void setLongitude(Double _longitude) {
 		longitude = _longitude;
 		
 	}

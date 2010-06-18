@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.andybotting.tramhunter.NextTram;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.StopsList;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
@@ -171,7 +172,9 @@ public class StopDetailsActivity extends ListActivity {
 		case 2:
 			// Map view
 			Bundle bundle = new Bundle();
-			bundle.putInt("tramTrackerId", mTramTrackerId);
+			StopsList mStopList = new StopsList();
+			mStopList.add(mStop);
+			bundle.putParcelable("stopslist", mStopList);
 			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 			intent.putExtras(bundle);
 			startActivityForResult(intent, 1);

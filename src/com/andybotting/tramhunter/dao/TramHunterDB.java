@@ -575,8 +575,8 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			stop.setPrimaryName(c.getString(col_primaryName));
 			stop.setSecondaryName(c.getString(col_secondaryName));
 			stop.setCityDirection(c.getString(col_cityDirection));
-			stop.setLatitude(c.getFloat(col_latitude));
-			stop.setLongitude(c.getFloat(col_longitude));
+			stop.setLatitude(c.getDouble(col_latitude));
+			stop.setLongitude(c.getDouble(col_longitude));
 			stop.setSuburb(c.getString(col_suburb));
 			stop.setStarred(c.getInt(col_starred));
 
@@ -726,8 +726,8 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		stop.setPrimaryName(c.getString(col_primaryName));
 		stop.setSecondaryName(c.getString(col_secondaryName));
 		stop.setCityDirection(c.getString(col_cityDirection));
-		stop.setLatitude(c.getFloat(col_latitude));
-		stop.setLongitude(c.getFloat(col_longitude));
+		stop.setLatitude(c.getDouble(col_latitude));
+		stop.setLongitude(c.getDouble(col_longitude));
 		stop.setSuburb(c.getString(col_suburb));
 		stop.setStarred(c.getInt(col_starred));
 		return stop;

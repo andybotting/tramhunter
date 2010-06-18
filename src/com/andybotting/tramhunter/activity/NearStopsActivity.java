@@ -7,7 +7,6 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
@@ -15,6 +14,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +23,11 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Route;
 import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.StopsList;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.util.GenericUtil;
  
@@ -35,6 +35,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	private ListView mListView;
 	private List<Stop> mAllStops;
+	private StopsList mNearStopsList;
 	private LocationManager mLocationManager;
 	private Location mLastKnownLocation;
 	
@@ -67,6 +68,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Get our stops from the DB
 		mDB = new TramHunterDB(this);
 		mAllStops = mDB.getAllStops();
+		
+		// Make our Near Stops List for the map
+		mNearStopsList = new StopsList();
 
 		// Get the location
 		mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
@@ -80,7 +84,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			// Finish the activity, and go back to the main menu
 			this.finish();
     	}
-	}
+	}	
 	
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
@@ -93,6 +97,32 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		startActivityForResult(intent, 1);
 	}
 	
+	// Add menu
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.add(0, 0, 0, "Map");
+		MenuItem menuItem0 = menu.findItem(0);
+		menuItem0.setIcon(R.drawable.ic_menu_mapmode);
+		
+		return true;
+	}
+	
+	// Menu actions
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case 0:
+			Bundle bundle = new Bundle();
+			bundle.putParcelable("stopslist", mNearStopsList);
+			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
+			intent.putExtras(bundle);
+			startActivityForResult(intent, 1);
+		}
+		return false;
+
+	}
+		
 	private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)adapterView.getAdapter();
@@ -181,6 +211,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    	
 			// Find the routes for our nearest stops
 			for(Stop stop: sortedStops) {
+				// Add this stop to our near StopsList
+				mNearStopsList.add(stop);
 				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
 				stop.setRoutes(routes);
 			}
