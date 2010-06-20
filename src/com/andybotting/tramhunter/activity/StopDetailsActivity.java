@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import android.app.ListActivity;
@@ -240,7 +239,7 @@ public class StopDetailsActivity extends ListActivity {
 				// Show the dialog window
 				this.dialog.setMessage("Fetching Tram Times...");
 				this.dialog.show();
-				mShowDialog = false;
+				
 			}
 			// Show the spinner in the title bar
 			setProgressBarIndeterminateVisibility(true);
@@ -284,7 +283,19 @@ public class StopDetailsActivity extends ListActivity {
 				
 				dateStringText.setText("Last updated: " + sdf.format(today.getTime()));
 				
-				setListAdapter(new NextTramsListAdapter());	
+				if ( (nextTrams.size() == 1) && (nextTrams.get(0).getSpecialEventMessage().length() > 1)) {
+					if (mShowDialog) {
+						Context context = getApplicationContext();
+						CharSequence text = nextTrams.get(0).getSpecialEventMessage();
+						int duration = Toast.LENGTH_LONG;
+						Toast toast = Toast.makeText(context, text, duration);
+						toast.show();
+					}
+				}
+				else {
+					// Show trams list
+					setListAdapter(new NextTramsListAdapter());
+				}
 			}
 			else {
 				// If we've not had a loading error already
@@ -300,6 +311,7 @@ public class StopDetailsActivity extends ListActivity {
 
 			// Hide our dialog window
 			if (this.dialog.isShowing()) {
+				mShowDialog = false;
 				this.dialog.dismiss();
 			}
 			setProgressBarIndeterminateVisibility(false);
