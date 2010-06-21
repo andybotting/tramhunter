@@ -3,10 +3,13 @@ package com.andybotting.tramhunter.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.LinearLayout;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.Stop;
@@ -17,28 +20,70 @@ import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
 public class StopMapActivity extends MapActivity 
 {    
 	
-	List<Overlay> mapOverlays;
-	Drawable drawable;
-	MapItemizedOverlay itemizedOverlay;
+	private List<Overlay> mMapOverlays;
+
+	private MapController mMapController;	
+    private MapView mMapView;
+    private MyLocationOverlay mMyLocationOverlay;
 	
-	LinearLayout linearLayout;
-	MapView mapView;
-	MapController mapController;
+	private StopsList mStops;
 	
-	StopsList mStops;
 	
-	Stop stop;
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.stop_map);
+
+//        int tramTrackerId = 0;
+        
+		// Get bundle data
+		Bundle extras = getIntent().getExtras();
+		if(extras != null) {
+			//tramTrackerId = extras.getInt("tramTrackerId");
+			mStops = extras.getParcelable("stopslist");
+		} 
+		      
+		// Get our Stop object
+//		TramHunterDB db = new TramHunterDB(this);
+//		stop = db.getStop(tramTrackerId);
+//		db.close();
+				
+		// Set title
+//		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
+//		setTitle(title);
+		
+
+       	mMapView = (MapView) findViewById(R.id.mapView);
+       	mMapView.setBuiltInZoomControls(true);
+       	
+        mMapController = mMapView.getController();
+        mMapOverlays = mMapView.getOverlays();
+        
+        mMyLocationOverlay = new MyLocationOverlay(this, mMapView);
+        mMapOverlays.add(mMyLocationOverlay);
+
+        mMapView.setClickable(true);
+        mMapView.setEnabled(true);
+        
+        displayStops(mStops);
+    }
+        
+	
 	
 	@SuppressWarnings("unchecked")
 	public class MapItemizedOverlay extends ItemizedOverlay {
 		
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
+		private	PopupPanel panel = new PopupPanel(R.layout.stop_map_popup);
 		
 		public MapItemizedOverlay(Drawable defaultMarker) {
 			super(boundCenterBottom(defaultMarker));
@@ -58,58 +103,113 @@ public class StopMapActivity extends MapActivity
 		public int size() {
 			return mOverlays.size();
 		}
+		
+		@Override
+		protected boolean onTap(int i) {
+			Stop stop = null;
+			
+			OverlayItem item = getItem(i);
+			GeoPoint geoPoint = item.getPoint();
+			Point pt = mMapView.getProjection().toPixels(geoPoint, null);
+			
+			View view = panel.getView();
+			
+			// Parse the marker title into an int
+			int tramTrackerId = Integer.parseInt(item.getTitle());
+			
+			TramHunterDB db = new TramHunterDB(getBaseContext());
+			stop = db.getStop(tramTrackerId);
+	
+			// Set labels from Stop hash map
+			String firstLineText = stop.getPrimaryName();	
+			
+			String secondLineText = "Stop " + stop.getFlagStopNumber();
+			// If the stop has a secondary name, add it
+			if (stop.getSecondaryName().length() > 0) {
+				secondLineText += ": " + stop.getSecondaryName();
+			}
+			secondLineText += " - " + stop.getCityDirection();
+			
+			stop.setRoutes(db.getRoutesForStop(tramTrackerId));
+			
+			String thirdLineText = stop.getRoutesString();
+			
+			((TextView)view.findViewById(R.id.stopNameTextView)).setText(firstLineText);
+			((TextView)view.findViewById(R.id.stopDetailsTextView)).setText(secondLineText);
+			((TextView)view.findViewById(R.id.stopRoutesTextView)).setText(thirdLineText);
 
+			db.close();
+			
+			panel.show(pt.y*2 > mMapView.getHeight());
+			
+			return(true);
+		}
+		
 	}
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.stop_map);
+	class PopupPanel {
+		View popup;
+		boolean isVisible = false;
+		
+		PopupPanel(int layout) {
+			ViewGroup parent = (ViewGroup) mMapView.getParent();
+			popup = getLayoutInflater().inflate(layout, parent, false);
+			popup.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					hide();
+				}
+			});
+		}
+		
+		View getView() {
+			return(popup);
+		}
+		
+		void show(boolean alignTop) {
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+			
+			if (alignTop) {
+				lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				lp.setMargins(0, 20, 0, 0);
+			}
+			else {
+				lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+				lp.setMargins(0, 0, 0, 60);
+			}
+			
+			hide();
+			
+			((ViewGroup)mMapView.getParent()).addView(popup, lp);
+			isVisible = true;
+		}
+		
+		void hide() {
+			if (isVisible) {
+				isVisible = false;
+				((ViewGroup)popup.getParent()).removeView(popup);
+			}
+		}
+	}
+
+	
+
+
+    private void displayStops(StopsList mStops) {
         
+    	Drawable drawable = this.getResources().getDrawable(R.drawable.map_marker);
+    	MapItemizedOverlay itemizedOverlay = new MapItemizedOverlay(drawable);
+    	
         double minLat = 0;
         double maxLat = 0;
         double minLng = 0;
         double maxLng = 0;
-     
-//        int tramTrackerId = 0;
-        
-		// Get bundle data
-		Bundle extras = getIntent().getExtras();
-		if(extras != null) {
-			//tramTrackerId = extras.getInt("tramTrackerId");
-			mStops = extras.getParcelable("stopslist");
-			Log.d("Testing", "Found stops: " + mStops.size());
-		} 
-		      
-		// Get our Stop object
-//		TramHunterDB db = new TramHunterDB(this);
-//		stop = db.getStop(tramTrackerId);
-//		db.close();
-				
-		// Set title
-//		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
-//		setTitle(title);
-		
 
-       	mapView = (MapView) findViewById(R.id.mapView);
-        mapController = mapView.getController();
-        
-        mapView.setBuiltInZoomControls(true);
-        
-        mapOverlays = mapView.getOverlays();
-        
-        // Draw our markers
-        
         for (Stop stop: mStops) {
-        	Log.d("Testing", "Found Stop: " + stop.getPrimaryName());
-        	drawable = this.getResources().getDrawable(R.drawable.map_marker);
-        	itemizedOverlay = new MapItemizedOverlay(drawable);
+
         	GeoPoint point = stop.getGeoPoint();
-        	OverlayItem overlayitem = new OverlayItem(point, stop.getStopName(), stop.getStopName());
+        	OverlayItem overlayitem = new OverlayItem(point, String.valueOf(stop.getTramTrackerID()), null);
         	itemizedOverlay.addOverlay(overlayitem);
-        	mapOverlays.add(itemizedOverlay);
+        	mMapOverlays.add(itemizedOverlay);
 
         	Double lat = stop.getLatitude();
         	Double lng = stop.getLongitude();
@@ -144,12 +244,30 @@ public class StopMapActivity extends MapActivity
         
         GeoPoint point = new GeoPoint(lat1E6, lng1E6);
         
-        mapController.setZoom(15);
-        mapController.setCenter(point);
+        mMapController.setZoom(15);
+        mMapController.setCenter(point);
         
-        
+//        mMyLocationOverlay.runOnFirstFix(new Runnable() { 
+//        	public void run() {
+//        		mMapView.getController().animateTo(mMyLocationOverlay.getMyLocation());
+//        	}
+//        });
     }
  
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMyLocationOverlay.enableMyLocation();
+    }
+
+    @Override
+    protected void onStop() {
+        mMyLocationOverlay.disableMyLocation();
+        super.onStop();
+    }
+    
+    
     @Override
     protected boolean isRouteDisplayed() {
         return false;

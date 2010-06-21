@@ -7,13 +7,16 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -229,7 +233,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 				stopsListAdapter.updateStopList(sortedStops, m_location);
 			}else{
 				// Refresh the entire list
-				StopsListAdapter stopsListAdapter = new StopsListAdapter(sortedStops, m_location);
+				StopsListAdapter stopsListAdapter = new StopsListAdapter(sortedStops, m_location, getBaseContext());
 				setListAdapter(stopsListAdapter);	
 			}
 			
@@ -245,10 +249,14 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		private ArrayList<Stop> m_stops;
 		private Location m_location;
-		
-		public StopsListAdapter(ArrayList<Stop> stops, Location location){
+		private LayoutInflater mInflater;
+	
+		public StopsListAdapter(ArrayList<Stop> stops, Location location, Context context){
 			m_stops = stops;
 			m_location = location;
+			
+			// Cache the LayoutInflate to avoid asking for a new one each time.
+			mInflater = LayoutInflater.from(context);
 		}
 		
 		public void updateStopList(ArrayList<Stop> stops, Location location){
@@ -262,12 +270,28 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			View inflatedView = getLayoutInflater().inflate(R.layout.near_stops_list_row, parent, false);
-			ViewWrapper viewWrapper = new ViewWrapper(inflatedView);
-			inflatedView.setTag(viewWrapper);
-			fillViewWrapper(viewWrapper, m_stops.get(position));
-			
-			return inflatedView;
+            // A ViewHolder keeps references to children views to avoid unneccessary calls
+            // to findViewById() on each row.
+			ViewWrapper viewWrapper;
+
+            // When convertView is not null, we can reuse it directly, there is no need
+            // to reinflate it. We only inflate a new View when the convertView supplied
+            // by ListView is null.
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.near_stops_list_row, null);
+
+                // Creates a ViewHolder and store references to the two children views
+                // we want to bind data to.
+                viewWrapper = new ViewWrapper(convertView);
+                fillViewWrapper(viewWrapper, m_stops.get(position));
+                convertView.setTag(viewWrapper);
+            } else {
+                // Get the ViewHolder back to get fast access to the TextView
+                // and the ImageView.
+            	viewWrapper = (ViewWrapper) convertView.getTag();
+            }
+
+			return convertView;
 		}
 
 		private void fillViewWrapper(ViewWrapper viewWrapper, Stop stop){

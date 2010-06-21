@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="@drawable/popup_frame">
+
+	<TextView
+		android:id="@+id/stopNameTextView"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:textSize="18dip" />
+
+	<TextView
+		android:id="@+id/stopDetailsTextView" 
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_below="@+id/stopNameTextView" />
+				
+	<TextView
+		android:id="@+id/stopRoutesTextView"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_below="@+id/stopDetailsTextView" />
+	
+</RelativeLayout>
