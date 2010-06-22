@@ -2,11 +2,18 @@ package com.andybotting.tramhunter;
 
 
 public class Destination { 
-	
+	private long id;
 	private String routeNumber;
 	private String destination;
 	private Boolean up;
 
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long _id) {
+		this.id = _id;
+	}
 	
 	public void setRouteNumber(String _routeNumber) {
 		routeNumber = _routeNumber;
@@ -43,12 +50,7 @@ public class Destination {
 
 	
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Route ");
-		buffer.append(routeNumber);
-		buffer.append(":");
-		buffer.append(destination);
-		return buffer.toString();
+		return "Destination: " + destination;
 	}
 
 }

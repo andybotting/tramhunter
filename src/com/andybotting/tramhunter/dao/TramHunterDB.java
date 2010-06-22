@@ -249,20 +249,22 @@ public class TramHunterDB extends SQLiteOpenHelper {
 				// TODO: We should call this as another method, but doing it here
 				// until we get out db create/close stuff sorted
 				Cursor d = db.query(TABLE_DESTINATIONS, 
-									null,
-									DestinationsColumns.ROUTE_ID + " = '" + routeId + "'",
-									null, 
-									null, 
-									null, 
-									null);
+						new String[] { "destinations._id", "destination", "direction"},
+						DestinationsColumns.ROUTE_ID + " = '" + routeId + "'",
+						null, 
+						null, 
+						null, 
+						null);
 				
-				if (d.moveToFirst()) {		
+				if (d.moveToFirst()) {
 					do {	
 						Destination dest = new Destination();
 
+						int d_col_id = d.getColumnIndexOrThrow(DestinationsColumns.ID);
 						int d_col_destination = d.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
 						int d_col_direction = d.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
 
+						dest.setId(d.getLong(d_col_id));
 						dest.setRouteNumber(route.getNumber());
 						dest.setDestination(d.getString(d_col_destination));
 						dest.setUp(d.getInt(d_col_direction));
@@ -311,10 +313,12 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			do {	
 				Destination dest = new Destination();
 
+				int col_id = c.getColumnIndexOrThrow(RoutesColumns.ID);
 				int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
 				int col_destination = c.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
 				int col_direction = c.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
-
+				
+				dest.setId(c.getInt(col_id));
 				dest.setRouteNumber(c.getString(col_number));
 				dest.setDestination(c.getString(col_destination));
 				dest.setUp(c.getInt(col_direction));
@@ -345,10 +349,12 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		Destination dest = new Destination();
 		
 		if (c.moveToFirst()) {		
+			int col_id = c.getColumnIndexOrThrow(RoutesColumns.ID);
 			int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
 			int col_destination = c.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
 			int col_direction = c.getColumnIndexOrThrow(DestinationsColumns.DIRECTION);
 
+			dest.setId(c.getInt(col_id));
 			dest.setRouteNumber(c.getString(col_number));
 			dest.setDestination(c.getString(col_destination));
 			dest.setUp(c.getInt(col_direction));

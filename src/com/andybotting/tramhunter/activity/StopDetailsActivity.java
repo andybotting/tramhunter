@@ -41,7 +41,7 @@ public class StopDetailsActivity extends ListActivity {
 	private TextView mStopDetailsTextView;
 	private TextView mStopRoutesTextView;
 	private CompoundButton mStarButton;
-	private TramTrackerService mTTService;
+	//private TramTrackerService mTTService;
 
 	private List<NextTram> mNextTrams = new ArrayList<NextTram>();
 	private Stop mStop;
@@ -144,7 +144,7 @@ public class StopDetailsActivity extends ListActivity {
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 		// Ensure the 'Favourite' menu item has the correct text
-		MenuItem favouriteMenuItem =  menu.getItem(1).setTitle((mStop.isStarred() ? "Unfavourite" : "Favourite"));
+		menu.getItem(1).setTitle((mStop.isStarred() ? "Unfavourite" : "Favourite"));
 
 		return super.onMenuOpened(featureId, menu);
 	}
@@ -263,7 +263,7 @@ public class StopDetailsActivity extends ListActivity {
 				}
 				
 			} catch (Exception e) {
-				// TODO: Put something here
+				// Don't do anything
 			}
 			
 			return mNextTrams;
@@ -283,7 +283,8 @@ public class StopDetailsActivity extends ListActivity {
 				
 				dateStringText.setText("Last updated: " + sdf.format(today.getTime()));
 				
-				if ( (nextTrams.size() == 1) && (nextTrams.get(0).getSpecialEventMessage().length() > 1)) {
+				// > 10 because ksoap2 fills in anytype{} instead of null
+				if (nextTrams.get(0).getSpecialEventMessage().length() > 10) {
 					if (mShowDialog) {
 						Context context = getApplicationContext();
 						CharSequence text = nextTrams.get(0).getSpecialEventMessage();

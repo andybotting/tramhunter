@@ -11,7 +11,7 @@ import com.google.android.maps.GeoPoint;
 
 public class Stop { 
 	
-	private int id;
+	private long id;
 	private int tramTrackerID;
 	private String flagStopNumber;
 	private String primaryName;
@@ -39,7 +39,7 @@ public class Stop {
 		"(.+) & (.+)";
 	
 
-	public void setId(int _id) {
+	public void setId(long _id) {
 		id = _id;
 	}
 	
@@ -47,7 +47,7 @@ public class Stop {
 	/**
 	 * @return The id
 	 */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	

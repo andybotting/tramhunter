@@ -7,6 +7,7 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -50,10 +51,12 @@ public class StopsListActivity extends ListActivity {
 		  destinationId = extras.getLong("destinationId");
 		  
 		}  
-						
+
 		// Are we looking for stops for a route, or fav stops?
-		if (destinationId > -1) {
+		if (destinationId != -1) {
+			Log.d("Testing", "Getting destination: " + destinationId);
 			mDestination = mDB.getDestination(destinationId);
+			
 			title = "Stops for Route " + mDestination.getRouteNumber() + " to " + mDestination.getDestination();
 			setTitle(title);
 			displayStopsForDestination(destinationId);

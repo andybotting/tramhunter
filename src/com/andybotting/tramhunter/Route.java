@@ -1,12 +1,15 @@
 package com.andybotting.tramhunter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Route { 
 	
 	private int id;
 	private String number;
-	private Destination destinationUp;
-	private Destination destinationDown;
+	private Destination destinationUp = null;
+	private Destination destinationDown = null;
 	
 	public int getId() {
 		return id;
@@ -39,18 +42,62 @@ public class Route {
 	public void setDestinationDown(Destination destinationDown) {
 		this.destinationDown = destinationDown;
 	}
+	
+	public List<Destination> getDestinations() {
+		
+		List<Destination> destinations = new ArrayList<Destination>();
+		
+		if (destinationUp != null)
+			destinations.add(destinationUp);
+		
+		if (destinationDown != null)
+			destinations.add(destinationDown);
+		
+		return destinations;
+	}
+	
+	public boolean hasDestinationUp(){
+		if (this.destinationUp != null) 
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean hasDestinationDown(){
+		if (this.destinationDown != null) 
+			return true;
+		else
+			return false;
+	}	
 
 	public String getDestinationString() {
-		return getDestinationUp().getDestination() 
-			+ " to " 
-			+ getDestinationDown().getDestination();
+		
+		String destinationString = "";
+		
+		Destination up = getDestinationUp();
+		Destination down = getDestinationDown();
+		
+		if ( (up != null) && (down != null) ) {
+			destinationString = getDestinationUp().getDestination() 
+				+ " to " 
+				+ getDestinationDown().getDestination();
+		}
+		else {
+			destinationString = "To ";
+
+			if (up != null)
+				destinationString += getDestinationUp().getDestination();
+			
+			if (down != null)
+				destinationString += getDestinationDown().getDestination();
+				
+		}
+		
+		return destinationString;
 	}
 	
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Route ");
-		buffer.append(number);
-		return buffer.toString();
+		return "Route: " + number;
 	}
 
 }

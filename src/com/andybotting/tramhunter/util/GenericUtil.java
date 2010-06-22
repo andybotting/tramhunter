@@ -1,6 +1,5 @@
 package com.andybotting.tramhunter.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;

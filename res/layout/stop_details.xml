@@ -36,6 +36,7 @@
 			android:layout_alignParentTop="true"
 			android:layout_alignWithParentIfMissing="true"
 		
+			android:singleLine="true"
 			android:ellipsize="marquee"
 			android:gravity="center_vertical" />
 	
@@ -101,12 +102,13 @@
 		
 	</TableLayout>
 	
-	
-	
+	<!--  ListView to hold our stop_details_row list items -->
 	<ListView android:id="@android:id/list"
 	   	android:layout_width="fill_parent"
 	   	android:layout_height="wrap_content"
-       	android:layout_weight="1.0" />  	
+       	android:layout_weight="1.0"
+       	android:headerDividersEnabled="true"
+       	android:footerDividersEnabled="true" />  	
         	
        <TextView
        	android:id="@+id/bottomLine"
