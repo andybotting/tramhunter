@@ -51,16 +51,6 @@ public class StopMapActivity extends MapActivity
 			//tramTrackerId = extras.getInt("tramTrackerId");
 			mStops = extras.getParcelable("stopslist");
 		} 
-		      
-		// Get our Stop object
-//		TramHunterDB db = new TramHunterDB(this);
-//		stop = db.getStop(tramTrackerId);
-//		db.close();
-				
-		// Set title
-//		String title = "Stop " + stop.getFlagStopNumber() + ": " + stop.getStopName();
-//		setTitle(title);
-		
 
        	mMapView = (MapView) findViewById(R.id.mapView);
        	mMapView.setBuiltInZoomControls(true);
