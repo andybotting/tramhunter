@@ -73,7 +73,8 @@
 	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:stretchColumns="1">
+		android:stretchColumns="1"
+		android:id="@+id/headingTable">
 			
 		<TableRow>	
 			<TextView
@@ -101,6 +102,13 @@
 		</TableRow>
 		
 	</TableLayout>
+	
+	<ImageView android:id="@+id/divider" 
+		android:layout_width="fill_parent"
+		android:layout_height="1px"
+		android:background="@drawable/list_divider"
+		android:layout_below="@+id/headingTable" />
+	
 	
 	<!--  ListView to hold our stop_details_row list items -->
 	<ListView android:id="@android:id/list"

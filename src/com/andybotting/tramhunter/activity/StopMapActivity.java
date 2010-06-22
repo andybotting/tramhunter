@@ -185,21 +185,22 @@ public class StopMapActivity extends MapActivity
 
 
     private void displayStops(StopsList mStops) {
-        
+
+    	double minLat = 0;
+    	double maxLat = 0;
+    	double minLng = 0;
+    	double maxLng = 0;
+    	
     	Drawable drawable = this.getResources().getDrawable(R.drawable.map_marker);
     	MapItemizedOverlay itemizedOverlay = new MapItemizedOverlay(drawable);
+    	mMapOverlays.add(itemizedOverlay);
     	
-        double minLat = 0;
-        double maxLat = 0;
-        double minLng = 0;
-        double maxLng = 0;
+    	for (Stop stop: mStops) {
 
-        for (Stop stop: mStops) {
-
-        	GeoPoint point = stop.getGeoPoint();
+    		GeoPoint point = stop.getGeoPoint();
         	OverlayItem overlayitem = new OverlayItem(point, String.valueOf(stop.getTramTrackerID()), null);
         	itemizedOverlay.addOverlay(overlayitem);
-        	mMapOverlays.add(itemizedOverlay);
+        	
 
         	Double lat = stop.getLatitude();
         	Double lng = stop.getLongitude();
