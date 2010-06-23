@@ -39,6 +39,7 @@ public class StopsListActivity extends ListActivity {
 		super.onCreate(icicle);	  
 		
 		long destinationId = -1;
+		String searchQuery = null;
 		
 		setContentView(R.layout.stops_list);
 		mListView = (ListView)this.findViewById(android.R.id.list);
@@ -49,11 +50,16 @@ public class StopsListActivity extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
 		  destinationId = extras.getLong("destinationId");
-		  
+		  searchQuery = extras.getString("search_query");
 		}  
 
 		// Are we looking for stops for a route, or fav stops?
-		if (destinationId != -1) {
+		if(searchQuery != null) {
+			title = "Stops for search";
+			setTitle(title);
+			displaySearchStops(searchQuery);
+		}
+		else if (destinationId != -1) {
 			Log.d("Testing", "Getting destination: " + destinationId);
 			mDestination = mDB.getDestination(destinationId);
 			
@@ -99,6 +105,11 @@ public class StopsListActivity extends ListActivity {
 				stop.setRoutes(routes);
 			}
 		}
+		displayStops();
+	}
+	
+	public void displaySearchStops(String search) {
+		mStops = mDB.getStopsForSearch(search);
 		displayStops();
 	}
 

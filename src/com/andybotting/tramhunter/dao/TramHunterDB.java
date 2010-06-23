@@ -551,6 +551,48 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}
 	
 	
+	// Get a list of Stops for a particular destination
+	public List<Stop> getStopsForSearch(String searchString) {
+		db = getDatabase();
+		
+		String searchQuery = StopsColumns.TRAMTRACKER_ID + " LIKE '%" + searchString 
+								+ "%' OR " + StopsColumns.PRIMARY_NAME + " LIKE '%" + searchString 
+								+ "%' OR " + StopsColumns.SECONDARY_NAME + " LIKE '%" + searchString + "%'";
+		
+		String searchLimit = "100";
+		
+		List<Stop> stops = new ArrayList<Stop>();
+		
+		Cursor c = db.query(TABLE_STOPS, 
+							null, 
+							searchQuery, 
+							null, 
+							null, 
+							null, 
+							null, 
+							searchLimit);
+
+		if (c.moveToFirst()) {		
+			do {
+				Stop stop = getStopFromCursor(c);
+				
+				stops.add(stop);
+				
+			} while(c.moveToNext());
+		}
+		
+		c.close();
+		db.close();
+		return stops;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	// Get a stop object from a given TramTracker ID
 	public Stop getStop(int tramTrackerId) {
 		db = getDatabase();
