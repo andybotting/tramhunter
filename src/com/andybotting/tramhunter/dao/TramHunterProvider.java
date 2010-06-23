@@ -1,4 +1,4 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.dao;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -11,7 +11,7 @@ import android.text.TextUtils;
 
 import java.util.List;
 
-import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
 
 /**
  * Provides search suggestions for a list of words and their definitions.

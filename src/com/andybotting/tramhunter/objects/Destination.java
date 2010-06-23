@@ -1,4 +1,4 @@
-package com.andybotting.tramhunter;
+package com.andybotting.tramhunter.objects;
 
 
 public class Destination { 
