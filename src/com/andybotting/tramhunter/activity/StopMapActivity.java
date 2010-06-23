@@ -12,9 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Stop;
-import com.andybotting.tramhunter.StopsList;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.StopsList;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;

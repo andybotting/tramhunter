@@ -20,11 +20,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.andybotting.tramhunter.Destination;
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Destination;
+import com.andybotting.tramhunter.objects.Route;
+import com.andybotting.tramhunter.objects.Stop;
 
 public class StopsListActivity extends ListActivity {
 

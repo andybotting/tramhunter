@@ -57,7 +57,7 @@
 				  android:configChanges="orientation|keyboardHidden"/>
 		
 		<!-- Provides search suggestions for stops -->
-		<provider android:name="TramHunterProvider"
+		<provider android:name="com.andybotting.tramhunter.dao.TramHunterProvider"
 					android:authorities="TramHunter"
                 	android:syncable="false" />
 		

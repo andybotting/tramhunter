@@ -2,8 +2,8 @@ package com.andybotting.tramhunter.service;
 
 import java.util.List;
 
-import com.andybotting.tramhunter.NextTram;
-import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.objects.NextTram;
+import com.andybotting.tramhunter.objects.Stop;
 
 /**
  * Service for retrieving Tram Tracking information.

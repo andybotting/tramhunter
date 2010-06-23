@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.Destination;
+import com.andybotting.tramhunter.objects.Destination;
+import com.andybotting.tramhunter.objects.Route;
 
 import android.app.ExpandableListActivity;
 import android.content.Intent;

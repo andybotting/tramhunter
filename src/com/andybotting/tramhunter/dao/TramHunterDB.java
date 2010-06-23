@@ -18,9 +18,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.andybotting.tramhunter.Destination;
-import com.andybotting.tramhunter.Route;
-import com.andybotting.tramhunter.Stop;
+import com.andybotting.tramhunter.objects.Destination;
+import com.andybotting.tramhunter.objects.Route;
+import com.andybotting.tramhunter.objects.Stop;
 
 public class TramHunterDB extends SQLiteOpenHelper {
 	 

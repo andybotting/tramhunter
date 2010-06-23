@@ -10,6 +10,7 @@ import com.andybotting.tramhunter.activity.SettingsActivity;
 import com.andybotting.tramhunter.activity.StopDetailsActivity;
 import com.andybotting.tramhunter.activity.StopsListActivity;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;

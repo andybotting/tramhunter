@@ -14,9 +14,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.content.Context;
 import android.util.Log;
 
-import com.andybotting.tramhunter.NextTram;
-import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.NextTram;
+import com.andybotting.tramhunter.objects.Stop;
 
 
 public class TramTrackerServiceSOAP implements TramTrackerService {

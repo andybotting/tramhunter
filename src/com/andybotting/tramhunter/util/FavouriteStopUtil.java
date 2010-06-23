@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import android.location.Location;
 import android.location.LocationManager;
 
-import com.andybotting.tramhunter.Stop;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
 
 public class FavouriteStopUtil {
 	private static final int UNLIMITED_METRES_AWAY = 0;
