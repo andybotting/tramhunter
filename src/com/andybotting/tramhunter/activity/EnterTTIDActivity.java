@@ -16,11 +16,13 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
 public class EnterTTIDActivity extends Activity {
 
 	int tramTrackerId;
+	Context context;
 	
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 
+		context = this.getApplicationContext();
 		setContentView(R.layout.enter_ttid);
 		 
 		String title = getResources().getText(R.string.app_name) + ": Enter an ID";
@@ -40,14 +42,13 @@ public class EnterTTIDActivity extends Activity {
 					tramTrackerId = Integer.parseInt(textTramTrackerId.getText().toString());
 				}
 				catch (NumberFormatException nfe) {
-					Context context = getApplicationContext();
 					CharSequence text = "TramTracker ID " + tramTrackerId + " not valid!";
 					int duration = Toast.LENGTH_SHORT;
 					Toast toast = Toast.makeText(context, text, duration);
 					toast.show();
 				}
 				
-				TramHunterDB db = new TramHunterDB(getBaseContext());
+				TramHunterDB db = new TramHunterDB(context);
 				
 				// Check to make sure we get 1 result for our TramTrackerID search
 				if (db.checkStop(tramTrackerId)) {
@@ -55,12 +56,12 @@ public class EnterTTIDActivity extends Activity {
 					imm.hideSoftInputFromWindow(textTramTrackerId.getWindowToken(), 0);
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", tramTrackerId);
-					Intent stopsListIntent = new Intent(EnterTTIDActivity.this, StopDetailsActivity.class);
+					Intent stopsListIntent = new Intent(context, StopDetailsActivity.class);
 					stopsListIntent.putExtras(bundle);
-					startActivityForResult(stopsListIntent, 1);				
+					startActivityForResult(stopsListIntent, 1);
+					finish();
 				}
 				else {				  	
-					Context context = getApplicationContext();
 					CharSequence text = "TramTracker ID " + tramTrackerId + " not found!";
 					int duration = Toast.LENGTH_SHORT;
 

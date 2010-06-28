@@ -23,4 +23,10 @@ public class PreferenceHelper {
 	{
 		return preferences.getString(SettingsActivity.KEY_DEFAULT_LAUNCH_ACTIVITY, "HomeActivity");
 	}
+	
+	public boolean isSendStatsEnabled()
+	{
+		return preferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
+	}
+	
 }

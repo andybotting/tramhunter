@@ -13,5 +13,7 @@ public interface TramTrackerService {
 	Stop getStopInformation(int tramTrackerID);
 
 	List<NextTram> getNextPredictedRoutesCollection(Stop stop);
+	
+	String getGUID();
 
 }

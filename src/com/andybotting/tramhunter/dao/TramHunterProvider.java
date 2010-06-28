@@ -18,7 +18,7 @@ import com.andybotting.tramhunter.objects.Stop;
  */
 public class TramHunterProvider extends ContentProvider {
 
-    public static String AUTHORITY = "TramHunter";
+    public static String AUTHORITY = "com.andybotting.tramhunter";
 
     private static final int SEARCH_SUGGEST = 0;
     

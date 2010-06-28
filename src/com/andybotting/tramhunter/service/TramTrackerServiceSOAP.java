@@ -143,6 +143,10 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		db.close();
 	}
 	
+	public String getGUID() {
+		return guid;
+	}
+	
 	public String toString() {
 		return "GUID: " + guid;
 	}

@@ -27,7 +27,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DB_NAME = "tramhunter.db";
 	private static final String DB_PATH = "/data/data/"+ AUTHORITY + "/databases/";
-	private static final int DB_VERSION = 3;
+
+	// Update this is we modify the DB in any way
+	private static final int DB_VERSION = 4;
 	
 	// Create
 	private static final String TABLE_FIRST_LAUNCH = "first_launch";

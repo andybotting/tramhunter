@@ -130,7 +130,7 @@ public class StopsListActivity extends ListActivity {
 					//  Action for 'NO' Button
 					dialog.cancel();				
 					// TODO: getParent() instead?
-					StopsListActivity.this.finish();
+					finish();
 				}
 			});
 		
@@ -190,6 +190,7 @@ public class StopsListActivity extends ListActivity {
 			}
 
 			Stop thisStop = (Stop)mStops.get(info.position);
+			// TODO: These menu items should use final static variables
 			menu.add(0, 0, 0, "View Stop");
 			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavourite" : "Favourite"));
 		}

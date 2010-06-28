@@ -11,11 +11,16 @@ import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_DEFAULT_LAUNCH_ACTIVITY = "defaultLaunchActivity";
+	
 	public static final String KEY_WELCOME_MESSAGE = "displayWelcomeMessage";
 	public static final boolean KEY_WELCOME_MESSAGE_DEFAULT_VALUE = true;
 	
+	public static final String KEY_SEND_STATS = "sendUsageStats";
+	public static final boolean KEY_SEND_STATS_DEFAULT_VALUE = false;
+	
 	private ListPreference mDefaultLaunchActivity;
 	private CheckBoxPreference mDisplayWelcomeMessage;
+	private CheckBoxPreference mSendStats;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +31,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         // Get a reference to the preferences
         mDefaultLaunchActivity = (ListPreference)getPreferenceScreen().findPreference(KEY_DEFAULT_LAUNCH_ACTIVITY);
         mDisplayWelcomeMessage = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_WELCOME_MESSAGE);
+        mSendStats = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_SEND_STATS);
 
     }
     
@@ -36,7 +42,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         // Setup the initial values
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_DEFAULT_LAUNCH_ACTIVITY);
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_WELCOME_MESSAGE);
-
+        setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_SEND_STATS);
+        
         // Set up a listener whenever a key changes            
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
@@ -61,7 +68,11 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		}else if(key.equals(KEY_WELCOME_MESSAGE)){
 			mDisplayWelcomeMessage.setSummary(sharedPreferences.getBoolean(key, KEY_WELCOME_MESSAGE_DEFAULT_VALUE) ? 
 					"Show welcome messages" : "Hide welcome messages");
-		}    	
+		    	
+		}else if(key.equals(KEY_SEND_STATS)){
+			mSendStats.setSummary(sharedPreferences.getBoolean(key, KEY_SEND_STATS_DEFAULT_VALUE) ? 
+					"Send anonymous usage statistics" : "Don't send anonymous usage statistics");
+		}   
     }
     
     private String getFreindlyDefaultActivityName(SharedPreferences sharedPreferences){

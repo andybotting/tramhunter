@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-		  package="com.andybotting.tramhunter" android:versionCode="31" android:versionName="0.3.1">
+		  package="com.andybotting.tramhunter" android:versionCode="40" android:versionName="0.4.0">
 	  
 	<application android:icon="@drawable/icon" 
 				 android:label="@string/app_name" android:theme="@android:style/Theme.Light">
@@ -12,7 +12,13 @@
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
-				
+			
+		</activity>
+
+		<activity android:name="com.andybotting.tramhunter.activity.HomeActivity" 
+				  android:label="@string/app_name" 
+				  android:configChanges="orientation|keyboardHidden">
+				  
 			<!-- facilitate the search mechanism -->
 			<intent-filter>
 				<action android:name="android.intent.action.SEARCH" />
@@ -21,8 +27,7 @@
 			
 			<!-- Points to searchable meta data. -->
 			<meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
-			
-		</activity>
+		</activity>	
 
 		<activity android:name="com.andybotting.tramhunter.activity.EnterTTIDActivity" 
 				  android:label="@string/app_name" 
@@ -58,20 +63,19 @@
 		
 		<!-- Provides search suggestions for stops -->
 		<provider android:name="com.andybotting.tramhunter.dao.TramHunterProvider"
-					android:authorities="TramHunter"
+					android:authorities="com.andybotting.tramhunter"
                 	android:syncable="false" />
 		
 		
 		<uses-library android:name="com.google.android.maps" />
-</application>
-	
+	</application>
 	
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	
-	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"></uses-permission>
 	
 	<uses-sdk android:minSdkVersion="3" />
 	

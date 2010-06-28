@@ -1,19 +1,35 @@
 package com.andybotting.tramhunter.activity;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +48,8 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
+import com.andybotting.tramhunter.util.GenericUtil;
+import com.andybotting.tramhunter.util.PreferenceHelper;
 
 
 public class StopDetailsActivity extends ListActivity {
@@ -50,6 +68,9 @@ public class StopDetailsActivity extends ListActivity {
     
     boolean mLoadingError = false;
     boolean mShowDialog = true;
+    
+    private PreferenceHelper mPreferenceHelper;
+    private TramTrackerService ttService;
      
     // Handle the timer
     Handler UpdateHandler = new Handler() {
@@ -94,6 +115,11 @@ public class StopDetailsActivity extends ListActivity {
 			}
 		});
 
+		// Get our TramTracker service
+		ttService = new TramTrackerServiceSOAP(getBaseContext());
+		
+		
+		
 		// Our thread for updating the stops every 60 secs
         mRefreshThread = new Thread(new CountDown());
         mRefreshThread.setDaemon(true);
@@ -249,10 +275,24 @@ public class StopDetailsActivity extends ListActivity {
 		// Automatically done on worker thread (separate from UI thread)
 		@Override
 		protected List<NextTram> doInBackground(final NextTram... params) {
-			TramTrackerService ttService = new TramTrackerServiceSOAP(getBaseContext());
+			
 			
 			try {
 				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop);
+				
+				// Only send stats if user has specifically clicked
+				if (mShowDialog) {
+					// Upload stats
+					
+					mPreferenceHelper = new PreferenceHelper(getBaseContext());
+					if (mPreferenceHelper.isSendStatsEnabled()) {
+						new Thread() {
+							public void run() {
+								uploadStats();
+							}
+						}.start();
+					}
+				}
 
 				// We'll remove all NextTrams which are longer than
 				// 300 minutes away - e.g. not running on weekend
@@ -409,4 +449,124 @@ public class StopDetailsActivity extends ListActivity {
 		}		
 
 	}
+	
+    private void uploadStats() {
+    	
+		// gather all of the device info
+    	Log.d("Testing", "Sending usage stats...");
+	
+		PackageManager pm = getPackageManager();
+		String app_version = "";
+		try {
+			try {
+				PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
+				app_version = pi.versionName;
+			} catch (NameNotFoundException e) {
+				app_version = "N/A";
+			}
+	
+			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			String device_uuid = tm.getDeviceId();
+			String device_id = "00000000000000000000000000000000";
+			if (device_uuid != null) {
+				device_id = GenericUtil.MD5(device_uuid);
+			}
+			
+			String device_language = getResources().getConfiguration().locale.getLanguage();
+			String mobile_country_code = tm.getNetworkCountryIso();
+			String mobile_network_number = tm.getNetworkOperator();
+			int network_type = tm.getNetworkType();
+	
+			// get the network type string
+			String mobile_network_type = "N/A";
+			switch (network_type) {
+			case 0:
+				mobile_network_type = "TYPE_UNKNOWN";
+				break;
+			case 1:
+				mobile_network_type = "GPRS";
+				break;
+			case 2:
+				mobile_network_type = "EDGE";
+				break;
+			case 3:
+				mobile_network_type = "UMTS";
+				break;
+			case 4:
+				mobile_network_type = "CDMA";
+				break;
+			case 5:
+				mobile_network_type = "EVDO_0";
+				break;
+			case 6:
+				mobile_network_type = "EVDO_A";
+				break;
+			case 7:
+				mobile_network_type = "1xRTT";
+				break;
+			case 8:
+				mobile_network_type = "HSDPA";
+				break;
+			case 9:
+				mobile_network_type = "HSUPA";
+				break;
+			case 10:
+				mobile_network_type = "HSPA";
+				break;
+			}
+	
+			String device_version = android.os.Build.VERSION.RELEASE;
+	
+			if (device_version == null) {
+				device_version = "N/A";
+			}
+			
+			LocationManager mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+			Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+	
+			// post the data
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/send");
+			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+			pairs.add(new BasicNameValuePair("device_id", device_id));
+			pairs.add(new BasicNameValuePair("guid", ttService.getGUID()));	
+			pairs.add(new BasicNameValuePair("ttid", String.valueOf(mStop.getTramTrackerID())));
+			pairs.add(new BasicNameValuePair("app_version", app_version));
+			pairs.add(new BasicNameValuePair("device_version", device_version));
+			pairs.add(new BasicNameValuePair("device_language", device_language));
+			pairs.add(new BasicNameValuePair("mobile_country_code",	mobile_country_code));
+			pairs.add(new BasicNameValuePair("mobile_network_number", mobile_network_number));
+			pairs.add(new BasicNameValuePair("mobile_network_type",	mobile_network_type));
+			
+			if (location != null) {
+				pairs.add(new BasicNameValuePair("latitude", String.valueOf(location.getLatitude())));
+				pairs.add(new BasicNameValuePair("longitude", String.valueOf(location.getLongitude())));
+				pairs.add(new BasicNameValuePair("accuracy", String.valueOf(location.getAccuracy())));
+			}
+
+			try {
+				post.setEntity(new UrlEncodedFormEntity(pairs));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+			try {
+				HttpResponse response = client.execute(post);
+				int responseCode = response.getStatusLine().getStatusCode();
+				Log.d("Testing", "Stats reponse: " + responseCode);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+    }
+
 }
