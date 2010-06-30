@@ -13,7 +13,7 @@
 
 	<CheckBoxPreference android:key="sendUsageStats"
 		android:title="Send Usage Stats" 
-		android:defaultValue="true" />
+		android:defaultValue="false" />
 
 
 </PreferenceScreen>
