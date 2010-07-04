@@ -19,9 +19,6 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -224,6 +221,7 @@ public class StopDetailsActivity extends ListActivity {
 			secondLineText += ": " + stop.getSecondaryName();
 		}
 		secondLineText += " - " + stop.getCityDirection();
+		secondLineText += " (" + stop.getTramTrackerID() + ")";
 		
 		//initialiseDatabase();
 		stop.setRoutes(mDB.getRoutesForStop(mTramTrackerId));
@@ -451,20 +449,10 @@ public class StopDetailsActivity extends ListActivity {
 	}
 	
     private void uploadStats() {
+    	Log.d("Testing", "Sending stop request statistics");
     	
 		// gather all of the device info
-    	Log.d("Testing", "Sending usage stats...");
-	
-		PackageManager pm = getPackageManager();
-		String app_version = "";
-		try {
-			try {
-				PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
-				app_version = pi.versionName;
-			} catch (NameNotFoundException e) {
-				app_version = "N/A";
-			}
-	
+    	try {
 			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 			String device_uuid = tm.getDeviceId();
 			String device_id = "00000000000000000000000000000000";
@@ -472,73 +460,18 @@ public class StopDetailsActivity extends ListActivity {
 				device_id = GenericUtil.MD5(device_uuid);
 			}
 			
-			String device_language = getResources().getConfiguration().locale.getLanguage();
-			String mobile_country_code = tm.getNetworkCountryIso();
-			String mobile_network_number = tm.getNetworkOperator();
-			int network_type = tm.getNetworkType();
-	
-			// get the network type string
-			String mobile_network_type = "N/A";
-			switch (network_type) {
-			case 0:
-				mobile_network_type = "TYPE_UNKNOWN";
-				break;
-			case 1:
-				mobile_network_type = "GPRS";
-				break;
-			case 2:
-				mobile_network_type = "EDGE";
-				break;
-			case 3:
-				mobile_network_type = "UMTS";
-				break;
-			case 4:
-				mobile_network_type = "CDMA";
-				break;
-			case 5:
-				mobile_network_type = "EVDO_0";
-				break;
-			case 6:
-				mobile_network_type = "EVDO_A";
-				break;
-			case 7:
-				mobile_network_type = "1xRTT";
-				break;
-			case 8:
-				mobile_network_type = "HSDPA";
-				break;
-			case 9:
-				mobile_network_type = "HSUPA";
-				break;
-			case 10:
-				mobile_network_type = "HSPA";
-				break;
-			}
-	
-			String device_version = android.os.Build.VERSION.RELEASE;
-	
-			if (device_version == null) {
-				device_version = "N/A";
-			}
-			
 			LocationManager mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 			Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 	
 			// post the data
 			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/send");
+			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/stop/send");
 			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 	
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			pairs.add(new BasicNameValuePair("device_id", device_id));
 			pairs.add(new BasicNameValuePair("guid", ttService.getGUID()));	
 			pairs.add(new BasicNameValuePair("ttid", String.valueOf(mStop.getTramTrackerID())));
-			pairs.add(new BasicNameValuePair("app_version", app_version));
-			pairs.add(new BasicNameValuePair("device_version", device_version));
-			pairs.add(new BasicNameValuePair("device_language", device_language));
-			pairs.add(new BasicNameValuePair("mobile_country_code",	mobile_country_code));
-			pairs.add(new BasicNameValuePair("mobile_network_number", mobile_network_number));
-			pairs.add(new BasicNameValuePair("mobile_network_type",	mobile_network_type));
 			
 			if (location != null) {
 				pairs.add(new BasicNameValuePair("latitude", String.valueOf(location.getLatitude())));
@@ -556,7 +489,6 @@ public class StopDetailsActivity extends ListActivity {
 			try {
 				HttpResponse response = client.execute(post);
 				int responseCode = response.getStatusLine().getStatusCode();
-				Log.d("Testing", "Stats reponse: " + responseCode);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

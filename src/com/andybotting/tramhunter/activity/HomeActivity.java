@@ -1,6 +1,17 @@
 package com.andybotting.tramhunter.activity;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
@@ -22,6 +33,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -109,6 +121,9 @@ public class HomeActivity extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		boolean isNewIntentUUID = false;
 		
+		checkStats();
+		
+		
 		// Check to make sure we have not already used the UUID for a default activity launch
 		if(extras != null && extras.containsKey(TramHunter.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH)) {
 			String currentIntentUUID = extras.getString(TramHunter.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH);
@@ -119,8 +134,6 @@ public class HomeActivity extends ListActivity {
 		if(isNewIntentUUID) {
 			String activityName = mPreferenceHelper.defaultLaunchActivity();
 			Intent intent = null;
-			
-			Log.d("Testing", "activityName: " + activityName);
 			
 			// TODO: We really need unit testing for this stuff
 			if(activityName.equals("HomeActivity")){
@@ -371,6 +384,135 @@ public class HomeActivity extends ListActivity {
 		return false;
 
 	}
-    
+
+	
+	private void checkStats() {	
+		mPreferenceHelper = new PreferenceHelper(getBaseContext());
+		if (mPreferenceHelper.isSendStatsEnabled()) {
+			long lastStatsDate = mDB.getStatsDate();
+			long now = System.currentTimeMillis();
+			// Only once a week
+			if ((now - lastStatsDate) > 604800000) {
+				new Thread() {
+					public void run() {
+						uploadStats();
+					}
+				}.start();
+				mDB.setStatsDate();
+			}
+		}
+	}
+
+	private void uploadStats() {
+		Log.d("Testing", "Sending app statistics");
+
+		// gather all of the device info
+		PackageManager pm = getPackageManager();
+		String app_version = "";
+		try {
+			try {
+				PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
+				app_version = pi.versionName;
+			} catch (NameNotFoundException e) {
+				app_version = "N/A";
+			}
+
+			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			String device_uuid = tm.getDeviceId();
+			String device_id = "00000000000000000000000000000000";
+			if (device_uuid != null) {
+				device_id = GenericUtil.MD5(device_uuid);
+			}
+			
+			String mobile_country_code = tm.getNetworkCountryIso();
+			String mobile_network_number = tm.getNetworkOperator();
+			int network_type = tm.getNetworkType();
+	
+			// get the network type string
+			String mobile_network_type = "N/A";
+			switch (network_type) {
+			case 0:
+				mobile_network_type = "TYPE_UNKNOWN";
+				break;
+			case 1:
+				mobile_network_type = "GPRS";
+				break;
+			case 2:
+				mobile_network_type = "EDGE";
+				break;
+			case 3:
+				mobile_network_type = "UMTS";
+				break;
+			case 4:
+				mobile_network_type = "CDMA";
+				break;
+			case 5:
+				mobile_network_type = "EVDO_0";
+				break;
+			case 6:
+				mobile_network_type = "EVDO_A";
+				break;
+			case 7:
+				mobile_network_type = "1xRTT";
+				break;
+			case 8:
+				mobile_network_type = "HSDPA";
+				break;
+			case 9:
+				mobile_network_type = "HSUPA";
+				break;
+			case 10:
+				mobile_network_type = "HSPA";
+				break;
+			}
+	
+			String device_version = android.os.Build.VERSION.RELEASE;
+	
+			if (device_version == null) {
+				device_version = "N/A";
+			}
+
+			String device_language = getResources().getConfiguration().locale.getLanguage();
+			String home_function = mPreferenceHelper.defaultLaunchActivity();
+			String welcome_message = String.valueOf(mPreferenceHelper.isWelcomeQuoteEnabled());
+			
+			// post the data
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/app/send");
+			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+			pairs.add(new BasicNameValuePair("device_id", device_id));
+			pairs.add(new BasicNameValuePair("app_version", app_version));
+			pairs.add(new BasicNameValuePair("home_function", home_function));
+			pairs.add(new BasicNameValuePair("welcome_message", welcome_message));
+			pairs.add(new BasicNameValuePair("device_version", device_version));
+			pairs.add(new BasicNameValuePair("device_language", device_language));
+			pairs.add(new BasicNameValuePair("mobile_country_code", mobile_country_code));
+			pairs.add(new BasicNameValuePair("mobile_network_number", mobile_network_number));
+			pairs.add(new BasicNameValuePair("mobile_network_type",	mobile_network_type));
+
+			try {
+				post.setEntity(new UrlEncodedFormEntity(pairs));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			try {
+				HttpResponse response = client.execute(post);
+				int responseCode = response.getStatusLine().getStatusCode();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
     
 }

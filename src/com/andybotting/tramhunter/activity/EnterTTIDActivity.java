@@ -51,7 +51,13 @@ public class EnterTTIDActivity extends Activity {
 				TramHunterDB db = new TramHunterDB(context);
 				
 				// Check to make sure we get 1 result for our TramTrackerID search
-				if (db.checkStop(tramTrackerId)) {
+				if (tramTrackerId >= 8000) {
+					CharSequence text = "TramTracker ID " + tramTrackerId + " not found!";
+					int duration = Toast.LENGTH_SHORT;
+					Toast toast = Toast.makeText(context, text, duration);
+					toast.show();
+				}
+				else if (db.checkStop(tramTrackerId)) {
 					// Hide our soft keyboard
 					imm.hideSoftInputFromWindow(textTramTrackerId.getWindowToken(), 0);
 					Bundle bundle = new Bundle();
@@ -64,7 +70,6 @@ public class EnterTTIDActivity extends Activity {
 				else {				  	
 					CharSequence text = "TramTracker ID " + tramTrackerId + " not found!";
 					int duration = Toast.LENGTH_SHORT;
-
 					Toast toast = Toast.makeText(context, text, duration);
 					toast.show();
 				}

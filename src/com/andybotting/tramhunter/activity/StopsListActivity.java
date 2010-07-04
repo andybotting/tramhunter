@@ -144,7 +144,15 @@ public class StopsListActivity extends ListActivity {
 	
 	public void displayStopsForDestination(long destinationId) {
 		mStops = mDB.getStopsForDestination(destinationId);
-
+		
+		// Let's remove any Terminus stops, because we can't get times for them
+		for(int i=0; i<mStops.size(); i++) {
+			Stop stop = mStops.get(i);
+			if (stop.getTramTrackerID() >= 8000) {
+				mStops.remove(i);
+			}
+		}
+		
 // Slows things down a bit!
 //		// Find the routes for our stops
 //		for(Stop stop: mStops) {
@@ -248,14 +256,15 @@ public class StopsListActivity extends ListActivity {
 			Stop thisStop = (Stop) mStops.get(position);
 			
 			String stopName = thisStop.getPrimaryName();
-			String stopDetails = "Stop " + thisStop.getFlagStopNumber() + ": ";
-
+			String stopDetails = "Stop " + thisStop.getFlagStopNumber();
 			// If the stop has a secondary name, add it
 			if (thisStop.getSecondaryName().length() > 0) {
-				stopDetails += thisStop.getSecondaryName() + " - ";
+				stopDetails += ": " + thisStop.getSecondaryName();
 			}
 			
-			stopDetails += thisStop.getCityDirection();
+			stopDetails += " - " + thisStop.getCityDirection();
+			stopDetails += " (" + thisStop.getTramTrackerID() + ")";
+			
 			
 			wrapper.getStopNameTextView().setText(stopName);
 			wrapper.getStopDetailsTextView().setText(stopDetails);

@@ -34,6 +34,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// Create
 	private static final String TABLE_FIRST_LAUNCH = "first_launch";
 	private static final String TABLE_GUID = "guid";
+	private static final String TABLE_STATS = "stats";
 	
 	// Existing
 	private static final String TABLE_ROUTES = "routes";
@@ -60,6 +61,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// Create guid table
 	private static final String CREATE_TABLE_GUID  = "create table if not exists '" + TABLE_GUID + "' "
 		+ "(id integer primary key autoincrement, guid integer);";
+	
+	// Create guid table
+	private static final String CREATE_TABLE_STATS  = "create table if not exists '" + TABLE_STATS + "' "
+		+ "(id integer primary key autoincrement, statsdate integer);";
+	
 
 	private SQLiteDatabase db; 
 	private Context context;
@@ -94,8 +100,8 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		// Create extra tables in our DB
 		db.execSQL(CREATE_TABLE_FIRST_LAUNCH);
 		db.execSQL(CREATE_TABLE_GUID);
-	
-		
+		db.execSQL(CREATE_TABLE_STATS);
+			
 		return db;
 	}
 	
@@ -740,23 +746,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			
 		return returnValue;
 	}
-
-	
-	
-	// Set the GUID in our database for next time
-	public void setGUID(String guid) {
-		db = getDatabase();
-		
-		ContentValues values = new ContentValues();
-		values.put("id", 0);
-		values.put("guid", guid);
-	
-		db.insert(TABLE_GUID, null, values);
-		
-		Log.d("Testing", "Storing GUID in DB: " + guid);
-		
-		db.close();
-	}
 	
 	private Stop getStopFromCursor(Cursor c) {
 		Stop stop = new Stop();
@@ -783,6 +772,17 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return stop;
 	}	
 	
+	// Set the GUID in our database for next time
+	public void setGUID(String guid) {
+		db = getDatabase();
+		ContentValues values = new ContentValues();
+		values.put("id", 0);
+		values.put("guid", guid);
+		db.insert(TABLE_GUID, null, values);
+		db.close();
+	}
+	
+	
 	// Return a String of the GUID value generated from TramTracker
 	public String getGUID(){
 		db = getDatabase();	
@@ -797,20 +797,51 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		
 		int numRows = c.getCount();
 		c.moveToFirst();
-		
 		String guid = "";
-		
+
 		if (numRows == 1){
 			guid = c.getString(0);
 		}
-		
-		Log.d("Testing", "Returning GUID from DB: " + guid);
-		
+
 		c.close();
 		db.close();
-			
 		return guid;
 	}
+	
+	
+	// Set the statsdate in our database
+	public void setStatsDate() {
+		db = getDatabase();
+		ContentValues values = new ContentValues();
+		values.put("id", 0);
+		values.put("statsdate", System.currentTimeMillis());
+		db.insert(TABLE_STATS, null, values);
+		db.close();
+	}
+
+	
+	public long getStatsDate() {
+		db = getDatabase();
+		Cursor c = db.query(TABLE_STATS, 
+				new String[] { "statsdate" }, 
+				"id=0", 
+				null, 
+				null, 
+				null, 
+				null);
+
+		int numRows = c.getCount();
+		c.moveToFirst();
+		long returnValue = 0;
+		if (numRows == 1){
+			returnValue = c.getLong(0);
+		}
+		c.close();
+		db.close();
+		return returnValue;
+	}
+	
+	
 	
 
 	// Database column definitions
