@@ -122,7 +122,8 @@ public class StopsListActivity extends ListActivity {
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 				// Action for 'Yes' Button				
-					startActivity(routeListIntent);		
+					startActivity(routeListIntent);
+					finish();
 				}
 			})
 			.setNegativeButton("No", new DialogInterface.OnClickListener() {

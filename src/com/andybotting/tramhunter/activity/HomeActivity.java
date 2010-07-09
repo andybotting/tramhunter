@@ -471,6 +471,12 @@ public class HomeActivity extends ListActivity {
 			if (device_version == null) {
 				device_version = "N/A";
 			}
+			
+			String device_model = android.os.Build.MODEL;
+			
+			if (device_model == null) {
+				device_model = "N/A";
+			}
 
 			String device_language = getResources().getConfiguration().locale.getLanguage();
 			String home_function = mPreferenceHelper.defaultLaunchActivity();
@@ -486,6 +492,7 @@ public class HomeActivity extends ListActivity {
 			pairs.add(new BasicNameValuePair("app_version", app_version));
 			pairs.add(new BasicNameValuePair("home_function", home_function));
 			pairs.add(new BasicNameValuePair("welcome_message", welcome_message));
+			pairs.add(new BasicNameValuePair("device_model", device_model));
 			pairs.add(new BasicNameValuePair("device_version", device_version));
 			pairs.add(new BasicNameValuePair("device_language", device_language));
 			pairs.add(new BasicNameValuePair("mobile_country_code", mobile_country_code));
