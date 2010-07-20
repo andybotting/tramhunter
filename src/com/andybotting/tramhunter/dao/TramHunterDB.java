@@ -563,9 +563,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public List<Stop> getStopsForSearch(String searchString) {
 		db = getDatabase();
 		
-		String searchQuery = StopsColumns.TRAMTRACKER_ID + " LIKE '%" + searchString 
-								+ "%' OR " + StopsColumns.PRIMARY_NAME + " LIKE '%" + searchString 
-								+ "%' OR " + StopsColumns.SECONDARY_NAME + " LIKE '%" + searchString + "%'";
+		String searchQuery = StopsColumns.FLAG_NUMBER + " LIKE '%" + searchString 
+								+ "%' OR " + StopsColumns.PRIMARY_NAME + " LIKE '%" + searchString + "%'"
+								+ "OR " + StopsColumns.SECONDARY_NAME + " LIKE '%" + searchString + "%'"
+								+ "OR " + StopsColumns.TRAMTRACKER_ID + " LIKE '%" + searchString + "%'";
 		
 		String searchLimit = "100";
 		
