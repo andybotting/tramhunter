@@ -6,6 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import android.content.Context;
+
+import com.andybotting.tramhunter.dao.TramHunterDB;
+
 
 public class NextTram implements Comparable<NextTram> { 
 	
@@ -13,7 +17,8 @@ public class NextTram implements Comparable<NextTram> {
 	private String internalRouteNo;
 	private String routeNo;
 	private String headboardRouteNo;
-	private String vehicleNo;
+	private int vehicleNo;
+	private String tramClass;
 	private String destination;
 	private Boolean hasDisruption;
 	private Boolean isTTAvailable;
@@ -63,10 +68,10 @@ public class NextTram implements Comparable<NextTram> {
 	
 	
 	// vehicleNo
-	public void setVehicleNo(String _vehicleNo) {
+	public void setVehicleNo(int _vehicleNo) {
 		vehicleNo = _vehicleNo;
 	}
-	public String getVehicleNo() {
+	public int getVehicleNo() {
 		return vehicleNo;
 	} 
 	
@@ -163,6 +168,16 @@ public class NextTram implements Comparable<NextTram> {
 		return requestDateTime;
 	}  	
 	
+	
+	// tramClass
+	public void setTramClass(String _tramClass) {
+		tramClass = _tramClass;
+	}
+	public String getTramClass() {
+		return tramClass;
+	}	
+	
+	
 	public List<Stop> getFavouritesOnRoute() {
 		return favouritesOnRoute;
 	}
@@ -235,37 +250,12 @@ public class NextTram implements Comparable<NextTram> {
 		return 0; 
 	}
 	
-	
-	
 
+	
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 			buffer.append(routeNo + " " + destination + ": " + minutesAway());
-//		buffer.append("routeNo: ");
-//		buffer.append(routeNo);
-//		buffer.append("\n");
-//		buffer.append("destination: ");
-//		buffer.append(destination);
-//		buffer.append("\n");
-//		buffer.append("hasDisruption: ");
-//		buffer.append(hasDisruption);
-//		buffer.append("\n");
-//		buffer.append("minutesAway: ");
-//		buffer.append(minutesAway());
-//		buffer.append("\n");
-//		buffer.append("hasSpecialEvent: ");
-//		buffer.append(hasSpecialEvent);
-//		buffer.append("\n");
-//		buffer.append("specialEventMessage: ");
-//		buffer.append(specialEventMessage);
-//		buffer.append("\n");
-//		buffer.append("predictedArrivalDateTime: ");
-//		buffer.append(predictedArrivalDateTime.toString());
-//		buffer.append("\n");
-//		buffer.append("requestDateTime: ");
-//		buffer.append(requestDateTime.toString());
-//		buffer.append("\n");
 		return buffer.toString();
 	}
 

@@ -19,6 +19,9 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -35,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,8 +87,11 @@ public class StopDetailsActivity extends ListActivity {
 		// Set the window to have a spinner in the title bar
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		
-		setContentView(R.layout.stop_details);
-
+		setContentView(R.layout.stop_details);		
+		
+		// Preferences
+		mPreferenceHelper = new PreferenceHelper(getBaseContext());
+		
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
@@ -281,8 +288,7 @@ public class StopDetailsActivity extends ListActivity {
 				// Only send stats if user has specifically clicked
 				if (mShowDialog) {
 					// Upload stats
-					
-					mPreferenceHelper = new PreferenceHelper(getBaseContext());
+										
 					if (mPreferenceHelper.isSendStatsEnabled()) {
 						new Thread() {
 							public void run() {
@@ -361,7 +367,7 @@ public class StopDetailsActivity extends ListActivity {
 	
 
 	private class NextTramsListAdapter extends BaseAdapter {
-
+	
 		public int getCount() {
 			return mNextTrams.size();
 		}
@@ -375,7 +381,7 @@ public class StopDetailsActivity extends ListActivity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			
+
 			View pv = convertView;
 			ViewWrapper wrapper = null;
 				
@@ -396,15 +402,41 @@ public class StopDetailsActivity extends ListActivity {
 				
 			pv.setId(0);
 			
-			
 			NextTram thisTram = (NextTram) mNextTrams.get(position);
 			
 			wrapper.getNextTramRouteNumber().setText(thisTram.getRouteNo());
 			wrapper.getNextTramDestination().setText(thisTram.getDestination());
 			
+			if (mPreferenceHelper.isTramImageEnabled()) {
+				mDB = new TramHunterDB(getBaseContext());
+				// Get the tram class
+				
+				String tramClassImage = mDB.getTramImage(thisTram.getVehicleNo());
+				
+				if (tramClassImage != null) {
+				
+					int resID = getResources().getIdentifier(tramClassImage, "drawable", "com.andybotting.tramhunter");
+					Bitmap bMap = BitmapFactory.decodeResource(getResources(), resID);
+
+					int h = bMap.getHeight();
+					int w = bMap.getWidth();  
+					double ratio = w/h;
+					w = (int)(h*ratio);
+
+					Bitmap bMapScaled = Bitmap.createScaledBitmap(bMap, w, h, true);
+					wrapper.getNextTramClass().setImageBitmap(bMapScaled);
+					wrapper.getNextTramClass().setPadding(3, 3, 3, 3);
+
+				}
+				else {
+					Log.d("Testing", "Null image for tram number: " + thisTram.getVehicleNo());
+				}
+				mDB.close();
+			}
+			
 			// Show red for 'Now' only
 			if (thisTram.minutesAway() < 1)
-				wrapper.getNextTramTime().setTextColor(R.drawable.red);
+				wrapper.getNextTramTime().setTextColor(Color.RED);
 			
 			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());   
 
@@ -419,6 +451,7 @@ public class StopDetailsActivity extends ListActivity {
 		TextView nextTramRouteNumber = null;
 		TextView nextTramDestination = null;
 		TextView nextTramTime = null;
+		ImageView nextTramClass = null;
 			
 
 		ViewWrapper(View base) {
@@ -446,8 +479,13 @@ public class StopDetailsActivity extends ListActivity {
 			return (nextTramTime);
 		}		
 
+		ImageView getNextTramClass() {
+			if (nextTramClass == null) {
+				nextTramClass = (ImageView) base.findViewById(R.id.tramClass);
+			}
+			return (nextTramClass);
+		}	
 	}
-	
     private void uploadStats() {
     	Log.d("Testing", "Sending stop request statistics");
     	

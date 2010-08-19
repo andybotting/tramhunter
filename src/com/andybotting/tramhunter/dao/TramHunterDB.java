@@ -29,7 +29,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String DB_PATH = "/data/data/"+ AUTHORITY + "/databases/";
 
 	// Update this is we modify the DB in any way
-	private static final int DB_VERSION = 4;
+	private static final int DB_VERSION = 5;
 	
 	// Create
 	private static final String TABLE_FIRST_LAUNCH = "first_launch";
@@ -40,6 +40,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String TABLE_ROUTES = "routes";
 	private static final String TABLE_DESTINATIONS = "destinations";
 	private static final String TABLE_STOPS = "stops";
+	private static final String TABLE_TRAMS = "trams";
 	
 	private static final String TABLE_STOPS_JOIN_DESTINATIONS = "stops "
 		+ "JOIN destination_stops ON destination_stops.stop_id = stops._id "
@@ -96,7 +97,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 		db = this.getWritableDatabase();
 		
-		Log.d("Testing", "Creating DB tables");
+		//Log.d("Testing", "Creating DB tables");
 		// Create extra tables in our DB
 		db.execSQL(CREATE_TABLE_FIRST_LAUNCH);
 		db.execSQL(CREATE_TABLE_GUID);
@@ -809,6 +810,33 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return guid;
 	}
 	
+	// Get the tram class based on the number
+	public String getTramImage(int vehicleNo) {
+		db = getDatabase();
+		
+		Cursor c = db.query(TABLE_TRAMS, 
+				new String[] { "image" }, 
+				TramsColumns.NUMBER + " = '" + vehicleNo + "'", 
+				null, 
+				null, 
+				null, 
+				null);
+		
+		String tramImage = "";
+		
+		if (c.moveToFirst()) {		
+			int col_image = c.getColumnIndexOrThrow(TramsColumns.IMAGE);
+			tramImage = c.getString(col_image);
+		}
+		else {
+			tramImage = null;
+		}
+		
+		c.close();
+		db.close();
+		return tramImage;
+	}
+	
 	
 	// Set the statsdate in our database
 	public void setStatsDate() {
@@ -876,8 +904,14 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		 public static final String DESTINATION_ID = "route_id";
 		 public static final String STOP_ID = "stop_id";
 		 public static final String STOP_ORDER = "stop_order";
-	}
-	
+	 }
+
+	 public static interface TramsColumns {
+			public static final String ID = "_id";
+			public static final String NUMBER = "number";
+			public static final String CLASS = "class";
+			public static final String IMAGE = "image";
+	 }	 	 
 		
 	public static class Stops implements BaseColumns, StopsColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/stops/");

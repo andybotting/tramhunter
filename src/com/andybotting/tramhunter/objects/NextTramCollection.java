@@ -58,8 +58,6 @@ public class NextTramCollection {
 	}
 	
 	
-	
-
 	public String toString() {
 		
 		StringBuffer buf = new StringBuffer();

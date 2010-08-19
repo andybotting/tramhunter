@@ -92,6 +92,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 				
 			SoapObject result1 = (SoapObject)result.getProperty("diffgram");
 			SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
+
 			
 			for (int i = 0; i < result2.getPropertyCount(); i++) {
 				
@@ -102,7 +103,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					tram.setInternalRouteNo(nextPredicted.getProperty(0).toString());
 					tram.setRouteNo(nextPredicted.getProperty(1).toString());
 					tram.setHeadboardRouteNo(nextPredicted.getProperty(2).toString());
-					tram.setVehicleNo(nextPredicted.getProperty(3).toString());
+					tram.setVehicleNo(Integer.parseInt(nextPredicted.getProperty(3).toString()));
 					tram.setDestination(nextPredicted.getProperty(4).toString());
 					tram.setHasDisruption(nextPredicted.getProperty(5).toString());
 					tram.setIsTTAvailable(nextPredicted.getProperty(6).toString());
@@ -113,10 +114,10 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					tram.setSpecialEventMessage(nextPredicted.getProperty(11).toString());
 					tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
 					tram.setRequestDateTime(nextPredicted.getProperty(13).toString());
-						
+					
 					nextTrams.add(tram);
-			}
-						
+			}		
+			
 		}
 		else {
 			Log.d("Testing", "result is null");

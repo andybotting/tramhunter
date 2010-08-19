@@ -1,36 +1,45 @@
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:stretchColumns="1"
-	android:padding="2dip" >
+	android:layout_height="wrap_content"
+	android:padding="5dip" >
 	
-	<TableRow>
-
-		<TextView
-			android:text="Route Number"
-			android:id="@+id/routeNumber" 
-			android:padding="3dip"
-			android:textSize="18dip" 
-			android:width="45dip" />
-			
-		<TextView
-			android:text="Route Destination" 
-			android:id="@+id/routeDestination"
-			android:gravity="left"
-			android:padding="3dip"
-			android:width="190dip"
-			android:singleLine="true"
-			android:textSize="18dip" />
-			
-		<TextView
-			android:text="Next Time" 
-			android:id="@+id/nextTime" 
-			android:gravity="right"
-			android:padding="3dip"
-			android:textSize="18dip" 
-			android:width="50dip"
-			android:layout_alignParentRight="true"/>
-	</TableRow>
-
-</TableLayout>
+	<TextView
+		android:id="@+id/routeNumber"
+		android:padding="3dip"
+		android:textSize="18dip" 
+		android:layout_width="45dip" 
+		android:layout_height="wrap_content"
+	/>
+	
+	<TextView
+		android:id="@+id/routeDestination"
+		android:layout_toRightOf="@+id/routeNumber"
+		android:padding="3dip"
+		android:textSize="18dip" 
+		android:singleLine="true"
+		android:ellipsize="marquee"
+		android:layout_width="200dip"
+		android:layout_height="wrap_content" 
+	/>
+	
+	<ImageView
+		android:id="@+id/tramClass"
+		android:layout_toRightOf="@+id/routeNumber"
+		android:layout_below="@+id/routeDestination"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+	/>
+	
+	<TextView
+   		android:text="Mins"
+		android:id="@+id/nextTime" 
+		android:gravity="right"
+		android:layout_toRightOf="@+id/routeDestination"
+		android:padding="3dip"
+		android:textSize="18dip" 
+		android:layout_width="50dip"
+		android:layout_height="wrap_content"
+	/>
+		
+</RelativeLayout>	
 
