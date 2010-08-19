@@ -414,19 +414,9 @@ public class StopDetailsActivity extends ListActivity {
 				String tramClassImage = mDB.getTramImage(thisTram.getVehicleNo());
 				
 				if (tramClassImage != null) {
-				
 					int resID = getResources().getIdentifier(tramClassImage, "drawable", "com.andybotting.tramhunter");
-					Bitmap bMap = BitmapFactory.decodeResource(getResources(), resID);
-
-					int h = bMap.getHeight();
-					int w = bMap.getWidth();  
-					double ratio = w/h;
-					w = (int)(h*ratio);
-
-					Bitmap bMapScaled = Bitmap.createScaledBitmap(bMap, w, h, true);
-					wrapper.getNextTramClass().setImageBitmap(bMapScaled);
 					wrapper.getNextTramClass().setPadding(3, 3, 3, 3);
-
+					wrapper.getNextTramClass().setBackgroundResource(resID);
 				}
 				else {
 					Log.d("Testing", "Null image for tram number: " + thisTram.getVehicleNo());
