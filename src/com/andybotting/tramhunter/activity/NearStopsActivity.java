@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -286,6 +287,11 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			viewWrapper.getStopDetailsTextView().setText(directionLabel);
 			viewWrapper.getStopDistanceTextView().setText(distanceLabel);
 			viewWrapper.getStopRoutesTextView().setText(routesLabel);
+			
+			// Show the star is stop is a favourite
+			if (stop.isStarred()) {
+				viewWrapper.getStarImageView().setVisibility(View.VISIBLE);
+			}
 		}
 		
 		public int getCount() {
@@ -305,7 +311,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		TextView m_stopDetailsTextView = null;
 		TextView m_stopDistanceTextView = null;
 		TextView m_stopRoutesTextView = null;
-
+		ImageView starImageView = null;
+		
 		ViewWrapper(View base) {
 			this.base = base;
 		}
@@ -336,8 +343,14 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 				m_stopRoutesTextView = (TextView) base.findViewById(R.id.stopRoutesTextView);
 			}
 			return (m_stopRoutesTextView);
-		}		
+		}	
 		
+		ImageView getStarImageView() {
+			if (starImageView == null) {
+				starImageView = (ImageView) base.findViewById(R.id.starImageView);
+			}
+			return (starImageView);
+		}
 		
 	}	
 	

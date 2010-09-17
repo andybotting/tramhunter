@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -270,11 +271,19 @@ public class StopsListActivity extends ListActivity {
 			wrapper.getStopNameTextView().setText(stopName);
 			wrapper.getStopDetailsTextView().setText(stopDetails);
 			
+
+			
 			// Only show the routes if this is the favourites view, it's too slow with LOTS of stops
 			if(mIsFavouritesView){
 				wrapper.getStopRoutesTextView().setText(thisStop.getRoutesString());	
-			}else{
+			}
+			else{
 				wrapper.getStopRoutesTextView().setVisibility(View.GONE);
+				
+				if (thisStop.isStarred()) {
+					wrapper.getStarImageView().setVisibility(View.VISIBLE);
+				}
+				
 			}
 						
 			return pv;
@@ -289,7 +298,8 @@ public class StopsListActivity extends ListActivity {
 		TextView stopNameTextView = null;
 		TextView stopDetailsTextView = null;
 		TextView stopRoutesTextView = null;
-
+		ImageView starImageView = null;
+		
 		ViewWrapper(View base) {
 			this.base = base;
 		}
@@ -315,6 +325,12 @@ public class StopsListActivity extends ListActivity {
 			return (stopRoutesTextView);
 		}
 		
+		ImageView getStarImageView() {
+			if (starImageView == null) {
+				starImageView = (ImageView) base.findViewById(R.id.starImageView);
+			}
+			return (starImageView);
+		}
 	}	  
 	  
 	
