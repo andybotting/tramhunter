@@ -5,7 +5,7 @@
 	
 	<TextView
 		android:id="@+id/routeNumber"
-		android:padding="3dip"
+		
 		android:textSize="18dip" 
 		android:layout_width="45dip" 
 		android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
 	<TextView
 		android:id="@+id/routeDestination"
 		android:layout_toRightOf="@+id/routeNumber"
-		android:padding="3dip"
+		
 		android:textSize="18dip" 
 		android:singleLine="true"
 		android:ellipsize="marquee"
@@ -35,7 +35,7 @@
 		android:id="@+id/nextTime" 
 		android:gravity="right"
 		android:layout_toRightOf="@+id/routeDestination"
-		android:padding="3dip"
+		
 		android:textSize="18dip" 
 		android:layout_width="50dip"
 		android:layout_height="wrap_content"

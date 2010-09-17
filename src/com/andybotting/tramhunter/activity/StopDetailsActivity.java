@@ -425,8 +425,10 @@ public class StopDetailsActivity extends ListActivity {
 			}
 			
 			// Show red for 'Now' only
-			if (thisTram.minutesAway() < 1)
-				wrapper.getNextTramTime().setTextColor(Color.RED);
+//			if (thisTram.humanMinutesAway() == "Now") {
+//				Log.d("Testing", "Marking " + thisTram.minutesAway() + " and " + thisTram.humanMinutesAway() + " as RED");
+//				wrapper.getNextTramTime().setTextColor(Color.RED);
+//			}
 			
 			wrapper.getNextTramTime().setText(thisTram.humanMinutesAway());   
 
