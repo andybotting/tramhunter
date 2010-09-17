@@ -6,10 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import android.content.Context;
-
-import com.andybotting.tramhunter.dao.TramHunterDB;
-
+import android.util.Log;
 
 public class NextTram implements Comparable<NextTram> { 
 	
@@ -154,6 +151,7 @@ public class NextTram implements Comparable<NextTram> {
 	// predictedArrivalDateTime
 	public void setPredictedArrivalDateTime(String _predictedArrivalDateTime) {
 		predictedArrivalDateTime = parseDate(_predictedArrivalDateTime);
+		Log.d("Testing", "Predict: " + _predictedArrivalDateTime + " Parsed: " + predictedArrivalDateTime);
 	}
 	 public Date getPredictedArrivalDateTime() {
 		 return predictedArrivalDateTime;
@@ -162,6 +160,7 @@ public class NextTram implements Comparable<NextTram> {
 	// requestDateTime
 	public void setRequestDateTime(String _requestDateTime) {
 		requestDateTime = parseDate(_requestDateTime);
+		Log.d("Testing", "Request: " + _requestDateTime + " Parsed: " + requestDateTime);
 	}
 	
 	public Date getRequestDateTime() {
@@ -188,14 +187,15 @@ public class NextTram implements Comparable<NextTram> {
 
 	// Parse the dates
 	public Date parseDate(String dateString) {
-		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ssZ");
+		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss");
 		Date date = new Date();
 		
 		//<PredictedArrivalDateTime>2010-05-30T19:00:48+10:00</PredictedArrivalDateTime>
 		//<RequestDateTime>2010-05-30T18:59:54.2212858+10:00</RequestDateTime>
 		
 		try {
-			date = df.parse(dateString);
+			String fixedDate = dateString.substring(0, 18);
+			date = df.parse(fixedDate);
 			
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -209,10 +209,9 @@ public class NextTram implements Comparable<NextTram> {
 	public int minutesAway() {
 		Date predictedDate = getPredictedArrivalDateTime();
 		Date requestDate = getRequestDateTime();
-		
+
 		long diff = predictedDate.getTime() - requestDate.getTime(); 
 		int minutes = (int)diff/60000;
-
 		return minutes;
 	}
 	
