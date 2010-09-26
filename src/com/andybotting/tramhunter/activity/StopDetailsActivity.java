@@ -334,7 +334,8 @@ public class StopDetailsActivity extends ListActivity {
 						toast.show();
 					}
 				}
-				else {
+				
+				if (nextTrams.size() > 1) {
 					// Show trams list
 					setListAdapter(new NextTramsListAdapter());
 				}

@@ -37,6 +37,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private ListView mListView;
 	private List<Stop> mAllStops;
 	private StopsList mNearStopsList;
+	private StopsListAdapter mStopsListAdapter;
 	private LocationManager mLocationManager;
 	private Location mLastKnownLocation;
 	
@@ -162,6 +163,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     				// Toggle favourite
     				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
     				thisStop.setStarred(!thisStop.isStarred());
+    				// Refresh adapter to show fav/unfav change instantly
+    				mStopsListAdapter.notifyDataSetChanged();
     				return true;
         	}
     	} catch (ClassCastException e) {}
@@ -204,9 +207,13 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    	// Build a sorted list, of MAXSTOPS stops 
 	    	for(Entry<Double, Stop> item : sortedStopList.entrySet()) {
 	    		Stop stop = item.getValue();
-	    		sortedStops.add(stop);
-	
-	    		if(sortedStops.size() >= MAXSTOPS)
+	    		
+	    		// Don't show terminus stops > 8000
+				if (stop.getTramTrackerID() < 8000) {
+					sortedStops.add(stop);
+				}
+	    		
+				if(sortedStops.size() >= MAXSTOPS)
 	    			break;
 	    	}
 	    	
@@ -230,8 +237,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 				stopsListAdapter.updateStopList(sortedStops, m_location);
 			}else{
 				// Refresh the entire list
-				StopsListAdapter stopsListAdapter = new StopsListAdapter(sortedStops, m_location);
-				setListAdapter(stopsListAdapter);	
+				mStopsListAdapter = new StopsListAdapter(sortedStops, m_location);
+				setListAdapter(mStopsListAdapter);	
 			}
 			
 			// Hide dialog

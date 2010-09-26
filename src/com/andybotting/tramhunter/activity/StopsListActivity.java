@@ -31,6 +31,7 @@ public class StopsListActivity extends ListActivity {
 
 	private boolean mIsFavouritesView;
 	private ListView mListView;
+	private StopsListAdapter mListAdapter;
 	private List<Stop> mStops;
 	private TramHunterDB mDB;
 	private Destination mDestination;
@@ -169,8 +170,8 @@ public class StopsListActivity extends ListActivity {
 		
 		mListView.setOnItemClickListener(mListView_OnItemClickListener);		
 		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
-		
-		setListAdapter(new StopsListAdapter());
+		mListAdapter = new StopsListAdapter();
+		setListAdapter(mListAdapter);
 	}
 	
 	private void viewStop(Stop stop){
@@ -223,6 +224,10 @@ public class StopsListActivity extends ListActivity {
     				// Refresh the favourites stops list
     				if(mIsFavouritesView)
     					displayFavStops(false);
+
+    				// Refresh the adapter to show fav/unfav changes in list
+    				mListAdapter.notifyDataSetChanged();
+    				
     				return true;
         	}
     	} catch (ClassCastException e) {}
