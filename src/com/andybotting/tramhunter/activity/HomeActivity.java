@@ -508,7 +508,7 @@ public class HomeActivity extends ListActivity {
 
 			try {
 				HttpResponse response = client.execute(post);
-				int responseCode = response.getStatusLine().getStatusCode();
+				response.getStatusLine().getStatusCode();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

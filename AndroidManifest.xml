@@ -77,6 +77,12 @@
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	
 	
-	<uses-sdk android:minSdkVersion="3" />
+	<uses-sdk android:minSdkVersion="3" 
+		android:targetSdkVersion="4" />
+    
+	<supports-screens smallScreens="true" 
+		normalScreens="true" 
+		largeScreens="true" 
+		android:anyDensity="true" />
 	
 </manifest> 
