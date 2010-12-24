@@ -5,13 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.ui.UIUtils;
 
 public class EnterTTIDActivity extends Activity {
 
@@ -25,13 +26,24 @@ public class EnterTTIDActivity extends Activity {
 		context = this.getApplicationContext();
 		setContentView(R.layout.enter_ttid);
 		 
-		String title = getResources().getText(R.string.app_name) + ": Enter an ID";
- 		setTitle(title);
+		String title = "Enter an ID";
+		((TextView) findViewById(R.id.title_text)).setText(title);
+		
+		// Home title button
+		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goHome(EnterTTIDActivity.this);
+		    }
+		});	
 
-		// Show soft keyboard right away
-		final InputMethodManager imm = (InputMethodManager) EnterTTIDActivity.this.getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-
+		// Search title button
+		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goSearch(EnterTTIDActivity.this);
+		    }
+		});	
+		
+		
 		final Button button = (Button) findViewById(R.id.buttonGo);
 		button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -59,7 +71,6 @@ public class EnterTTIDActivity extends Activity {
 				}
 				else if (db.checkStop(tramTrackerId)) {
 					// Hide our soft keyboard
-					imm.hideSoftInputFromWindow(textTramTrackerId.getWindowToken(), 0);
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", tramTrackerId);
 					Intent stopsListIntent = new Intent(context, StopDetailsActivity.class);

@@ -5,50 +5,48 @@
 	<string name="app_name">Tram Hunter</string>
 	
 	<!-- First run dialog text -->
-	<string name="about_msg">A simple Android client to Yarra Trams tramTRACKER® Web Service.\n\nFollow @tram_hunter on Twitter for latest updates.\n\nPlease file bug reports and feature requests at the Tram Hunter project website at:\nhttp://tramhunter.googlecode.com\n\nFor Terms of Use of the tramTRACKER® Web Service, see:\nhttp://ws.tramtracker.com.au/pidsservice/Terms.aspx\n\nThis application is provided with no warranty, and is licensed under GPL v2.</string>
+	<string name="about_msg">An Android client for Yarra Trams tramTRACKER® Web Service.\n\nFollow @tram_hunter on Twitter for latest updates.\n\nLatest Changes in v0.7\n - New home screen with icons\n - Action bar for each activity\n  - Nice high-res icons for HDPI devices\n  - Android 1.5 fixes\n  - Small screen device support (e.g. HTC Wildfire)\n  - App2SD Support\n  - Application wide search button support\n  - Tram Network Map\n  - Better Stop map marker\n  - My Location button for map\n  - Fixes for location\n  - Searching for TramTracker ID now done in general search\n\nPlease file bug reports and feature requests at the Tram Hunter project website at:\nhttp://tramhunter.googlecode.com\n\nFor Terms of Use of the tramTRACKER® Web Service, see:\nhttp://ws.tramtracker.com.au/pidsservice/Terms.aspx\n\nThis application is provided with no warranty, and is licensed under GPL v3.</string>
+
+    <string name="description_home">Home</string>
+    <string name="description_search">Search</string>
+    <string name="description_map">Map</string>
+    <string name="description_refresh">Refresh</string>
+    <string name="description_star">Star</string>
+	<string name="description_status">Status</string>
+	<string name="description_departures">Departures</string>
+	<string name="description_stations">Stations</string>
+	<string name="description_myloc">My Location</string>
+    
+    <string name="title_search_query">Search for \'<xliff:g id="query">%1$s</xliff:g>\'</string>
+    <string name="search_hint">Search for Stops</string>
+    
+    <string name="btn_starred">Favourite\nStops</string>	
+    <string name="btn_browse">Browse by\nRoutes</string>
+    <string name="btn_nearby">Nearby\nStops</string>
+    <string name="btn_settings">Application\nSettings</string>
+    <string name="btn_search">Search\nfor Stops</string>
+    <string name="btn_map">Network\nMap</string>
+    
+    <string name="label_no_results">No Results</string>      
+    <string name="label_loading">Loading...</string>  
 
 	<!-- Menu item labels -->
 	<string name="menu_item_about">About</string>
 	<string name="menu_item_settings">Settings</string>
 	<string name="menu_item_search">Search</string>
-
-	<!-- Menu list item labels -->
-    <string name="menu_list_browse">Browse for a Stop</string>
-    <string name="menu_list_browse_desc">Browse for your stop by route and stop lists</string>
-    	
-    <string name="menu_list_favourite">Favourite Stops</string>
-    <string name="menu_list_favourite_desc">Get the details for your favourite stops, fast</string>	
-	
-	<string name="menu_list_enterttid">Enter a TramTracker ID</string>
-	<string name="menu_list_enterttid_desc">Get the details for your stop by TramTracker ID</string>	
-	
-	<string name="menu_list_nearby">Nearby Stops</string>
-	<string name="menu_list_nearby_desc">Use your location to find stops nearest to you</string>
-	
-	<string name="menu_list_hunt">Hunt Down My Trips (Beta)</string>
-	<string name="menu_list_hunt_desc">Find trams I am likely to want to catch</string>		
-	
-	<string name="menu_list_search">Search</string>
-    <string name="menu_list_search_desc">Search for a stop</string>
-	
-	
 	
 	<!-- The label for the search results for this app (see searchable.xml for more details). -->
     <string name="search_label">Stop</string>
-
-
 
     <!-- The description that will show up in the search settings for this source.  -->
     <string name="settings_description">Tram Stops</string>
 
     <!-- General instructions in the main activity. -->
-    <string name="search_instructions">Press the search key to look for a stop</string>
+    <string name="search_instructions">Press the search key to search for stops</string>
 
     <!-- Shown above search results when we receive a search request. -->
-    <string name="search_results">Search results for \'<xliff:g id="string">%s</xliff:g>\': </string>
-	
-	
-	
-	
+    <string name="search_results">Search for \'<xliff:g id="string">%s</xliff:g>\': </string>
+
+    <string name="no_favourite_stops">You currently have no favourite tram stops.\n\nTo add favourite tram stops simply click the favourite star when browsing tram stops.\n\nDo you want to browse some now?</string>	
 	
 </resources>

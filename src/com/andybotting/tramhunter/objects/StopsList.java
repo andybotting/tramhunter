@@ -50,7 +50,6 @@ public class StopsList extends ArrayList<Stop> implements Parcelable{
 			s.setLatitude(in.readDouble());
 			s.setLongitude(in.readDouble());
 			s.setSuburb(in.readString());
-			s.setStarred(in.readInt());
 			
 			this.add(s);
 		}
@@ -78,11 +77,6 @@ public class StopsList extends ArrayList<Stop> implements Parcelable{
 			dest.writeDouble(s.getLatitude());
 			dest.writeDouble(s.getLongitude());
 			dest.writeString(s.getSuburb());
-			
-			if (s.isStarred())
-				dest.writeInt(1);
-			else
-				dest.writeInt(0);
 			
 		}
 	}

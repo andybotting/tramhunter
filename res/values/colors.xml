@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-	<drawable name="white">#ffffffff</drawable>
-	<drawable name="black">#ff000000</drawable>
-	<drawable name="gray">#ff606060</drawable>
-	<drawable name="aqua">#ff007bff</drawable>
-	<drawable name="red">#ffff0000</drawable>
+
+    <color name="title_background">#ff008000</color>
+    <color name="title_text">#ffffffff</color>
+    <color name="title_text_alt">#ff000000</color>
+    <color name="title_separator">#40ffffff</color>
+    
+    <color name="foreground1">#ff355689</color>
+    <color name="foreground2">#ff7081a3</color>
+    <color name="background1">#ffffffff</color>
+    <color name="background2">#ffd5ddeb</color>
+    <color name="background3">#ffe3e8f1</color>
+    
+	<color name="white">#ffffffff</color>
+	<color name="black">#ff000000</color>
+	<color name="gray">#ff606060</color>
+	<color name="aqua">#ff007bff</color>
+	<color name="red">#ffff0000</color>
 </resources>

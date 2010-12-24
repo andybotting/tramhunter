@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout style="@style/TitleBar">
+    
+        <ImageButton android:id="@+id/title_btn_home" 
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_home"
+            android:src="@drawable/ic_title_home" />
+
+        <ImageView style="@style/TitleBarSeparator" />
+        
+        <TextView style="@style/TitleBarText" />
+        
+		<ImageView style="@style/TitleBarSeparator" />
+        
+        <ImageButton android:id="@+id/title_btn_map" 
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_map"
+            android:src="@drawable/ic_title_map" />
+            
+    </LinearLayout>
+	
+	<!-- Empty -->
+	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@id/android:empty"
+	    android:gravity="center"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent">
+		<TextView android:id="@+id/empty_text"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:gravity="center"
+            android:textSize="@dimen/text_size_small"
+			android:text="@string/label_no_results"/>
+	</RelativeLayout>
+
+    <!-- Results list -->
+	<ListView android:id="@android:id/list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" />
+
+	<!-- Loading Spinner -->
+	<LinearLayout
+        android:id="@+id/loading"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+        android:gravity="center">
+        
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="6dip"
+            android:indeterminate="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_size_small"
+            android:text="@string/label_loading"/>
+            
+    </LinearLayout>
+
+	<!-- Optional text window -->
+	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/user_info"
+	    android:gravity="center"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:visibility="gone">
+	    
+		<TextView android:id="@+id/text_info"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:gravity="center"
+            android:textSize="@dimen/text_size_small"/>
+            
+	</RelativeLayout>            
+
+</LinearLayout>

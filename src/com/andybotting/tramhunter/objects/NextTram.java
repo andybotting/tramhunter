@@ -6,8 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import android.util.Log;
-
 public class NextTram implements Comparable<NextTram> { 
 	
 	private Stop originStop;
@@ -151,7 +149,6 @@ public class NextTram implements Comparable<NextTram> {
 	// predictedArrivalDateTime
 	public void setPredictedArrivalDateTime(String _predictedArrivalDateTime) {
 		predictedArrivalDateTime = parseDate(_predictedArrivalDateTime);
-		Log.d("Testing", "Predict: " + _predictedArrivalDateTime + " Parsed: " + predictedArrivalDateTime);
 	}
 	 public Date getPredictedArrivalDateTime() {
 		 return predictedArrivalDateTime;
@@ -160,7 +157,6 @@ public class NextTram implements Comparable<NextTram> {
 	// requestDateTime
 	public void setRequestDateTime(String _requestDateTime) {
 		requestDateTime = parseDate(_requestDateTime);
-		Log.d("Testing", "Request: " + _requestDateTime + " Parsed: " + requestDateTime);
 	}
 	
 	public Date getRequestDateTime() {

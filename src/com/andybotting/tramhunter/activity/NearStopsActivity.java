@@ -5,15 +5,21 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+
+import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,9 +36,16 @@ import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.util.GenericUtil;
+import com.andybotting.tramhunter.ui.UIUtils;
+import com.andybotting.tramhunter.util.PreferenceHelper;
+
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
+	
+	private final static int CONTEXT_MENU_VIEW_STOP = 0;
+	private final static int CONTEXT_MENU_STAR_STOP = 1;
+	
+	private final static int MENU_MAP = 0;
 	
 	private ListView mListView;
 	private List<Stop> mAllStops;
@@ -40,35 +53,58 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private StopsListAdapter mStopsListAdapter;
 	private LocationManager mLocationManager;
 	private Location mLastKnownLocation;
-	
+
+	private Context mContext;
+	private PreferenceHelper mPreferenceHelper;
 	private TramHunterDB mDB;
 		
 	// Maximum stops to list
 	private final int MAXSTOPS = 20;
-	private final String m_title = "Nearest Stops";//±	
+	private final String mTitle = "Nearest Stops";//±	
  
 	// Only show loading dialog at first load
-	private boolean m_showBusy = true;
-	private boolean m_isListeningForNetworkLocation;
-	private boolean m_isCalculatingStopDistances;
+	private boolean mShowBusy = true;
+	private boolean mIsListeningForNetworkLocation;
+	private boolean mIsCalculatingStopDistances;
 	
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	 
-			
-		m_isListeningForNetworkLocation = true;
-		m_isCalculatingStopDistances = false;
+
+		setContentView(R.layout.near_stops_list);
 		
-		setContentView(R.layout.stops_list);
+		// Home title button
+		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goHome(NearStopsActivity.this);
+		    }
+		});	
+
+		// Map title button
+		findViewById(R.id.title_btn_map).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+				Bundle bundle = new Bundle();
+				bundle.putParcelable("stopslist", mNearStopsList);
+				Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, 1);
+		    }
+		});
+		
+		mIsListeningForNetworkLocation = true;
+		mIsCalculatingStopDistances = false;
+		
 		mListView = (ListView)this.findViewById(android.R.id.list);
-		
 		mListView.setOnItemClickListener(listView_OnItemClickListener);
 		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
 		
 		// Set the title
-		setTitle(m_title);
+		((TextView) findViewById(R.id.title_text)).setText(mTitle);
+
+		mContext = this.getBaseContext();
+		mPreferenceHelper = new PreferenceHelper(mContext);
+		mDB = new TramHunterDB(mContext);
 		
 		// Get our stops from the DB
-		mDB = new TramHunterDB(this);
 		mAllStops = mDB.getAllStops();
 		
 		// Make our Near Stops List for the map
@@ -76,17 +112,57 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		// Get the location
 		mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+		
 	  	Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-  	
-	  	if (location != null) {
+	  	
+	  	Log.d("Testing", "Location Services Enabled: " + 
+	  			" Network:" + mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) +
+	  			" GPS:" + mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+	  	
+	  	if (location != null) {		
 	  		new StopDistanceCalculator(location).execute();			
-    	}else{
-    		// TODO: This should a nicer dialog explaining that no location services
-    		GenericUtil.popToast(this, "Unable to determine location!");			
-			// Finish the activity, and go back to the main menu
-			this.finish();
     	}
+	  	else {
+	  		
+	  	    if ( (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) && 
+	  	    		(!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) ) {
+	  	    	buildAlertNoLocationServices();
+	  	    }
+	  	    
+	  	}
 	}	
+
+    private void buildAlertNoLocationServices() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("You do not have GPS or Wireless network location services enabled.\n\nWould you like to enable them now?")
+        .setTitle("No Location Services")
+        .setCancelable(false)
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                launchGPSOptions(); 
+            }
+        })
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                dialog.cancel();
+                finish();
+            }
+        });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+	
+	
+    private void launchGPSOptions() {
+        final ComponentName toLaunch = new ComponentName("com.android.settings","com.android.settings.SecuritySettings");
+        final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setComponent(toLaunch);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivityForResult(intent, 0);
+    }  
+    
+    
 	
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
@@ -103,7 +179,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, 0, 0, "Map");
+		menu.add(0, MENU_MAP, 0, "Map");
 		MenuItem menuItem0 = menu.findItem(0);
 		menuItem0.setIcon(R.drawable.ic_menu_mapmode);
 		
@@ -114,7 +190,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
-		case 0:
+		case MENU_MAP:
 			Bundle bundle = new Bundle();
 			bundle.putParcelable("stopslist", mNearStopsList);
 			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
@@ -143,8 +219,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
 			Stop thisStop = stopsListAdapter.getStops().get(info.position);
-			menu.add(0, 0, 0, "View Stop");
-			menu.add(0, 1, 0, (thisStop.isStarred() ? "Unfavourite" : "Favourite"));
+			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
+			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
+			
 		}
     };
     
@@ -156,13 +233,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			Stop thisStop = stopsListAdapter.getStops().get(info.position);
         	
         	switch (item.getItemId()) {
-    			case 0:
+    			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-    			case 1:
+    			case CONTEXT_MENU_STAR_STOP:
     				// Toggle favourite
-    				mDB.setStopStar(thisStop.getTramTrackerID(), !thisStop.isStarred());
-    				thisStop.setStarred(!thisStop.isStarred());
+    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
     				// Refresh adapter to show fav/unfav change instantly
     				mStopsListAdapter.notifyDataSetChanged();
     				return true;
@@ -173,24 +249,23 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     }
     	
 	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
-		private final ProgressDialog dialog = new ProgressDialog(NearStopsActivity.this);
-		private final Location m_location;
-		private boolean m_refreshListOnly;
+		private final Location mLocation;
+		private boolean mRefreshListOnly;
 		
 		public StopDistanceCalculator(Location location){
-			m_location = location;
+			mLocation = location;
 		}
 		
 		// Can use UI thread here
 		protected void onPreExecute() {
-			m_isCalculatingStopDistances = true;
-			m_refreshListOnly = !m_showBusy;
-			
-			if (m_showBusy) {
+			mIsCalculatingStopDistances = true;
+			mRefreshListOnly = !mShowBusy;			
+			if (mShowBusy) {
 				// Show the dialog window
-				this.dialog.setMessage("Finding tram stops...");
-				this.dialog.show();
-				m_showBusy = false;
+				mListView.setVisibility(View.GONE);
+				findViewById(android.R.id.empty).setVisibility(View.GONE);
+				findViewById(R.id.loading).setVisibility(View.VISIBLE);
+				mShowBusy = false;
 			}
 		}
 
@@ -200,7 +275,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
 			
 	    	for(Stop stop : mAllStops){
-	    		double distance = m_location.distanceTo(stop.getLocation());
+	    		double distance = mLocation.distanceTo(stop.getLocation());
 	    		sortedStopList.put(distance, stop);
 	    	}  
 	
@@ -209,9 +284,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    		Stop stop = item.getValue();
 	    		
 	    		// Don't show terminus stops > 8000
-				if (stop.getTramTrackerID() < 8000) {
+				if (stop.getTramTrackerID() < 8000)
 					sortedStops.add(stop);
-				}
 	    		
 				if(sortedStops.size() >= MAXSTOPS)
 	    			break;
@@ -230,135 +304,97 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		
 		// Can use UI thread here
 		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
-		
-			if(m_refreshListOnly){
+			if (mRefreshListOnly) {
 				// Just update the list
 				StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
-				stopsListAdapter.updateStopList(sortedStops, m_location);
-			}else{
+				stopsListAdapter.updateStopList(sortedStops, mLocation);
+			}
+			else {
 				// Refresh the entire list
-				mStopsListAdapter = new StopsListAdapter(sortedStops, m_location);
+				mStopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
 				setListAdapter(mStopsListAdapter);	
 			}
 			
-			// Hide dialog
-			if (this.dialog.isShowing())
-				this.dialog.dismiss();	
+			// If we've just been showing the loading screen
+			if (mListView.getVisibility() == View.GONE) {
+				mListView.setVisibility(View.VISIBLE);
+				findViewById(R.id.loading).setVisibility(View.GONE);
+			}
 			
-			m_isCalculatingStopDistances = false;
+			mIsCalculatingStopDistances = false;
 		}
 	}
 		  
 	private class StopsListAdapter extends BaseAdapter {
-
-		private ArrayList<Stop> m_stops;
-		private Location m_location;
+		
+		private ArrayList<Stop> mStops;
+		private Location mLocation;
 		
 		public StopsListAdapter(ArrayList<Stop> stops, Location location){
-			m_stops = stops;
-			m_location = location;
+			mStops = stops;
+			mLocation = location;
 		}
 		
 		public void updateStopList(ArrayList<Stop> stops, Location location){
-			m_stops = stops;
-			m_location = location;
+			mStops = stops;
+			mLocation = location;
 			this.notifyDataSetChanged();			
 		}
 		
 		public ArrayList<Stop> getStops() {
-			return m_stops;
+			return mStops;
+		}
+
+		public int getCount() {
+			return mStops.size();
+		}
+
+		public Object getItem(int position) {
+			return position;
+		}
+
+		public long getItemId(int position) {
+			return position;
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			View inflatedView = getLayoutInflater().inflate(R.layout.near_stops_list_row, parent, false);
-			ViewWrapper viewWrapper = new ViewWrapper(inflatedView);
-			inflatedView.setTag(viewWrapper);
-			fillViewWrapper(viewWrapper, m_stops.get(position));
+			View pv;
+            if(convertView == null) {
+    			LayoutInflater inflater = getLayoutInflater();
+    			pv = inflater.inflate(R.layout.near_stops_list_row, parent, false);
+            }
+            else {
+                pv = convertView;
+            }
 			
-			return inflatedView;
-		}
+			Stop stop = (Stop) mStops.get(position);
+			
+			String stopName = stop.getPrimaryName();
+			String stopDetails = "Stop " + stop.getFlagStopNumber();
+			// If the stop has a secondary name, add it
+			if (stop.getSecondaryName().length() > 0) {
+				stopDetails += ": " + stop.getSecondaryName();
+			}
+			
+			stopDetails += " - " + stop.getCityDirection();
+			stopDetails += " (" + stop.getTramTrackerID() + ")";
+			
+			String stopDistance = stop.formatDistanceTo(mLocation);
 
-		private void fillViewWrapper(ViewWrapper viewWrapper, Stop stop){
-			String stopNameLabel = stop.getPrimaryName();
-			String directionLabel = "Stop " + stop.getFlagStopNumber();
-
-			// If the stop has a secondary name, add it 
-			if (stop.getSecondaryName().length() > 0)
-				directionLabel += ": " + stop.getSecondaryName();
-			
-			directionLabel += " - " + stop.getCityDirection();
-			String distanceLabel = "" + stop.formatDistanceTo(m_location);
-			String routesLabel = stop.getRoutesString();
-			
-			viewWrapper.getStopNameTextView().setText(stopNameLabel);
-			viewWrapper.getStopDetailsTextView().setText(directionLabel);
-			viewWrapper.getStopDistanceTextView().setText(distanceLabel);
-			viewWrapper.getStopRoutesTextView().setText(routesLabel);
+			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
+			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
+			((TextView) pv.findViewById(R.id.stopDistanceTextView)).setText(stopDistance);
+			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(stop.getRoutesString());
 			
 			// Show the star is stop is a favourite
-			if (stop.isStarred()) {
-				viewWrapper.getStarImageView().setVisibility(View.VISIBLE);
-			}
+			if (mPreferenceHelper.isStarred(stop.getTramTrackerID()))
+				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
+			else
+				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
+			
+			return pv;
 		}
-		
-		public int getCount() {
-			return m_stops.size();
-		}
-
-		// TODO: LUKEK: Determine what these are meant to do and implement them properly...
-		public Object getItem(int position) {return position;}
-		public long getItemId(int position) {return position;}
-		
-	}
-
-	class ViewWrapper {
-		View base;
-				
-		TextView m_stopNameTextView = null;
-		TextView m_stopDetailsTextView = null;
-		TextView m_stopDistanceTextView = null;
-		TextView m_stopRoutesTextView = null;
-		ImageView starImageView = null;
-		
-		ViewWrapper(View base) {
-			this.base = base;
-		}
-
-		TextView getStopNameTextView() {
-			if (m_stopNameTextView == null) {
-				m_stopNameTextView = (TextView) base.findViewById(R.id.stopNameTextView);
-			}
-			return (m_stopNameTextView);
-		}
-
-		TextView getStopDetailsTextView() {
-			if (m_stopDetailsTextView == null) {
-				m_stopDetailsTextView = (TextView) base.findViewById(R.id.stopDetailsTextView);
-			}
-			return (m_stopDetailsTextView);
-		}
-
-		TextView getStopDistanceTextView() {
-			if (m_stopDistanceTextView == null) {
-				m_stopDistanceTextView = (TextView) base.findViewById(R.id.stopDistanceTextView);
-			}
-			return (m_stopDistanceTextView);
-		}
-		
-		TextView getStopRoutesTextView() {
-			if (m_stopRoutesTextView == null) {
-				m_stopRoutesTextView = (TextView) base.findViewById(R.id.stopRoutesTextView);
-			}
-			return (m_stopRoutesTextView);
-		}	
-		
-		ImageView getStarImageView() {
-			if (starImageView == null) {
-				starImageView = (ImageView) base.findViewById(R.id.starImageView);
-			}
-			return (starImageView);
-		}
-		
+			
 	}	
 	
     @Override
@@ -382,53 +418,54 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
     public void onLocationChanged(Location location) {
 
-    	if (location != null)
-    	{	
+    	if (location != null)     	{	
         	// If this is a GPS location then ignore and unsubscribe from network location updates.
-        	if(location.getProvider().equals("gps")&&m_isListeningForNetworkLocation){
+        	if (location.getProvider().equals("gps") && mIsListeningForNetworkLocation) {
         		stopLocationListening();
         		startLocationListening(false);
         	}
         	
-        	if(shouldCalculateNewDistance(location)){       		
+        	if(shouldCalculateNewDistance(location)) {
         		new StopDistanceCalculator(location).execute();
         		mLastKnownLocation = location;
         	}
         	
-        	if(location.hasAccuracy()){
-        		setTitle(m_title + "    ±" + (int)location.getAccuracy() + "m");	
-        	}else{
-        		setTitle(m_title);
+        	if(location.hasAccuracy()) {
+        		((TextView) findViewById(R.id.title_text)).setText(mTitle + " (±" + (int)location.getAccuracy() + "m)");
+        	}
+        	else {
+        		((TextView) findViewById(R.id.title_text)).setText(mTitle);
         	}
         	
     	}
     }
     
-    private boolean shouldCalculateNewDistance(Location location){
+    private boolean shouldCalculateNewDistance(Location location) {
 		boolean result = false;
 		
-    	if(mLastKnownLocation!=null&&mLastKnownLocation.distanceTo(location)>1)
-    	{
+    	if (mLastKnownLocation != null && mLastKnownLocation.distanceTo(location) > 1) {
     		result = true;	
-    	}else if(mLastKnownLocation==null){
+    	}
+    	else if(mLastKnownLocation == null) {
     		result = true;
     	}
     	
-    	return result && (!m_isCalculatingStopDistances);
+    	return result && (!mIsCalculatingStopDistances);
     }
                 
     private void stopLocationListening() {
-        if (mLocationManager != null)
-        	mLocationManager.removeUpdates(this);
+    	if (mLocationManager != null) {
+    		mLocationManager.removeUpdates(this);
+    	}
 	}
-                 
+    
     private void startLocationListening(boolean subscribeToNetworkLocation) {
-    	if (mLocationManager!=null){
-    		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        	m_isListeningForNetworkLocation = subscribeToNetworkLocation;
+    	if (mLocationManager != null) {
+    		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
+        	mIsListeningForNetworkLocation = subscribeToNetworkLocation;
         	
         	if(subscribeToNetworkLocation)       		
-        		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);    		
+        	mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
     	}
 	}
 

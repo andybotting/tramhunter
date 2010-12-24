@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 
@@ -16,10 +17,12 @@ public class FavouriteStopUtil {
 	
 	private final TramHunterDB db;
 	private final LocationManager locationManager;
+	private final Context context;
 
-	public FavouriteStopUtil(TramHunterDB db, LocationManager locationManager) {
+	public FavouriteStopUtil(TramHunterDB db, LocationManager locationManager, Context context) {
 		this.db = db;
 		this.locationManager = locationManager;
+		this.context = context;
 	}
 
 	public Stop getClosestFavouriteStop() {
@@ -28,7 +31,7 @@ public class FavouriteStopUtil {
 	}
 
 	public List<Stop> getClosestFavouriteStops(final int maxNumberOfStops, final int maxMetresAway) {
-		final List<Stop> stops = db.getFavouriteStops();
+		final List<Stop> stops = db.getFavouriteStops(context);
 		List<Stop> closestFavourites = new ArrayList<Stop>();
 		if (!stops.isEmpty()) {
 			// Get the location

@@ -64,7 +64,7 @@
   			android:layout_alignParentBottom="true"
   			android:layout_centerHorizontal="true"
 			android:textSize="12dip"
-			android:textColor="@drawable/gray"
+			android:textColor="@color/gray"
 			android:text="" />
 
     </RelativeLayout>	

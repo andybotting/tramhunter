@@ -7,6 +7,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.text.TextUtils;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class TramHunterProvider extends ContentProvider {
     private static final UriMatcher sURIMatcher = buildUriMatcher();
 
     private static final String[] COLUMNS = {
-    	"_id",
+    	BaseColumns._ID,
     	SearchManager.SUGGEST_COLUMN_TEXT_1,
     	SearchManager.SUGGEST_COLUMN_TEXT_2,
     	SearchManager.SUGGEST_COLUMN_INTENT_DATA,
@@ -69,20 +70,17 @@ public class TramHunterProvider extends ContentProvider {
 	private Cursor getSuggestions(String query, String[] projection) {
 		String processedQuery = query == null ? "" : query.toLowerCase();
 		MatrixCursor cursor = new MatrixCursor(COLUMNS);
+          
+		// Inefficient use of the DB!
+		TramHunterDB mDB = new TramHunterDB(getContext()); 
+		List<Stop> stops = mDB.getStopsForSearch(processedQuery);
+		mDB.close();
         
-		// Only begin searching after 2 letters
-		if (processedQuery.length() > 1) {
-        
-			// Inefficient use of the DB!
-			TramHunterDB mDB = new TramHunterDB(getContext()); 
-			List<Stop> stops = mDB.getStopsForSearch(processedQuery);
-			mDB.close();
-	        
-			long id = 0;
-			for (Stop stop: stops) {
-				cursor.addRow(columnValuesOfWord(id++, stop));
-			}
+		long id = 0;
+		for (Stop stop: stops) {
+			cursor.addRow(columnValuesOfWord(id++, stop));
 		}
+
 		return cursor;
     }
 
@@ -90,8 +88,8 @@ public class TramHunterProvider extends ContentProvider {
     	
 		String text1 = stop.getStopName();
 		String text2 = "Stop " + stop.getFlagStopNumber() + ": ";
-
-		text2 += stop.getCityDirection();	
+		text2 += stop.getCityDirection();
+		text2 += " (" + stop.getTramTrackerID() + ") " + stop.getRoutesString();
 
 		// Return an object suitable for Android search
 		return new Object[] {id, text1,	text2, stop.getTramTrackerID(), };

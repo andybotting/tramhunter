@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout style="@style/TitleBar">
+        <ImageButton android:id="@+id/title_btn_home" 
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_home"
+            android:src="@drawable/ic_title_home" />
+
+        <ImageView style="@style/TitleBarSeparator" />
+        
+        <TextView style="@style/TitleBarText" />
+        
+		<ImageView style="@style/TitleBarSeparator" />
+        
+        <ImageButton android:id="@+id/title_btn_search"
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_search"
+            android:src="@drawable/ic_title_search" />
+            
+    </LinearLayout>
 	
-	<ListView android:id="@android:id/list"
+	<ExpandableListView android:id="@android:id/list"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
 		

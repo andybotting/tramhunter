@@ -1,54 +1,50 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/departures_row"
 	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:orientation="vertical"
-	android:padding="5dip">
+	android:layout_height="fill_parent"
+	style="@style/ListItem" >
 
-			<TextView android:id="@+id/stopNameTextView"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_toLeftOf="@+id/starImageView"
-				android:layout_alignParentLeft="true"
-				android:textSize="18dip"
-				android:singleLine="true"
-				android:ellipsize="end"/>	
-				
-			<ImageView android:id="@+id/starImageView"
-				android:layout_width="23dip"
-				android:layout_height="23dip"
-				android:layout_alignParentRight="true"
-				android:src="@drawable/btn_star_big_buttonless_on" 
-				android:visibility="invisible" />
+	<ImageView android:id="@+id/starImageView"
+		android:src="@drawable/star_on"	
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+ 		android:visibility="invisible" />		
 
-			<TextView android:id="@+id/stopDetailsTextView"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_below="@+id/stopNameTextView"
-				android:singleLine="true"
-				android:ellipsize="end"
-				android:textSize="12dip"
-				android:textColor="@drawable/gray"/>
-				
-			<TextView
-			   	android:id="@+id/stopDistanceTextView"
-			    android:layout_width="50dip"
-				android:layout_height="wrap_content"
-				android:layout_below="@+id/starImageView"
-				android:layout_alignParentRight="true"
-				android:textSize="12dip"
-				android:gravity="center_vertical"
-				android:textColor="@drawable/aqua"
-				android:text="Distance" />			
+	<TextView android:id="@+id/stopNameTextView"
+		style="@style/ListTitle"	
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentTop="true"		
+		android:layout_toLeftOf="@+id/starImageView" />
 
-			<TextView
-			   	android:id="@+id/stopRoutesTextView"
-			    android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:layout_below="@+id/stopDetailsTextView"
-				android:textSize="12dip"
-				android:singleLine="true"
-				android:ellipsize="marquee"
-				android:textColor="@drawable/gray"
-				android:text="Routes" />	
+	<TextView android:id="@+id/stopDistanceTextView"
+		style="@style/ListSubtitle"
+		android:textColor="@color/aqua"
+		android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_alignParentRight="true"
+		android:layout_below="@+id/starImageView" />	
+	
+	<TextView android:id="@+id/stopDetailsTextView"
+		style="@style/ListSubtitle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"		
+		android:layout_below="@+id/stopNameTextView"
+		android:layout_toLeftOf="@+id/stopDistanceTextView"
+		android:textSize="@dimen/text_size_tiny" />
+	
+	<TextView
+	   	android:id="@+id/stopRoutesTextView"
+	   	style="@style/ListSubtitle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"		
+		android:layout_below="@+id/stopDetailsTextView"
+		android:layout_toLeftOf="@+id/stopDistanceTextView"
+		android:textSize="@dimen/text_size_tiny" />
 
 </RelativeLayout>

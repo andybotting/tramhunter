@@ -1,0 +1,96 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/home_root"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout style="@style/TitleBar">
+    
+        <ImageView style="@style/TitleBarLogo"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/title_logo" />
+
+        <View style="@style/TitleBarSpring" />
+
+        <ImageView style="@style/TitleBarSeparator" />
+    
+        <ImageButton android:id="@+id/title_btn_search" 
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_search"
+            android:src="@drawable/ic_title_search" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="6dip">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <Button android:id="@+id/home_btn_starred"
+                style="@style/HomeButton"
+                android:text="@string/btn_starred"
+                android:drawableTop="@drawable/home_btn_starred"/>            
+                
+            <Button android:id="@+id/home_btn_browse"
+                style="@style/HomeButton"
+                android:text="@string/btn_browse"
+                android:drawableTop="@drawable/home_btn_browse"/>
+            
+            <Button android:id="@+id/home_btn_nearby"
+                style="@style/HomeButton"
+                android:text="@string/btn_nearby"
+                android:drawableTop="@drawable/home_btn_nearby"/>
+                
+        </LinearLayout>
+    
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">                
+
+            <Button android:id="@+id/home_btn_search"
+                style="@style/HomeButton"
+                android:text="@string/btn_search"
+                android:drawableTop="@drawable/home_btn_search"/>
+
+            <Button android:id="@+id/home_btn_map"
+                style="@style/HomeButton"
+                android:text="@string/btn_map"
+                android:drawableTop="@drawable/home_btn_map"/>
+                
+            <Button android:id="@+id/home_btn_settings"
+                style="@style/HomeButton"
+                android:text="@string/btn_settings"
+                android:drawableTop="@drawable/home_btn_settings"/>
+                
+        </LinearLayout>
+        
+	</LinearLayout>
+<!--			-->
+<!--		-->
+<!--	<LinearLayout-->
+<!--        android:id="@+id/welcomeMessage"-->
+<!--        android:layout_width="fill_parent"-->
+<!--    	android:layout_height="wrap_content"-->
+<!--    	android:orientation="horizontal"-->
+<!--    	android:background="@color/background2"-->
+<!--    	android:padding="5dip"-->
+<!--        android:gravity="center">-->
+<!---->
+<!--        <TextView android:id="@+id/welcomeMessageText"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:textSize="@dimen/text_size_tiny"-->
+<!--			android:textColor="@color/foreground1" />-->
+<!--            -->
+<!--    </LinearLayout>	-->
+
+</LinearLayout>

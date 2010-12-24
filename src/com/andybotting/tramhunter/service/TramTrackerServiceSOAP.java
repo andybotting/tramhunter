@@ -17,6 +17,7 @@ import android.util.Log;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.util.PreferenceHelper;
 
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
@@ -28,12 +29,15 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String CLIENTVERSION = "0.6.0";
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 	
-	private Context context;
+	private Context mContext;
+	private PreferenceHelper mPreferenceHelper;
 	
 	String guid = "";
 
 	public TramTrackerServiceSOAP(Context context) {
-		this.context = context;
+		this.mContext = context;
+		this.mPreferenceHelper = new PreferenceHelper(mContext);
+		
 	}
 	
 	public Stop getStopInformation(int tramTrackerID) {
@@ -139,9 +143,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		Log.d("Testing", "GUID from TT is: " + guid);
 		
 		// Create out DB instance
-		TramHunterDB db = new TramHunterDB(context);
-		db.setGUID(guid);
-		db.close();
+		mPreferenceHelper.setGUID(guid);
 	}
 	
 	public String getGUID() {
@@ -166,9 +168,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		envelope.dotNet = true;
 		
 		// Get our GUID from the database
-		TramHunterDB db = new TramHunterDB(context);
-		guid = db.getGUID();
-		db.close();
+		guid = mPreferenceHelper.getGUID();
 		
 		// If we don't have a GUID yet, get from from TramTracker
 		if (guid == "") {

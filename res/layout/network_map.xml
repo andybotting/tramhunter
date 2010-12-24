@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainlayout"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+    
+    <com.andybotting.tramhunter.map.AndroidBigImageView android:id="@+id/map_view"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+    	android:scaleType="matrix" > <!-- Change it to "centerCrop" for Android 1.5 -->
+    </com.andybotting.tramhunter.map.AndroidBigImageView>
+    
+    <LinearLayout
+	    android:id="@+id/zoomview"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignBottom="@+id/map_view"
+	    android:layout_alignParentRight="true"
+	    android:paddingRight="10dip"
+	    android:paddingBottom="10dip" >
+		
+		<ImageButton
+	        android:id="@+id/zoomOut"
+	        android:src="@drawable/map_zoomout"
+	        android:background="@null"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"/>
+		
+		<ImageButton
+	        android:id="@+id/zoomIn"
+	        android:src="@drawable/map_zoomin"
+	        android:background="@null"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true" />
+		
+	</LinearLayout>
+</RelativeLayout>

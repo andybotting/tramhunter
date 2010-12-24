@@ -16,113 +16,73 @@ import org.apache.http.message.BasicNameValuePair;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.map.AndroidBigImage;
 import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class HomeActivity extends ListActivity {
+public class HomeActivity extends Activity {
 
+    private static final String TAG = "Home";
+    private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
+	
 	// Menu items
 	private static final int MENU_ABOUT = 0;
 	private static final int MENU_SEARCH = 1;
 	private static final int MENU_SETTINGS = 2;
 	
-	// Menu list items
-	private static final int MENU_LIST_FAVOURITE = 0;
-	private static final int MENU_LIST_BROWSE = 1;
-	private static final int MENU_LIST_ENTERTTID = 2;
-	private static final int MENU_LIST_NEARBY = 3;
-	private static final int MENU_LIST_SEARCH = 4;
-	
-	private static final int NUMBER_OF_MENU_ITEMS = 5;
-
-	// Menu list arrays
-	private String[] mMenuItems = new String[NUMBER_OF_MENU_ITEMS];
-	private String[] mMenuItemsDesc = new String[NUMBER_OF_MENU_ITEMS];
-	
-	private ListView mListView;
+	private Context mContext;
 	private PreferenceHelper mPreferenceHelper;
-	private TramHunterDB mDB;
+	
 	private FavouriteStopUtil mFavouriteStopUtil;
-	private static Resources res;
 	private static String mLastUsedIntentUUID;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.home);
-		res = getResources();
-		
-		// Get shared prefs
-		mPreferenceHelper = new PreferenceHelper(this);	
-		
-		// Create db instance
-		mDB = new TramHunterDB(this);
-		final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		mFavouriteStopUtil = new FavouriteStopUtil(mDB, locationManager);
-    	
-		// Test our intent action in case it's a search
-		Intent intent = getIntent();
-		
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            // from click on search results
-            int tramTrackerId = Integer.parseInt(intent.getDataString());
-            Intent next = new Intent();
-            next.setClass(this, StopDetailsActivity.class);
-            next.putExtra("tramTrackerId", tramTrackerId);
-            startActivity(next);
-            finish();
-        } 
-        else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);      
-            Intent next = new Intent();
-            next.setClass(this, StopsListActivity.class);
-            next.putExtra("search_query", query);
-            startActivity(next);
-            finish();
-        }
-        else {
-			if (isFirstLaunch()) {
-				showAbout();
-			}
-			goDefaultLaunchActivity();
-        }
-	}
+		mContext = getBaseContext();
+		mPreferenceHelper = new PreferenceHelper(mContext);
 
+        // Create db instance
+		TramHunterDB db = new TramHunterDB(mContext);
+		db.getDatabase();
+		db.close();
+
+        final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mFavouriteStopUtil = new FavouriteStopUtil(db, locationManager, mContext);
+		
+		// Show about dialog window on first launch (or just after an upgrade)
+		if (mPreferenceHelper.isFirstLaunchThisVersion())
+			showAbout();
+
+		goDefaultLaunchActivity();
+	}
 	
 	private void goDefaultLaunchActivity(){
 		Bundle extras = getIntent().getExtras();
 		boolean isNewIntentUUID = false;
 		
 		checkStats();
-		
 		
 		// Check to make sure we have not already used the UUID for a default activity launch
 		if(extras != null && extras.containsKey(TramHunter.KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH)) {
@@ -135,218 +95,145 @@ public class HomeActivity extends ListActivity {
 			String activityName = mPreferenceHelper.defaultLaunchActivity();
 			Intent intent = null;
 			
-			// TODO: We really need unit testing for this stuff
-			if(activityName.equals("HomeActivity")){
+			if(activityName.equals("HomeActivity")) {
 				intent = null;
-				
-			}else if(activityName.equals("StopsListActivity")){
-				intent = new Intent(HomeActivity.this, StopsListActivity.class);
-				
-			}else if(activityName.equals("ClosestStopsListActivity")){
+			}
+			else if (activityName.equals("StopsListActivity")) {
+				startActivity(new Intent(this, StopsListActivity.class));
+			}
+			else if (activityName.equals("ClosestStopsListActivity")) {
 				Stop closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
-
 				if (closestFavouriteStop != null) {
 					// Go to the closest favourite stop
 					Bundle bundle = new Bundle();
 					bundle.putInt("tramTrackerId", closestFavouriteStop.getTramTrackerID());
 					intent = new Intent(HomeActivity.this, StopDetailsActivity.class);
 					intent.putExtras(bundle);
-				}else{
+				}
+				else {
 					GenericUtil.popToast(this, "Unable to determine closest favourite stop!");
 				}
-				
-			}else if(activityName.equals("NearStopsActivity")){
-				intent = new Intent(HomeActivity.this, NearStopsActivity.class);
-				
-			}else if(activityName.equals("PredictionActivity")){
-				intent = new Intent(HomeActivity.this, PredictionActivity.class);
+			}
+			else if(activityName.equals("NearStopsActivity")) {
+				startActivity(new Intent(this, NearStopsActivity.class));
 			}
 			
-			if(intent!=null)
+			if (intent != null)
 				startActivityForResult(intent, 1);
 		}
 		
-		// Business as usual on return
-		showHomeMenu();
+		setContentView(R.layout.home);
+		
+		// Search button
+		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goSearch(HomeActivity.this);
+		    }
+		});	
+		
+		// Starred
+		findViewById(R.id.home_btn_starred).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	startActivity(new Intent(HomeActivity.this, StopsListActivity.class));
+		    }
+		});
+		
+		// Browse
+		findViewById(R.id.home_btn_browse).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	startActivity(new Intent(HomeActivity.this, RoutesListActivity.class));
+		    }
+		});
+		
+		// Nearby
+		findViewById(R.id.home_btn_nearby).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	startActivity(new Intent(HomeActivity.this, NearStopsActivity.class));
+		    }
+		});
+		
+		// Search
+		findViewById(R.id.home_btn_search).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goSearch(HomeActivity.this);
+		    }
+		});
+
+		// Enter TTID
+		findViewById(R.id.home_btn_map).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	startActivity(new Intent(HomeActivity.this, AndroidBigImage.class));
+		    }
+		});
+
+		// Search
+		findViewById(R.id.home_btn_settings).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+		    }
+		});
+		
+		// Show or hide the welcome quote
+		View welcomeMessage = findViewById(R.id.welcomeMessage);
+        if (welcomeMessage != null) {
+			if(mPreferenceHelper.isWelcomeQuoteEnabled()) {
+				findViewById(R.id.welcomeMessage).setVisibility(View.VISIBLE);
+				setRandomWelcomeMessage();
+			}
+			else {
+				findViewById(R.id.welcomeMessage).setVisibility(View.GONE);
+			}
+        }
 	}	
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// Comment out here to only show messages each time the app is opened.
 		setRandomWelcomeMessage();
-	}
-	
-	public boolean isFirstLaunch() {
-		TramHunterDB db = new TramHunterDB(this);
-		return !db.checkFirstLaunch();
 	}
 
 	private String getRandomWelcomeMessage(){
 		Random r = new Random(System.currentTimeMillis());
-		String[] welcomeMessages = res.getStringArray(R.array.welcomeMessages);
+		String[] welcomeMessages = getResources().getStringArray(R.array.welcomeMessages);
 		return welcomeMessages[r.nextInt(welcomeMessages.length - 1)];
 	}
 	
 	private void setRandomWelcomeMessage() {
-		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessage);
-		String welcomeText = "";
-		
-		if (mPreferenceHelper.isWelcomeQuoteEnabled())
-			welcomeText = "\"" + getRandomWelcomeMessage()+ "\"";
-		
-        welcomeMessageTextView.setText(welcomeText);
+		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessageText);
+		if (welcomeMessageTextView != null) {
+			String welcomeText = "";
+			welcomeText = '"' + getRandomWelcomeMessage()+ '"';
+	        welcomeMessageTextView.setText(welcomeText);
+		}
     }
 	
 	public void showAbout() {
 		// Get the package name
 		String heading = getResources().getText(R.string.app_name) + "\n";
-		
-        // Get the package version
-        PackageManager pm = getPackageManager();
-        try {
-			PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
+
+		try {
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
 			heading += "v" + pi.versionName + "\n\n";
-		} catch (NameNotFoundException e) {
+		} 
+		catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
 		
 		// Build alert dialog
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 		dialogBuilder.setTitle(heading);
-		dialogBuilder.setMessage(getResources().getText(R.string.about_msg));
+		View aboutView = getLayoutInflater().inflate(R.layout.dialog_about, null);
+		dialogBuilder.setView(aboutView);
 		dialogBuilder.setPositiveButton("OK",
 			new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					TramHunterDB db = new TramHunterDB(getBaseContext());
-					db.setFirstLaunch();
-					db.close();
+					mPreferenceHelper.setFirstLaunchThisVersion();
 				}
 			});
 		dialogBuilder.setCancelable(false);
 		dialogBuilder.setIcon(R.drawable.icon);
 		dialogBuilder.show();
 	}
-	
-	public void showHomeMenu() { 
-		setContentView(R.layout.home);
-		
-		setRandomWelcomeMessage();
-		
-		mListView = (ListView)this.findViewById(android.R.id.list);
-		setTitle(getResources().getText(R.string.app_name));
-
-		mListView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> arg0, View row, int position, long id) {
-				Intent intent = null;
-				Context context = getBaseContext();
-								
-				switch ( (int)id ) {
-					case MENU_LIST_FAVOURITE:
-						intent = new Intent(context, StopsListActivity.class);
-						break;
-					case MENU_LIST_BROWSE:
-						intent = new Intent(context, RoutesListActivity.class);
-						break;
-					case MENU_LIST_ENTERTTID:
-						intent = new Intent(context, EnterTTIDActivity.class);
-						break;
-					case MENU_LIST_NEARBY:
-						intent = new Intent(context, NearStopsActivity.class);
-						break;
-					case MENU_LIST_SEARCH:
-						onSearchRequested();
-						break;
-				}
-				
-				if(intent != null)
-					startActivityForResult(intent, 1);
-  
-			}
-								
-		});
-		
-		
-		// Build our menu items
-	    mMenuItems[MENU_LIST_FAVOURITE] = res.getString(R.string.menu_list_favourite);
-	    mMenuItemsDesc[MENU_LIST_FAVOURITE] = res.getString(R.string.menu_list_favourite_desc);
-		
-	    mMenuItems[MENU_LIST_BROWSE] = res.getString(R.string.menu_list_browse);
-	    mMenuItemsDesc[MENU_LIST_BROWSE] = res.getString(R.string.menu_list_browse_desc);
-	    
-	    mMenuItems[MENU_LIST_ENTERTTID] = res.getString(R.string.menu_list_enterttid);
-	    mMenuItemsDesc[MENU_LIST_ENTERTTID] = res.getString(R.string.menu_list_enterttid_desc);
-	    
-	    mMenuItems[MENU_LIST_NEARBY] = res.getString(R.string.menu_list_nearby);
-	    mMenuItemsDesc[MENU_LIST_NEARBY] = res.getString(R.string.menu_list_nearby_desc);
-	    
-	    mMenuItems[MENU_LIST_SEARCH] = res.getString(R.string.menu_list_search);
-	    mMenuItemsDesc[MENU_LIST_SEARCH] = res.getString(R.string.menu_list_search_desc);
-		
-		
-        // Set up our adapter
-		setListAdapter(new MenuListAdapter());
-	}
-
-	private class MenuListAdapter extends BaseAdapter {
-
-		public int getCount() {
-			return mMenuItems.length;
-		}
-
-		public Object getItem(int position) {
-			return position;
-		}
-
-		public long getItemId(int position) {
-			return position;
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-				
-			View pv = convertView;
-			ViewWrapper wrapper = null;
-
-			LayoutInflater inflater = getLayoutInflater();
-			pv = inflater.inflate(R.layout.home_row, parent, false);
-					
-			wrapper = new ViewWrapper(pv);
-			pv.setTag(wrapper);
-									
-			wrapper.getNameText().setText(mMenuItems[position]);
-			wrapper.getDescriptionText().setText(mMenuItemsDesc[position]);
-
-			return pv;
-		}
-
-	}
-	
-	class ViewWrapper {
-		View base;
-				
-		TextView m_nameText = null;
-		TextView m_descriptionText = null;
-
-		ViewWrapper(View base) {
-			this.base = base;
-		}
-
-		TextView getNameText() {
-			if (m_nameText == null) {
-				m_nameText = (TextView) base.findViewById(R.id.nameText);
-			}
-			return (m_nameText);
-		}
-
-		TextView getDescriptionText() {
-			if (m_descriptionText == null) {
-				m_descriptionText = (TextView) base.findViewById(R.id.descriptionText);
-			}
-			return (m_descriptionText);
-		}
-
-	}	 
 	
 	// Add menu items
 	@Override
@@ -377,8 +264,7 @@ public class HomeActivity extends ListActivity {
             onSearchRequested();
             return true;
 		case MENU_SETTINGS:
-			Intent intent = new Intent(getBaseContext(), SettingsActivity.class);
-			startActivityForResult(intent, 1);
+			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
 		}
 		return false;
@@ -386,19 +272,24 @@ public class HomeActivity extends ListActivity {
 	}
 
 	
+    /**
+     * Check last time stats were sent, and send again if time greater than a week
+     */
 	private void checkStats() {	
-		mPreferenceHelper = new PreferenceHelper(getBaseContext());
 		if (mPreferenceHelper.isSendStatsEnabled()) {
-			long lastStatsDate = mDB.getStatsDate();
-			long now = System.currentTimeMillis();
+			long statsTimestamp = mPreferenceHelper.getStatsTimestamp();
+	        long timeDiff = UIUtils.dateDiff(statsTimestamp);
+	        
+	        if (LOGV) Log.v(TAG, "Lasts stats date was " + timeDiff + "ms ago" );
+			
 			// Only once a week
-			if ((now - lastStatsDate) > 604800000) {
+			if (timeDiff > 604800000) {
 				new Thread() {
 					public void run() {
 						uploadStats();
 					}
 				}.start();
-				mDB.setStatsDate();
+				mPreferenceHelper.setStatsTimestamp();
 			}
 		}
 	}
@@ -407,13 +298,13 @@ public class HomeActivity extends ListActivity {
 		Log.d("Testing", "Sending app statistics");
 
 		// gather all of the device info
-		PackageManager pm = getPackageManager();
 		String app_version = "";
 		try {
 			try {
-				PackageInfo pi = pm.getPackageInfo("com.andybotting.tramhunter", 0);
+				PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
 				app_version = pi.versionName;
-			} catch (NameNotFoundException e) {
+			} 
+			catch (NameNotFoundException e) {
 				app_version = "N/A";
 			}
 
@@ -501,21 +392,21 @@ public class HomeActivity extends ListActivity {
 
 			try {
 				post.setEntity(new UrlEncodedFormEntity(pairs));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 
 			try {
 				HttpResponse response = client.execute(post);
 				response.getStatusLine().getStatusCode();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 

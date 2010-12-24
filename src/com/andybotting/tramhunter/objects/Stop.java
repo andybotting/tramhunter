@@ -16,41 +16,35 @@ public class Stop {
 	private String flagStopNumber;
 	private String primaryName;
 	private String secondaryName;
+	private String routesString;
 	private String cityDirection;
 	private Location location;
 	private double latitude;
 	private double longitude;
 	private String suburb;
-	private boolean starred = false;
+//	private boolean starred = false;
 	private List<Route> routes;
+	
+	private static final String NAME_PATTERN = "(.+) & (.+)";
+	
 	@Override
 	public boolean equals(Object o) {
-		
-		if(o instanceof Stop){
+		if (o instanceof Stop) {
 			Stop oStop = (Stop)o;
 			return this.getTramTrackerID()==oStop.getTramTrackerID();
-		}else{
+		}
+		else {
 			return false;
 		}
-		
 	}
 	
-	private static final String NAME_PATTERN =
-		"(.+) & (.+)";
-	
-
 	public void setId(long _id) {
 		id = _id;
 	}
 	
-	
-	/**
-	 * @return The id
-	 */
 	public long getId() {
 		return id;
 	}
-	
 	
 	public void setTramTrackerID(int _tramTrackerID) {
 		tramTrackerID = _tramTrackerID;
@@ -99,44 +93,42 @@ public class Stop {
 	public void setPrimaryName(String _primaryName) {
 			primaryName = _primaryName;
 	}
-	
-	
+		
 	public String getPrimaryName() {
 			return primaryName;
 	}
-		
-
-
+	
 	public void setSecondaryName(String _secondaryName) {
 			secondaryName = _secondaryName;
 	}
-	
-	
+		
 	public String getSecondaryName() {
 		return secondaryName;
 	}
 	
-   
+	public void setRoutesString(String routesString) {
+		this.routesString = routesString;
+	}
+	
+	public String getRoutesString() {
+		return routesString;
+	}
 	
 	public void setCityDirection(String _cityDirection) {
 		   cityDirection = _cityDirection;
 	}
-	
-	
+		
 	public String getCityDirection() {
 		  return cityDirection;
 	}	
-	
-	
+		
 	public double getLatitude() {
 		return latitude;
 	}	
-
 	
 	public void setLatitude(Double _latitude) {
 		latitude = _latitude;		
 	}
-	
 	
 	public double getLongitude() {
 		return longitude;
@@ -147,12 +139,9 @@ public class Stop {
 		
 	}
 	
-	
-	
 	public void setLocation(Location _location) {
 		 location = _location;
 	}
-	
 	
 	public Location getLocation() {
 		if (location != null) {
@@ -225,39 +214,39 @@ public class Stop {
 	}   
 
 	
-	/**
-	 * @return true if starred
-	 */
-	public boolean isStarred() {
-		return starred;
-	}
-
-	
-	/**
-	 * @param starred true to star
-	 */
-	public void setStarred(boolean _starred) {
-		starred = _starred;
-	}
-	
-	/**
-	 * @param starred true to star
-	 */
-	public void setStarred(int _starred) {
-		if (_starred == 1) {
-			starred = true;
-		}
-	}
-	
-	
-	public void toggleStarred() {
-		if(starred) {
-			starred = false;
-		}
-		else {
-			starred = true;
-		}
-	}
+//	/**
+//	 * @return true if starred
+//	 */
+//	public boolean isStarred() {
+//		return starred;
+//	}
+//
+//	
+//	/**
+//	 * @param starred true to star
+//	 */
+//	public void setStarred(boolean _starred) {
+//		starred = _starred;
+//	}
+//	
+//	/**
+//	 * @param starred true to star
+//	 */
+//	public void setStarred(int _starred) {
+//		if (_starred == 1) {
+//			starred = true;
+//		}
+//	}
+//	
+//	
+//	public void toggleStarred() {
+//		if(starred) {
+//			starred = false;
+//		}
+//		else {
+//			starred = true;
+//		}
+//	}
 	
 	
 	public void setRoutes(List<Route> _routes) {
@@ -270,7 +259,7 @@ public class Stop {
 	}   	
 	
 	
-	public String getRoutesString() {
+	public String getRoutesListString() {
 		String routesString = "";
 
 		if(routes!=null&&routes.size()>0){
@@ -304,5 +293,7 @@ public class Stop {
 	public String toString() {
 		return ("Stop " + tramTrackerID + ": " + getPrimaryName());
 	}
+
+
 	
 }

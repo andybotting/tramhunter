@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2010 Andy Botting <andy@andybotting.com>  
+    
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+     
+    This file is distributed in the hope that it will be useful, but  
+    WITHOUT ANY WARRANTY; without even the implied warranty of  
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  
+    General Public License for more details.  
+     
+    You should have received a copy of the GNU General Public License  
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.  
+    
+    This file incorporates work covered by the following copyright and  
+    permission notice:
+
+    Copyright 2010 Google Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <!-- Base application theme is the default theme. -->
+    <style name="Theme" parent="android:Theme.Light"></style>
+
+    <!-- Variation on the Light theme that turns off the title -->
+    <style name="Theme.TramHunterStyle" parent="android:style/Theme.Light">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="HomeButton">
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/foreground1</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="TitleBar">
+        <item name="android:id">@id/title_container</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">@dimen/title_height</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@color/title_background</item>
+    </style>
+
+    <style name="TitleBarAction">
+        <item name="android:layout_width">@dimen/title_height</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@drawable/title_button</item>
+    </style>
+
+    <style name="TitleBarProgressIndicator" parent="@android:style/Widget.ProgressBar.Small">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">12dip</item>
+        <item name="android:layout_marginRight">12dip</item>
+        <item name="android:layout_marginTop">12dip</item>
+        <item name="android:indeterminate">true</item> 
+    </style>
+
+    <style name="TitleBarProgressIndicatorInverse" parent="@android:style/Widget.ProgressBar.Small.Inverse">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">12dip</item>
+        <item name="android:layout_marginRight">12dip</item>
+        <item name="android:layout_marginTop">12dip</item>
+        <item name="android:indeterminate">true</item> 
+    </style>
+    
+    
+     <style name="SmallSpinnerInverse" parent="@android:style/Widget.ProgressBar.Small.Inverse">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:indeterminate">true</item> 
+        <item name="android:layout_margin">6dip</item>
+    </style>   
+
+
+    <style name="TitleBarSeparator">
+        <item name="android:layout_width">1px</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@color/title_separator</item>
+    </style>
+
+    <style name="TitleBarLogo">
+        <item name="android:id">@id/title_logo</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="TitleBarSpring">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="TitleBarText">
+        <item name="android:id">@id/title_text</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:paddingLeft">12dip</item>
+        <item name="android:paddingRight">12dip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/title_text</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="TextHeader">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="TextHeaderTwo">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="TextBody">
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+        <item name="android:textColor">@android:color/secondary_text_light</item>
+    </style>
+    
+    <style name="TitleNotBold">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="Title">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="Subtitle">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">@android:color/secondary_text_light</item>
+    </style>
+
+    <style name="HeaderItem">
+        <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingRight">6dip</item>
+        <item name="android:paddingTop">6dip</item>
+        <item name="android:paddingBottom">6dip</item>
+    </style>
+ 
+ 
+    <style name="ListHeader">
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingRight">10dip</item>
+        <item name="android:paddingTop">8dip</item>
+        <item name="android:paddingBottom">8dip</item>
+    </style>    
+
+    <style name="TightListItem">
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="ListItem">
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingRight">10dip</item>
+        <item name="android:paddingTop">6dip</item>
+        <item name="android:paddingBottom">6dip</item>
+    </style>
+    	
+    <style name="ListSubItem">
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">10dip</item>
+        <item name="android:paddingTop">6dip</item>
+        <item name="android:paddingBottom">6dip</item>
+        <item name="android:textColor">@color/gray</item>
+    </style>
+    
+    <style name="ListTitle">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="ListSubtitle">
+        <item name="android:textSize">@dimen/text_size_small</item>
+		<item name="android:textColor">@color/gray</item>
+    </style>
+    
+    <style name="DialogTextMedium">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+    <style name="DialogTextSmall">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+</resources>
