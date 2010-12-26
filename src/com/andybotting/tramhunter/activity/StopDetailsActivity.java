@@ -433,20 +433,18 @@ public class StopDetailsActivity extends ListActivity {
 				mDB = new TramHunterDB(getBaseContext());
 				
 				int tramNumber = thisTram.getVehicleNo();
-				
 				if (LOGV) Log.v(TAG, thisTram.toString() + " has tram number: " + tramNumber);
+				
 				if (tramNumber > 0) {
 					String tramClass = mDB.getTramClass(tramNumber);
 					String tramClassImage = UIUtils.getTramImage(tramClass);
-					
-					if (LOGV) Log.v(TAG, "Tram Class: " + tramClass + " Tram Image: " + tramClassImage);					
-				
-					int resID = getResources().getIdentifier(tramClassImage, "drawable", getPackageName());
-					((ImageView) pv.findViewById(R.id.tramClass)).setPadding(3, 5, 3, 3);
-					((ImageView) pv.findViewById(R.id.tramClass)).setBackgroundResource(resID);
-				}
-				else {
-					
+
+					if (tramClassImage != null) {	
+						if (LOGV) Log.v(TAG, "Tram Class: " + tramClass + " Tram Image: " + tramClassImage);
+						int resID = getResources().getIdentifier(tramClassImage, "drawable", getPackageName());
+						((ImageView) pv.findViewById(R.id.tramClass)).setPadding(3, 5, 3, 3);
+						((ImageView) pv.findViewById(R.id.tramClass)).setBackgroundResource(resID);
+					}
 				}
 				mDB.close();
 			}

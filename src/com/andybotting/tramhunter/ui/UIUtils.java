@@ -135,6 +135,10 @@ public class UIUtils {
      */
     public static String getTramImage(String tramClass) {
     	
+    	// If tramClass is null, 
+    	if (tramClass == null)
+    		return null;
+    	
 		// Match the name
 		if (tramClass.matches("A"))
 			return "class_a";

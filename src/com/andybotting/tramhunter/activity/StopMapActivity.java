@@ -72,8 +72,14 @@ public class StopMapActivity extends MapActivity {
 
 		// My Location button
 		findViewById(R.id.title_btn_myloc).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {       
-		    	mMapView.getController().animateTo(mMyLocationOverlay.getMyLocation());
+		    public void onClick(View v) {     
+		    	GeoPoint myLoc = mMyLocationOverlay.getMyLocation();
+		    	if (myLoc != null) {
+		    		mMapView.getController().animateTo(myLoc);
+		    	}
+		    	else {
+		    		UIUtils.popToast(getApplicationContext(), "Unable to find your location");
+		    	}
 		    }
 		});	
         
