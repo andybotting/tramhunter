@@ -2,9 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 		  package="com.andybotting.tramhunter" 
-		  android:versionCode="70" 
-		  android:versionName="0.7.0"
-		  android:installLocation="auto">
+		  android:installLocation="auto" android:versionCode="791" android:versionName="0.8-test1">
 	  
 	<!-- Application -->
     <application android:icon="@drawable/icon" 
@@ -85,7 +83,7 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-	
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	
 	<uses-sdk android:minSdkVersion="3" 
 		android:targetSdkVersion="8" />
@@ -95,4 +93,5 @@
 		largeScreens="true" 
 		android:anyDensity="true" />
 	
+
 </manifest> 

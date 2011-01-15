@@ -1,5 +1,6 @@
 package com.andybotting.tramhunter.dao;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -30,12 +32,24 @@ public class TramHunterDB extends SQLiteOpenHelper {
     private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
 	 
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
-	private static final String DB_NAME = "tramhunter.db";
-	private static final String DB_PATH = "/data/data/"+ AUTHORITY + "/databases/";
-	private static final String DB_FILE = DB_PATH + DB_NAME;
+	private static final String DATABASE_NAME = "tramhunter.db";
+	
+	private static final String DATABASE_INTERNAL_PATH = "/data/data/"+ AUTHORITY + "/databases/";
+    
+	// Update this with the App Version Code (App Version x 100)
+	// E.g. 
+	// 	App Version v0.1.00 = DB Version 100
+	//  App Version v0.2.92 = DB Version 292
+	// 	App Version v1.2.0 = DB Version 1200
+	private static final int DATABASE_VERSION = 791;
+	
+	
+	private SQLiteDatabase mDB = null;
+	private Context mContext;
+	private boolean mIsInitializing = false;
 
-	// Update this is we modify the DB in any way
-	private static final int DB_VERSION = 7;
+	// Are we using the internal database?
+	private boolean mIsDBInternal = true;
 	
 	// Existing
 	private static final String TABLE_ROUTES = "routes";
@@ -56,85 +70,132 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		+ "JOIN destination_stops ON destination_stops.destination_id = destinations._id "
 		+ "JOIN routes ON destinations.route_id = routes._id";
 	
-
-	private SQLiteDatabase db; 
-	private Context context;
-	private PreferenceHelper mPreferenceHelper;
 	
-	public TramHunterDB(Context context) {
-		super(context, DB_NAME, null, DB_VERSION);
-		this.context = context;
-		this.mPreferenceHelper = new PreferenceHelper(context);
+    public TramHunterDB(Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		mContext = context;
+		if (LOGV) Log.v(TAG, "Instantiating TramHunter database");
 	}	
-	
 	
 	public SQLiteDatabase getDatabase() {
 		SQLiteDatabase db;  
 		
+		if (LOGV) Log.v(TAG, "Getting DB");
+		db = getExternalStorageDB();
+		if (db == null) {
+			if (LOGV) Log.v(TAG, "DB from SD Card failed, using internal");
+			db = getInternalStorageDB();
+		}
+
+		return db;
+	}
+	
+	/**
+	 * Return the SQL Database from the internal device storage
+	 * @return
+	 */
+	private SQLiteDatabase getInternalStorageDB() {
+		if (LOGV) Log.v(TAG, "Getting DB from device internal storage");
+
+		SQLiteDatabase db = null;
+		String dbFile = DATABASE_INTERNAL_PATH + DATABASE_NAME;
+
 		try {		 	
-			this.createDataBase();
+			this.createDB(dbFile);
 		} 
 		catch (IOException ioe) {
-			throw new Error("Unable to create database");
+			throw new Error("Unable to create database:" + ioe);
 		}
-	
+
 		try {
-			this.openDataBase();
+			this.openDB(dbFile);
 		}
 		catch(SQLException sqle){
 			throw sqle;
 		}
 
-		db = this.getWritableDatabase();
-			
+		mIsDBInternal = true;
+		db = getWritableDatabase(dbFile);
+		return db;
+	}
+
+
+	/**
+	 * Return the SQL Database from external storage
+	 */
+	private SQLiteDatabase getExternalStorageDB() {
+		if (LOGV) Log.v(TAG, "Getting DB from external storage (SD Card)");
+
+		SQLiteDatabase db = null;
+
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            return null;
+
+        // Build the directory on the SD Card, if it doesn't exist
+        File appDbDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + AUTHORITY + "/files");
+        if (!appDbDir.exists()) {
+        	if (LOGV) Log.v(TAG, "Making dirs");
+        	appDbDir.mkdirs();
+        }
+
+        // Our dbFile at /mnt/sdcard/Android/data/com.andybotting.tubechaser/files/tubechaser.db
+        File dbFileObj = new File(appDbDir, DATABASE_NAME);
+        String dbFile = dbFileObj.getAbsolutePath();
+        
+		try {	 	
+			this.createDB(dbFile);
+		} 
+		catch (IOException ioe) {
+			throw new Error("Unable to create database:" + ioe);
+		}
+
+		try {
+			this.openDB(dbFile);
+		}
+		catch(SQLException sqle){
+			throw sqle;
+		}
+
+		mIsDBInternal = false;
+		db = getWritableDatabase(dbFile);
 		return db;
 	}
 	
-	public void createDataBase() throws IOException{
- 
-		boolean dbExist = checkDataBase();
+	/**
+	 * Create the initial database at a given file path
+	 * @param dbFile - a String representing the absolute file name
+	 * @throws IOException
+	 */
+	public void createDB(String dbFile) throws IOException{
+
+		boolean dbExist = checkDB(dbFile);
  
 		if (dbExist) {
-			List<Integer> oldFavouriteStops = new ArrayList<Integer>();
+			if (LOGV) Log.v(TAG, "Found existing DB at " + dbFile);
 
-			db = SQLiteDatabase.openDatabase(DB_FILE, null, SQLiteDatabase.OPEN_READONLY);
-			int thisDBVersion = db.getVersion();
+			mDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
+			int thisDBVersion = mDB.getVersion();
+			mDB.close();
 			
-			// Get the favourite stops if the version is changing
-			if (thisDBVersion < 7) {
-				if (LOGV) Log.v(TAG, "Existing DB version < 7, upgrading any existing favourites...");
-				oldFavouriteStops = getOldFavouriteStops(db);
-			}
-			
-			db.close();
-			
-			if (thisDBVersion < DB_VERSION) {							
+			if (LOGV) Log.v(TAG, "Current DB Version: v" + thisDBVersion + " - Shipped DB Version is v" + DATABASE_VERSION);
+			if (thisDBVersion < DATABASE_VERSION) {							
 				try {
-					// Upgrade the DB
-					if (LOGV) Log.v(TAG, "Copying database...");
-					copyDataBase();
-					
-					// If we're upgrading with existing favourites
-					if (oldFavouriteStops.size() > 0) {
-						if (LOGV) Log.v(TAG, "Found " + oldFavouriteStops.size() + " old favourite stop(s)...");
-						for (int tramTrackerID : oldFavouriteStops)
-							mPreferenceHelper.starStop(tramTrackerID);
-					}
-				} 
-				catch (IOException e) {
+					copyDB(dbFile);
+				} catch (IOException e) {
 					throw new Error("Error copying database");
 				}
 			}	
 		}
-		else{
+		else {
+			if (LOGV) Log.v(TAG, "Creating a new DB at " + dbFile);
 			// By calling this method and empty database will be created into the default system path
 			// of your application so we are gonna be able to overwrite that database with our database.
-			this.getReadableDatabase();
- 
+			mDB = getReadableDatabase(dbFile);
+			
 			try {
-				copyDataBase();
+				copyDB(dbFile);
 			} catch (IOException e) {
-				throw new Error("Error copying database");
+				throw new Error("Error copying database: " + e);
 			}
 		}
 	}
@@ -144,12 +205,12 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * Check if the database already exist to avoid re-copying the file each time you open the application.
 	 * @return true if it exists, false if it doesn't
 	 */
-	private boolean checkDataBase() {
- 
-		SQLiteDatabase checkDB = null;
- 
+	private boolean checkDB(String dbFile){
+ 		SQLiteDatabase checkDB = null;
+ 		if (LOGV) Log.v(TAG, "Checking for an existing DB at " + dbFile);
+ 		
 		try {
-			checkDB = SQLiteDatabase.openDatabase(DB_FILE, null, SQLiteDatabase.OPEN_READONLY);
+			checkDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
 		}
 		catch(SQLiteException e){
 			//database does't exist yet.
@@ -166,55 +227,164 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * system folder, from where it can be accessed and handled.
 	 * This is done by transfering bytestream.
 	 * */
-	private void copyDataBase() throws IOException {
+	private void copyDB(String dbFile) throws IOException {
+		
+		if (LOGV) Log.v(TAG, "Copying packaged DB to " + dbFile);
 		
 		// Open your local db as the input stream
-		InputStream myInput = context.getAssets().open(DB_NAME);
+		InputStream is = mContext.getAssets().open(DATABASE_NAME);
 
 		// Open the empty db as the output stream
-		OutputStream myOutput = new FileOutputStream(DB_FILE);
- 
+		OutputStream os = new FileOutputStream(dbFile);
+		
 		// Transfer bytes from the inputfile to the outputfile
 		byte[] buffer = new byte[1024];
 		int length;
-		while ( (length = myInput.read(buffer) ) > 0) {
-			myOutput.write(buffer, 0, length);
+		while ( (length = is.read(buffer) ) > 0) {
+			os.write(buffer, 0, length);
 		}
- 
+
 		// Close the streams
-		myOutput.flush();
-		myOutput.close();
-		myInput.close();
+		os.flush();
+		os.close();
+		is.close();
+		
+		if (LOGV) Log.v(TAG, "DB copying completed");
 	}
 
-	
-	public void openDataBase() throws SQLException {
+	public void openDB(String dbFile) throws SQLException {
 	 	// Open the database
-		db = SQLiteDatabase.openDatabase(DB_FILE, null, SQLiteDatabase.OPEN_READONLY);
+		mDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
 		// Close the DB to prevent a leak
-		db.close();
+		mDB.close();
 	}
- 
+
 	@Override
 	public synchronized void close() {
-		if(db != null)
-			db.close();
+		if(mDB != null)
+			mDB.close();
 		super.close();
 	}
  
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		if (LOGV) Log.v(TAG, "DB onCreate() called");
 		// Do nothing here
 	}
  
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if (LOGV) Log.v(TAG, "DB onUpgrade() called");
 		// Do nothing here
 	}
 	
+	public synchronized SQLiteDatabase getReadableDatabase(String dbFile) {
+		if(mIsDBInternal) {
+			return super.getReadableDatabase();
+		}
+		
+		
+		if (mDB != null && mDB.isOpen()) {
+			return mDB; // The database is already open for business
+		}
+
+		if (mIsInitializing) {
+			throw new IllegalStateException("getReadableDatabase called recursively");
+		}
+
+		try {
+			return getWritableDatabase();
+		} catch (SQLiteException e) {
+			Log.e(TAG, "Couldn't open " + DATABASE_NAME + " for writing (will try read-only):", e);
+		}
+
+		SQLiteDatabase db = null;
+		try {
+			mIsInitializing = true;
+			db = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
+			if (db.getVersion() != DATABASE_VERSION) {
+				throw new SQLiteException("Can't upgrade read-only database from version " + db.getVersion() + " to " + DATABASE_VERSION + ": " + dbFile);
+			}
+
+			onOpen(db);
+			if (LOGV) Log.v(TAG, "Opened " + DATABASE_NAME + " in read-only mode");
+			mDB = db;
+			return mDB;
+		} finally {
+			mIsInitializing = false;
+			if (db != null && db != mDB)
+				db.close();
+		}
+	}
+
+
+	public synchronized SQLiteDatabase getWritableDatabase(String dbFile) {
+		if(mIsDBInternal) {
+			return super.getWritableDatabase();
+		}
+		if (mDB != null && mDB.isOpen() && !mDB.isReadOnly()) {
+			return mDB; // The database is already open for business
+		}
+
+		if (mIsInitializing) {
+			throw new IllegalStateException("getWritableDatabase called recursively");
+		}
+
+		// If we have a read-only database open, someone could be using it
+		// (though they shouldn't), which would cause a lock to be held on
+		// the file, and our attempts to open the database read-write would
+		// fail waiting for the file lock. To prevent that, we acquire the
+		// lock on the read-only database, which shuts out other users.
+
+		boolean success = false;
+		SQLiteDatabase db = null;
+		// if (mDatabase != null) mDatabase.lock(); //can't call the locks for
+		// some reason. beginTransaction does lock it though
+		try {
+			mIsInitializing = true;
+			db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+			int version = db.getVersion();
+			if (version != DATABASE_VERSION) {
+				db.beginTransaction();
+				try {
+					if (version == 0) {
+						onCreate(db);
+					} else {
+						onUpgrade(db, version, DATABASE_VERSION);
+					}
+					db.setVersion(DATABASE_VERSION);
+					db.setTransactionSuccessful();
+				} finally {
+					db.endTransaction();
+				}
+			}
+
+			onOpen(db);
+			success = true;
+			return db;
+		} finally {
+			mIsInitializing = false;
+			if (success) {
+				if (mDB != null) {
+					try {
+						mDB.close();
+					} catch (Exception e) {
+					}
+					// mDatabase.unlock();
+				}
+				mDB = db;
+			} else {
+				// if (mDatabase != null) mDatabase.unlock();
+				if (db != null)
+					db.close();
+			}
+		}
+	}
+	
+	
 	// Get a list of destinations
 	public List<Route> getRoutes() {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 	
 		List<Route> routes = new ArrayList<Route>();
 		
@@ -283,12 +453,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return routes;
 	}
 	
-	
-
 
 	// Get a list of destinations
 	public List<Destination> getDestinations() {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 
 		List<Destination> destinations = new ArrayList<Destination>();
 		
@@ -327,7 +495,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Get a stop from a given TramTracker ID
 	public Destination getDestination(long destinationId) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 
 		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, 
 				new String[] { "destinations._id", "number", "destination", "direction"}, 
@@ -362,7 +530,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Get a list of destinations for a given TramTracker ID
 	public List<Route> getRoutesForStop(int tramTrackerId) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 
 		List<Route> routes = new ArrayList<Route>();
 		
@@ -449,7 +617,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Get a list of our 'starred' stops
 	public List<Stop> getAllStops() {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 		
 		List<Stop> stops = new ArrayList<Stop>();
 		
@@ -499,20 +667,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}	
 	
 	
-	
-//	// Get a list of our 'starred' stops
-//	public List<Stop> getFavouriteStops() {
-//		db = getDatabase();
-//		List<Stop> stops = getFavouriteStops(db);
-//		db.close();
-//		
-//		return stops;
-//	}	
-//	
-	
-	
-	
-	
 	private List<Integer> getOldFavouriteStops(SQLiteDatabase db) {
 		List<Integer> favouriteStops = new ArrayList<Integer>();
 		
@@ -541,7 +695,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	// Get a list of Stops for a particular destination
 	public List<Stop> getStopsForDestination(long destinationId) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 		
 		List<Stop> stops = new ArrayList<Stop>();
 		
@@ -571,7 +725,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Get a list of Stops for a particular destination
 	public List<Stop> getStopsForSearch(String searchString) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 		
 		String searchQuery = StopsColumns.FLAG_NUMBER + " LIKE '%" + searchString 
 								+ "%' OR " + StopsColumns.PRIMARY_NAME + " LIKE '%" + searchString + "%'"
@@ -605,16 +759,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return stops;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
 	// Get a stop object from a given TramTracker ID
 	public Stop getStop(int tramTrackerId) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 
 		Cursor c = db.query(TABLE_STOPS, 
 							null, 
@@ -655,7 +802,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	
 	// Check to see if a stop exists
 	public boolean checkStop(int tramTrackerId){
-		db = getDatabase();		
+		SQLiteDatabase db = getDatabase();		
 		
 		Cursor c = db.query(TABLE_STOPS, 
 							new String[] { StopsColumns.TRAMTRACKER_ID }, 
@@ -676,87 +823,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			
 		return returnValue;
 	}
-	
-	// 
-//	public boolean getStopStar(int tramTrackerId) {
-//		db = getDatabase();
-//
-//		Cursor c = db.query(TABLE_STOPS, 
-//							new String[] { "starred" }, 
-//							StopsColumns.TRAMTRACKER_ID + " = '"  + tramTrackerId + "'", 
-//							null, 
-//							null, 
-//							null, 
-//							null);
-//		
-//		int numRows = c.getCount();
-//		c.moveToFirst();
-//		
-//		boolean returnValue = false;
-//		if (numRows == 1){
-//			returnValue = (c.getInt(0) != 0);
-//		}
-//	
-//		return returnValue;
-//		
-//	}
-//	
-//	
-//	// Allow a DB query based on the TramTrackerID
-//	public void setStopStar(int tramTrackerId, boolean star) {	
-//		db = getDatabase();
-//		
-//		int starred = 0;
-//		if (star) { 
-//			starred = 1;
-//		}
-//		
-//		ContentValues values = new ContentValues();
-//		values.put("starred", starred);
-//		
-//		db.update(TABLE_STOPS, 
-//				values, 
-//				StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'", 
-//				null);
-//		
-//		db.close();
-//	}
-//	
-//	// Set the 'read' flag in the database
-//	public void setFirstLaunch() {
-//		db = getDatabase();
-//		ContentValues values = new ContentValues();
-//		values.put("id", 0);
-//		values.put("read", 1);
-//		db.insert(TABLE_FIRST_LAUNCH, null, values);
-//		db.close();
-//	}
-//	
-//	
-//	// Return a bool for whether the opening message dialog has been read
-//	public boolean checkFirstLaunch(){
-//		db = getDatabase();	
-//		
-//		Cursor c = db.query(TABLE_FIRST_LAUNCH, 
-//							new String[] { "read" }, 
-//							"id=0", 
-//							null, 
-//							null, 
-//							null, 
-//							null);
-//		
-//		int numRows = c.getCount();
-//		c.moveToFirst();
-//		
-//		boolean returnValue = false;
-//		if (numRows == 1){
-//			returnValue = (c.getInt(0) != 0);
-//		}
-//		c.close();
-//		db.close();
-//			
-//		return returnValue;
-//	}
+
 	
 	private Stop getStopFromCursor(Cursor c) {
 		Stop stop = new Stop();
@@ -783,45 +850,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		return stop;
 	}	
 	
-//	// Set the GUID in our database for next time
-//	public void setGUID(String guid) {
-//		db = getDatabase();
-//		ContentValues values = new ContentValues();
-//		values.put("id", 0);
-//		values.put("guid", guid);
-//		db.insert(TABLE_GUID, null, values);
-//		db.close();
-//	}
-//	
-//	
-//	// Return a String of the GUID value generated from TramTracker
-//	public String getGUID(){
-//		db = getDatabase();	
-//		
-//		Cursor c = db.query(TABLE_GUID, 
-//							new String[] { "guid" }, 
-//							"id=0", 
-//							null, 
-//							null, 
-//							null, 
-//							null);
-//		
-//		int numRows = c.getCount();
-//		c.moveToFirst();
-//		String guid = "";
-//
-//		if (numRows == 1){
-//			guid = c.getString(0);
-//		}
-//
-//		c.close();
-//		db.close();
-//		return guid;
-//	}
-	
+
 	// Get the tram class based on the number
 	public String getTramClass(int vehicleNo) {
-		db = getDatabase();
+		SQLiteDatabase db = getDatabase();
 		
 		Cursor c = db.query(TABLE_TRAMS, 
 				new String[] { TramsColumns.CLASS }, 
@@ -845,40 +877,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		db.close();
 		return tramClass;
 	}
-	
-	
-//	// Set the statsdate in our database
-//	public void setStatsDate() {
-//		db = getDatabase();
-//		ContentValues values = new ContentValues();
-//		values.put("id", 0);
-//		values.put("statsdate", System.currentTimeMillis());
-//		db.insert(TABLE_STATS, null, values);
-//		db.close();
-//	}
-//
-//	
-//	public long getStatsDate() {
-//		db = getDatabase();
-//		Cursor c = db.query(TABLE_STATS, 
-//				new String[] { "statsdate" }, 
-//				"id=0", 
-//				null, 
-//				null, 
-//				null, 
-//				null);
-//
-//		int numRows = c.getCount();
-//		c.moveToFirst();
-//		long returnValue = 0;
-//		if (numRows == 1){
-//			returnValue = c.getLong(0);
-//		}
-//		c.close();
-//		db.close();
-//		return returnValue;
-//	}
-	
 	
 	
 
