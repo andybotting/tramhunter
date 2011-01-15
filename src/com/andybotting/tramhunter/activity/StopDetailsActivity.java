@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +36,6 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
@@ -307,6 +307,11 @@ public class StopDetailsActivity extends ListActivity {
         }
 	}
 	
+    /**
+     * 
+     * @author andy
+     *
+     */
 	private class GetNextTramTimes extends AsyncTask<NextTram, Void, List<NextTram>> {
 
 		// Can use UI thread here
@@ -337,7 +342,6 @@ public class StopDetailsActivity extends ListActivity {
 				// Need some better exception handling
 				if (mErrorRetry < MAX_ERRORS) {
 					mErrorRetry++;
-					//if (LOGV) Log.v(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e.getMessage());
 					this.doInBackground(params);
 				}
 			}
@@ -348,7 +352,6 @@ public class StopDetailsActivity extends ListActivity {
 		// Can use UI thread here
 		@Override
 		protected void onPostExecute(List<NextTram> nextTrams) {
-			Log.d("Testing", "onPostExecute");
         	if (mErrorRetry == MAX_ERRORS) {
             	// Display a toast with the error
         		String error = "Failed to fetch tram times";
@@ -358,27 +361,25 @@ public class StopDetailsActivity extends ListActivity {
         	}
         	else {
 	
-				if(nextTrams.size() > 0) {
-					// Sort trams by minutesAway
-					Collections.sort(nextTrams);
+				if (nextTrams.size() > 0) {
 					mLoadingError = false;
 					
-					// > 10 because ksoap2 fills in anytype{} instead of null
-					if (nextTrams.get(0).getSpecialEventMessage().length() > 10) {
-						CharSequence text = nextTrams.get(0).getSpecialEventMessage();
-						int duration = Toast.LENGTH_LONG;
-						Toast toast = Toast.makeText(mContext, text, duration);
-						toast.show();
-					}
+					// Sort trams by minutesAway
+					Collections.sort(nextTrams);
 					
-					if (nextTrams.size() > 1) {
-						// Show trams list
+					// Show trams list					
+					if (nextTrams.size() > 1)
 						setListAdapter(new NextTramsListAdapter());
-					}
 				}
 
-        		// Upload stats
+        		// If it's the first reload
         		if (mFirstDepartureReqest) {
+        			
+					// > 10 because ksoap2 fills in anytype{} instead of null
+        			String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
+					if (specialEventMessage.length() > 10)
+						showSpecialEvent(specialEventMessage);
+        			
    					if (mPreferenceHelper.isSendStatsEnabled()) {
    						new Thread() {
    							public void run() {
@@ -386,6 +387,8 @@ public class StopDetailsActivity extends ListActivity {
    							}
    						}.start();
    					}
+   					
+   					// Reset the first departure request
    					mFirstDepartureReqest = false;
         		}
 
@@ -397,6 +400,19 @@ public class StopDetailsActivity extends ListActivity {
     		mShowDialog = false;
         	setListAdapter(mListAdapter);
 		}
+	}
+	
+	/**
+	 * Show a dialog message for a given 'Special Event'
+	 * @param message
+	 */
+	private void showSpecialEvent(String message) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Special Event");
+        dialogBuilder.setMessage(message);
+        dialogBuilder.setPositiveButton("OK", null);
+        dialogBuilder.setIcon(R.drawable.icon);
+        dialogBuilder.show();
 	}
 	
 
@@ -455,7 +471,7 @@ public class StopDetailsActivity extends ListActivity {
 
 	
     private void uploadStats() {
-    	Log.d("Testing", "Sending stop request statistics");
+    	if (LOGV) Log.v(TAG, "Sending stop request statistics");
     	
 		// gather all of the device info
     	try {
