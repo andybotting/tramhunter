@@ -8,7 +8,7 @@
     <com.andybotting.tramhunter.map.AndroidBigImageView android:id="@+id/map_view"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent"
-    	android:scaleType="matrix" > <!-- matrix for Android 1.6 +, "centerCrop" for Android 1.5 -->
+    	android:scaleType="matrix" > <!-- Change it to "centerCrop" for Android 1.5 -->
     </com.andybotting.tramhunter.map.AndroidBigImageView>
     
     <LinearLayout

@@ -20,16 +20,14 @@
 		android:layout_alignParentTop="true"		
 		android:layout_toLeftOf="@+id/starImageView" />
 				
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/stopDetailsTextView"
+	<TextView android:id="@+id/stopDetailsTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/stopNameTextView"
 		style="@style/ListSubtitle"
 		android:textSize="@dimen/text_size_tiny" />
 		
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/stopRoutesTextView"
+	<TextView android:id="@+id/stopRoutesTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/stopDetailsTextView"

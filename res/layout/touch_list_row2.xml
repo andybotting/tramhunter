@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"    
+    android:minHeight="64dip"
+    android:gravity="center_vertical"
+    android:ignoreGravity="@+id/icon">
+    
+    <ImageView android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"    
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="8dip"
+        android:paddingBottom="8dip"
+		android:src="@drawable/grabber" />
+
+	<RelativeLayout android:id="@+id/departures_row"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toRightOf="@+id/icon" >
+
+		<TextView android:id="@+id/stopNameTextView"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			style="@style/ListTitle" />
+						
+		<TextView android:id="@+id/stopDetailsTextView"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/stopNameTextView"
+			style="@style/ListSubtitle"
+			android:textSize="@dimen/text_size_tiny" />
+				
+		<TextView android:id="@+id/stopRoutesTextView"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/stopDetailsTextView"
+			style="@style/ListSubtitle"
+			android:textSize="@dimen/text_size_tiny" />	
+			
+	</RelativeLayout>	
+
+</RelativeLayout>
