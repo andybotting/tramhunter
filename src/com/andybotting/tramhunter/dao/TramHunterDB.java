@@ -29,7 +29,7 @@ import com.andybotting.tramhunter.util.StringUtil;
 public class TramHunterDB extends SQLiteOpenHelper {
 	
     private static final String TAG = "TramHunterDB";
-    private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 	 
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DATABASE_NAME = "tramhunter.db";
@@ -41,7 +41,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// 	App Version v0.1.00 = DB Version 100
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 793;
+	private static final int DATABASE_VERSION = 800;
 	
 	
 	private SQLiteDatabase mDB = null;

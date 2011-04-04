@@ -2,9 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 		  package="com.andybotting.tramhunter" 
-		  android:versionCode="793" 
-		  android:versionName="0.8-test3"
-		  android:installLocation="auto">
+		  android:installLocation="auto" android:versionName="0.8" android:versionCode="800">
 		  <!-- Keep the version code in sync with TramHunterDB -->
 	  
 	<!-- Application -->
