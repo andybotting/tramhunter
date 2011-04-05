@@ -1,12 +1,10 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,12 +21,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.andybotting.tramhunter.ui.TouchListView;
-
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Destination;
-import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.PreferenceHelper;
@@ -38,7 +33,6 @@ public class StopsListActivity extends ListActivity {
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 	private final static int CONTEXT_MENU_STAR_STOP = 1;
 	
-	private boolean mIsFavouritesView;
 	private ListView mListView;
 	private StopsListAdapter mListAdapter;
 	private List<Stop> mStops;

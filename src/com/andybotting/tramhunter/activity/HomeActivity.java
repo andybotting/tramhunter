@@ -99,7 +99,9 @@ public class HomeActivity extends Activity {
 				intent = null;
 			}
 			else if (activityName.equals("StopsListActivity")) {
-				startActivity(new Intent(this, StopsListActivity.class));
+				// Should be renamed to FavStopsListActivity, but causes a problem
+				// on upgrade, so we'll just leave it
+				startActivity(new Intent(this, FavStopsListActivity.class));
 			}
 			else if (activityName.equals("ClosestStopsListActivity")) {
 				Stop closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
