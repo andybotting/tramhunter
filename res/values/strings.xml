@@ -29,6 +29,7 @@
     
     <string name="label_no_results">No Results</string>      
     <string name="label_loading">Loading...</string>  
+    <string name="label_select_route">Select Route</string>      
 
 	<!-- Menu item labels -->
 	<string name="menu_item_about">About</string>

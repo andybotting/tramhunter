@@ -30,16 +30,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
+import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
@@ -62,6 +68,8 @@ public class StopDetailsActivity extends ListActivity {
 
 	private List<NextTram> mNextTrams = new ArrayList<NextTram>();
 	private Stop mStop;
+	private List<Route> mRoutes;
+	private Route mRoute;
 	private int mTramTrackerId;
     private volatile Thread mRefreshThread;
     
@@ -70,6 +78,8 @@ public class StopDetailsActivity extends ListActivity {
     
 	private ListAdapter mListAdapter;
 	private ListView mListView;
+	private Spinner mRoutesSpinner;
+	private ArrayAdapter<CharSequence> mAdapterForSpinner;
     
     private Context mContext;
     private PreferenceHelper mPreferenceHelper;
@@ -280,16 +290,59 @@ public class StopDetailsActivity extends ListActivity {
 		secondLineText += " (" + stop.getTramTrackerID() + ")";
 		
 		//initialiseDatabase();
-		stop.setRoutes(mDB.getRoutesForStop(mTramTrackerId));
+		final List<Route> mRoutes = mDB.getRoutesForStop(mTramTrackerId);
+		stop.setRoutes(mRoutes);
 		
 		String thirdLineText = stop.getRoutesString();
 			
 		((TextView)findViewById(R.id.stopNameTextView)).setText(firstLineText);
 		((TextView)findViewById(R.id.stopDetailsTextView)).setText(secondLineText);
 		((TextView)findViewById(R.id.stopRoutesTextView)).setText(thirdLineText);
+
+		// If we have more than one route for this stop, then show the spinner
+		if (mRoutes.size() > 1) {
+			mRoutesSpinner = (Spinner)findViewById(R.id.routeSelectSpinner);
+			mRoutesSpinner.setVisibility(View.VISIBLE);
+			mAdapterForSpinner = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+			mAdapterForSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mRoutesSpinner.setAdapter(mAdapterForSpinner);
+		
+			// Add 'All'
+			mAdapterForSpinner.add("All Routes");
+			for (Route r : mRoutes) {
+				mAdapterForSpinner.add("Route " + r.getNumber());
+			}
+
+			mRoutesSpinner.setOnItemSelectedListener(
+				new OnItemSelectedListener() {
+					public void onItemSelected(
+						AdapterView<?> parent, View view, int position, long id) {
+							if (id == 0) {
+								mRoute = null;
+							}
+							else {
+								// -1 for the offset of having 'All Routes' first item
+								mRoute = mRoutes.get(position-1);
+							}
+							
+							// Refresh the results
+					    	mShowDialog = true;
+					    	new GetNextTramTimes().execute();
+	                    }
+	
+						public void onNothingSelected(AdapterView<?> parent) {
+	                    	mRoute = null;
+						}
+				}
+			);
+		}
+		
 		
 	}
 	
+    void showToast(CharSequence msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
 	
     private class CountDown implements Runnable {
         public void run() {
@@ -328,7 +381,7 @@ public class StopDetailsActivity extends ListActivity {
 		@Override
 		protected List<NextTram> doInBackground(final NextTram... params) {
 			try {
-				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop);
+				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop, mRoute);
 
 				// We'll remove all NextTrams which are longer than
 				// 300 minutes away - e.g. not running on weekend

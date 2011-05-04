@@ -189,7 +189,7 @@
         <item name="android:paddingTop">6dip</item>
         <item name="android:paddingBottom">6dip</item>
     </style>
-    	
+    
     <style name="ListSubItem">
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">10dip</item>

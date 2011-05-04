@@ -73,6 +73,16 @@
 	        style="@style/Subtitle"
 	        android:textSize="@dimen/text_size_tiny" />
 	        
+	    <Spinner android:id="@+id/routeSelectSpinner"
+	        android:prompt="@string/label_select_route"
+	        android:layout_below="@+id/stopRoutesTextView"
+	        android:layout_alignParentLeft="true"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        style="@style/Subtitle"
+	        android:textSize="@dimen/text_size_tiny"
+	        android:visibility="gone" />
+	        
 	</RelativeLayout>
 		
 	<RelativeLayout

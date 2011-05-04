@@ -16,6 +16,7 @@ import android.util.Log;
 
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
+import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
@@ -76,10 +77,17 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		return null;
 	}
 
-	public List<NextTram> getNextPredictedRoutesCollection (Stop stop) {
+	public List<NextTram> getNextPredictedRoutesCollection (Stop stop, Route route) {
 		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedRoutesCollection");
+		
 		request.addProperty("stopNo", stop.getTramTrackerID());
-		request.addProperty("routeNo", "0");
+		
+		// Filter the results by route
+		if (route == null)
+			request.addProperty("routeNo", "0");
+		else
+			request.addProperty("routeNo", route.getNumber());
+		
 		request.addProperty("lowFloor", "false");
 	   
 		SoapObject result = null;
