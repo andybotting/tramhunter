@@ -57,7 +57,7 @@ import com.andybotting.tramhunter.util.PreferenceHelper;
 public class StopDetailsActivity extends ListActivity {
 	
     private static final String TAG = "StopDetailsActivity";
-    private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 		
 	private final static int MENU_ITEM_REFRESH = 0;
 	private final static int MENU_ITEM_FAVOURITE = 1;
@@ -204,11 +204,12 @@ public class StopDetailsActivity extends ListActivity {
      */
 	private void showLoadingView(boolean isRefreshing) {
 		
-		if (mListAdapter.getCount() == 0)
+		// Only 1 entry means an error, so make it < 2
+		if (mListAdapter.getCount() < 2)
 			mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 		else
 			mListView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
-		
+
 		findViewById(R.id.departures_loading).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
 	}
 
@@ -361,9 +362,7 @@ public class StopDetailsActivity extends ListActivity {
 	}
 	
     /**
-     * 
-     * @author andy
-     *
+     * Background task for fetching tram times
      */
 	private class GetNextTramTimes extends AsyncTask<NextTram, Void, List<NextTram>> {
 
@@ -413,19 +412,23 @@ public class StopDetailsActivity extends ListActivity {
         		mErrorRetry = 0;
         	}
         	else {
-	
+        		
+        		boolean noResults = true;
+       		
 				if (nextTrams.size() > 0) {
 					mLoadingError = false;
 					
 					// Sort trams by minutesAway
 					Collections.sort(nextTrams);
 					
-					// Show trams list					
-					if (nextTrams.size() > 1)
-						setListAdapter(new NextTramsListAdapter());
+					// Show trams list, only if more than one tram.
+					if (nextTrams.size() > 1) {
+						noResults = false;
+						setListAdapter(mListAdapter);
+					}
 				}
 
-        		// If it's the first reload
+        		// If it's the first load of data
         		if (mFirstDepartureReqest) {
         			
 					// > 10 because ksoap2 fills in anytype{} instead of null
@@ -444,6 +447,11 @@ public class StopDetailsActivity extends ListActivity {
    					// Reset the first departure request
    					mFirstDepartureReqest = false;
         		}
+        		
+        		if (noResults) {
+        			mListView.getEmptyView().setVisibility(noResults ? View.VISIBLE : View.GONE);
+       				mListView.setVisibility(noResults ? View.VISIBLE : View.GONE);
+        		}
 
         	}
         	        	
@@ -451,7 +459,6 @@ public class StopDetailsActivity extends ListActivity {
         	showLoadingView(false);
         	showRefreshSpinner(false);
     		mShowDialog = false;
-        	setListAdapter(mListAdapter);
 		}
 	}
 	
