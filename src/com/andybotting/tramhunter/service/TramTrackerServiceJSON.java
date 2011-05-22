@@ -1,11 +1,10 @@
 package com.andybotting.tramhunter.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +28,8 @@ import com.andybotting.tramhunter.objects.Stop;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
 
+    private static final String TAG = "TramTrackerServiceJSON";
+    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 	
 	private static final String BASE_URL = "http://extranetdev.yarratrams.com.au/pidsservicejson/Controller";
 
@@ -76,76 +77,46 @@ public class TramTrackerServiceJSON implements TramTrackerService {
             uri = new URI(url);
             HttpGet method = new HttpGet(uri);
             HttpResponse response = httpClient.execute(method);
-
             data = response.getEntity().getContent();
         } catch (Exception e) {
             e.printStackTrace();
         }
        
+
         return data;
     }
 	
+	
     /**
-     * Parse the given {@link InputStream} into a {@link JSONArray}.
+     * Parse the given {@link InputStream} into a {@link JSONObject}.
      */
-    private static JSONArray parseJsonStream(InputStream is) throws IOException, JSONException {
-        byte[] buffer = new byte[is.available()];
-        is.read(buffer);
-        return new JSONArray(new String(buffer));
+    private static JSONObject parseJsonStream(InputStream is) throws IOException, JSONException {
+    	JSONObject jsonObject = null;
+    	try {
+    		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    		StringBuilder sb = new StringBuilder();
+    		String line = null;
+    		while ((line = reader.readLine()) != null) {
+    			sb.append(line);
+    		}
+    		is.close();
+    		String jsonData = sb.toString();
+            if (LOGV) Log.v(TAG, "JSON Response: " + jsonData);
+            jsonObject = new JSONObject(jsonData);
+    	} 
+    	catch(Exception e){
+    		e.printStackTrace();
+    	}
+		return jsonObject;
     }
 
+    
     /**
      * Parse the given {@link InputStream} into {@link Stop}
      * assuming a JSON format.
      * @return Stop
      */
     public static Stop parseStopInformation(InputStream is) throws IOException, JSONException {
-
-        Stop stop = new Stop();
-    	
-        // Parse incoming JSON stream
-        JSONArray stopData = parseJsonStream(is);
-        
-        int stopCount = stopData.length();
-        for (int i = 0; i < stopCount; i++) {
-            JSONObject stopItem = stopData.getJSONObject(i);
-            
-            JSONObject responseObject = stopItem.getJSONObject("responseObject");
-            
-            String flagStopNo = responseObject.getString("FlagStopNo");
-            String stopName = responseObject.getString("StopName");
-            String cityDirection = responseObject.getString("CityDirection");
-            String suburbName = responseObject.getString("SuburbName");
-
-			stop.setFlagStopNumber(flagStopNo);
-			stop.setStopName(stopName);
-			stop.setCityDirection(cityDirection);
-			stop.setSuburb(suburbName);
-
-        }
-        
-    	return stop;
-    }
-
-	/**
-	 * Convert the timestamp string to a java date object
-	 * @param timestamp
-	 * @return date
-	 */
-	private static Date parseTimestamp(String timestamp) {
-		//"PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
-
-		String fixedDate = timestamp.substring(7, 19);
-		Date date = new Date(fixedDate);
-		
-		return date;
-	}
-	
-	
-	/**
-	 * Get tram stop information for a given TramTracker ID
-	 */
-	public Stop getStopInformation(int tramTrackerID) {
 		//	{
 		//	   "responseObject":[
 		//	      {
@@ -166,11 +137,32 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		//	   ],
 		//	   "isError":false
 		//	}
-		
+        Stop stop = new Stop();
+    	
+        // Parse incoming JSON stream
+        JSONObject stopData = parseJsonStream(is);
+        JSONObject responseObject = stopData.getJSONObject("responseObject");
+            
+        String flagStopNo = responseObject.getString("FlagStopNo");
+        String stopName = responseObject.getString("StopName");
+        String cityDirection = responseObject.getString("CityDirection");
+        String suburbName = responseObject.getString("SuburbName");
+
+		stop.setFlagStopNumber(flagStopNo);
+		stop.setStopName(stopName);
+		stop.setCityDirection(cityDirection);
+		stop.setSuburb(suburbName);
+        
+    	return stop;
+    }
+	
+    
+	/**
+	 * Get tram stop information for a given TramTracker ID
+	 */
+	public Stop getStopInformation(int tramTrackerID) {
 		Stop stop = null;
-		
 		String url = BASE_URL + "/GetStopInformation.aspx?s=" + tramTrackerID;
-		
 		InputStream httpData = getJSONData(url);
 		
 		try {
@@ -196,59 +188,57 @@ public class TramTrackerServiceJSON implements TramTrackerService {
      */
     public static List<NextTram> parseNextPredictedRoutesCollection(InputStream is) throws IOException, JSONException {
 
+		//	[{
+		//	    "responseObject": [
+		//	        {
+		//	            "TripID": null,
+		//	            "InternalRouteNo": 55,
+		//	            "RouteNo": "55",
+		//	            "HeadboardRouteNo": "55",
+		//	            "VehicleNo": 2003,
+		//	            "Destination": "Domain Interchange",
+		//	            "HasDisruption": false,
+		//	            "IsTTAvailable": true,
+		//	            "IsLowFloorTram": false,
+		//	            "AirConditioned": true,
+		//	            "DisplayAC": false,
+		//	            "HasSpecialEvent": false,
+		//	            "SpecialEventMessage": "Bus replacement Rte 59 btw Stop 57 Hawker St & Stop 59 Airport West til approx 7am Mon.",
+		//	            "PredictedArrivalDateTime": "\/Date(1305382369000+1000)\/",
+		//	            "RequestDateTime": "\/Date(1305381485739+1000)\/"
+		//	        },
+		//	        {
+		//	            "TripID": null,
+		//	            "InternalRouteNo": 59,
+		//	            "RouteNo": "59",
+		//	            "HeadboardRouteNo": "59",
+		//	            "VehicleNo": 2025,
+		//	            "Destination": "Flinders St City",
+		//	            "HasDisruption": false,
+		//	            "IsTTAvailable": true,
+		//	            "IsLowFloorTram": false,
+		//	            "AirConditioned": true,
+		//	            "DisplayAC": false,
+		//	            "HasSpecialEvent": true,
+		//	            "SpecialEventMessage": "Bus replacement Rte 59 btw Stop 57 Hawker St & Stop 59 Airport West til approx 7am Mon.",
+		//	            "PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
+		//	            "RequestDateTime": "\/Date(1305381485739+1000)\/"
+		//	        }
+		//	    ],
+		//	    "isError": false
+		//	}]      	
+    	
     	List<NextTram> nextTrams = new ArrayList<NextTram>();
     	
         // Parse incoming JSON stream
-        JSONArray nextTramsData = parseJsonStream(is);	
-    	
-        int nextTramsCount = nextTramsData.length();
+        JSONObject nextTramsData = parseJsonStream(is);	
+        JSONArray nextTramsArray = nextTramsData.getJSONArray("responseObject");
+        int nextTramsCount = nextTramsArray.length();
         for (int i = 0; i < nextTramsCount; i++) {
         	
-            JSONObject nextTramObject = nextTramsData.getJSONObject(i);
-            JSONObject responseObject = nextTramObject.getJSONObject("responseObject");
-            
-    		//	{
-    		//	    "responseObject": [
-    		//	        {
-    		//	            "TripID": null,
-    		//	            "InternalRouteNo": 55,
-    		//	            "RouteNo": "55",
-    		//	            "HeadboardRouteNo": "55",
-    		//	            "VehicleNo": 2003,
-    		//	            "Destination": "Domain Interchange",
-    		//	            "HasDisruption": false,
-    		//	            "IsTTAvailable": true,
-    		//	            "IsLowFloorTram": false,
-    		//	            "AirConditioned": true,
-    		//	            "DisplayAC": false,
-    		//	            "HasSpecialEvent": false,
-    		//	            "SpecialEventMessage": "Bus replacement Rte 59 btw Stop 57 Hawker St & Stop 59 Airport West til approx 7am Mon.",
-    		//	            "PredictedArrivalDateTime": "\/Date(1305382369000+1000)\/",
-    		//	            "RequestDateTime": "\/Date(1305381485739+1000)\/"
-    		//	        },
-    		//	        {
-    		//	            "TripID": null,
-    		//	            "InternalRouteNo": 59,
-    		//	            "RouteNo": "59",
-    		//	            "HeadboardRouteNo": "59",
-    		//	            "VehicleNo": 2025,
-    		//	            "Destination": "Flinders St City",
-    		//	            "HasDisruption": false,
-    		//	            "IsTTAvailable": true,
-    		//	            "IsLowFloorTram": false,
-    		//	            "AirConditioned": true,
-    		//	            "DisplayAC": false,
-    		//	            "HasSpecialEvent": true,
-    		//	            "SpecialEventMessage": "Bus replacement Rte 59 btw Stop 57 Hawker St & Stop 59 Airport West til approx 7am Mon.",
-    		//	            "PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
-    		//	            "RequestDateTime": "\/Date(1305381485739+1000)\/"
-    		//	        }
-    		//	    ],
-    		//	    "isError": false
-    		//	}            
-            
-            NextTram tram = new NextTram();
-		
+        	JSONObject responseObject = nextTramsArray.getJSONObject(i);
+        	
+
             int internalRouteNo = responseObject.getInt("InternalRouteNo");
             String routeNo = responseObject.getString("RouteNo");
             String headboardRouteNo = responseObject.getString("HeadboardRouteNo");
@@ -261,27 +251,28 @@ public class TramTrackerServiceJSON implements TramTrackerService {
             boolean displayAC = responseObject.getBoolean("DisplayAC");
             boolean hasSpecialEvent = responseObject.getBoolean("HasSpecialEvent");
             String specialEventMessage = responseObject.getString("SpecialEventMessage");
-            
-            String predictedArrivalDateTimeString = responseObject.getString("PredictedArrivalDateTime");
-            String requestDateTimeString = responseObject.getString("RequestDateTime");
-            
+            // Parse dates
+        	String predictedArrivalDateTimeString = responseObject.getString("PredictedArrivalDateTime");
             Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+            String requestDateTimeString = responseObject.getString("RequestDateTime");
             Date requestDateTime = parseTimestamp(requestDateTimeString);
+
+            NextTram tram = new NextTram();
             
-//			tram.setInternalRouteNo(internalRouteNo);
-//			tram.setRouteNo(routeNo);
-//			tram.setHeadboardRouteNo(headboardRouteNo);
-//			tram.setVehicleNo(Integer.parseInt(vehicleNo));
-//			tram.setDestination(destination);
-//			tram.setHasDisruption(hasDisruption);
-//			tram.setIsTTAvailable(isTTAvailable);
-//			tram.setIsLowFloorTram(isLowFloorTram);
-//			tram.setAirConditioned(airConditioned);
-//			tram.setDisplayAC(displayAC);
-//			tram.setHasSpecialEvent(hasSpecialEvent);
-//			tram.setSpecialEventMessage(specialEventMessage);
-//			tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
-//			tram.setRequestDateTime(requestDateTime);
+			tram.setInternalRouteNo(internalRouteNo);
+			tram.setRouteNo(routeNo);
+			tram.setHeadboardRouteNo(headboardRouteNo);
+			tram.setVehicleNo(vehicleNo);
+			tram.setDestination(destination);
+			tram.setHasDisruption(hasDisruption);
+			tram.setIsTTAvailable(isTTAvailable);
+			tram.setIsLowFloorTram(isLowFloorTram);
+			tram.setAirConditioned(airConditioned);
+			tram.setDisplayAC(displayAC);
+			tram.setHasSpecialEvent(hasSpecialEvent);
+			tram.setSpecialEventMessage(specialEventMessage);
+			tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
+			tram.setRequestDateTime(requestDateTime);
 			
 			nextTrams.add(tram);
 			
@@ -291,6 +282,9 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     	
     }
 	
+    /**
+     * Get the list of next trams for a given stop and route
+     */
 	public List<NextTram> getNextPredictedRoutesCollection (Stop stop, Route route) {
 
 		List<NextTram> nextTrams = null;
@@ -322,6 +316,22 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		return nextTrams;
 				
 	}
+	
+	
+	/**
+	 * Convert the JSON timestamp string to a java date object
+	 * @param timestamp
+	 * @return date
+	 */
+	private static Date parseTimestamp(String timestamp) {
+		//"PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
+		Long fixedDate = Long.parseLong(timestamp.substring(6, 19));
+		if (LOGV) Log.v(TAG, "Date string: " + fixedDate);
+		Date date = new Date();
+		date.setTime(fixedDate);
+		return date;
+	}
+	
 
 	public String getGUID() {
 		return guid;

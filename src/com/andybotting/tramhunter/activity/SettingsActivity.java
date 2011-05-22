@@ -18,12 +18,16 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	public static final String KEY_TRAM_IMAGE = "displayTramImage";
 	public static final boolean KEY_TRAM_IMAGE_DEFAULT_VALUE = true;
 	
+	public static final String KEY_USE_JSON_API = "useJSONAPI";
+	public static final boolean KEY_USE_JSON_API_DEFAULT_VALUE = false;
+	
 	public static final String KEY_SEND_STATS = "sendUsageStats";
 	public static final boolean KEY_SEND_STATS_DEFAULT_VALUE = false;
 	
 	private ListPreference mDefaultLaunchActivity;
 	private CheckBoxPreference mDisplayWelcomeMessage;
 	private CheckBoxPreference mDisplayTramImage;
+	private CheckBoxPreference mUseJSONAPI;
 	private CheckBoxPreference mSendStats;
 	
     @Override
@@ -36,6 +40,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         mDefaultLaunchActivity = (ListPreference)getPreferenceScreen().findPreference(KEY_DEFAULT_LAUNCH_ACTIVITY);
         mDisplayWelcomeMessage = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_WELCOME_MESSAGE);
         mDisplayTramImage = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_TRAM_IMAGE);
+        mUseJSONAPI = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_USE_JSON_API);
         mSendStats = (CheckBoxPreference)getPreferenceScreen().findPreference(KEY_SEND_STATS);
 
     }
@@ -48,6 +53,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_DEFAULT_LAUNCH_ACTIVITY);
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_WELCOME_MESSAGE);
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_TRAM_IMAGE);
+        setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_USE_JSON_API);
         setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_SEND_STATS);
         
         // Set up a listener whenever a key changes            
@@ -70,18 +76,22 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     private void setPreferenceSummary(SharedPreferences sharedPreferences, String key){
 		if(key.equals(KEY_DEFAULT_LAUNCH_ACTIVITY)){
 			mDefaultLaunchActivity.setSummary("Open " + getFreindlyDefaultActivityName(sharedPreferences) + " on launch");
-			
-		}else if(key.equals(KEY_WELCOME_MESSAGE)){
+		}
+		else if(key.equals(KEY_WELCOME_MESSAGE)){
 			mDisplayWelcomeMessage.setSummary(sharedPreferences.getBoolean(key, KEY_WELCOME_MESSAGE_DEFAULT_VALUE) ? 
-					"Show welcome messages" : "Hide welcome messages");
-			
-		}else if(key.equals(KEY_TRAM_IMAGE)){
+					"Showing welcome messages" : "Hiding welcome messages");
+		}
+		else if(key.equals(KEY_TRAM_IMAGE)){
 			mDisplayTramImage.setSummary(sharedPreferences.getBoolean(key, KEY_TRAM_IMAGE_DEFAULT_VALUE) ? 
-					"Show tram images" : "Hide tram images");			
-		    	
-		}else if(key.equals(KEY_SEND_STATS)){
+					"Showing tram images" : "Hiding tram images");			
+		}
+		else if(key.equals(KEY_USE_JSON_API)){
+			mUseJSONAPI.setSummary(sharedPreferences.getBoolean(key, KEY_USE_JSON_API_DEFAULT_VALUE) ? 
+					"Using experimental JSON API" : "Using stable SOAP API");
+		}
+		else if(key.equals(KEY_SEND_STATS)){
 			mSendStats.setSummary(sharedPreferences.getBoolean(key, KEY_SEND_STATS_DEFAULT_VALUE) ? 
-					"Send anonymous usage statistics" : "Don't send anonymous usage statistics");
+					"Sending anonymous usage statistics" : "Not send anonymous usage statistics");
 		}   
     }
     

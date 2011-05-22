@@ -1,7 +1,11 @@
 package com.andybotting.tramhunter.service;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.ksoap2.SoapEnvelope;
@@ -40,6 +44,26 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		this.mPreferenceHelper = new PreferenceHelper(mContext);
 		
 	}
+	
+	// Parse the dates
+	private Date parseTimestamp(String dateString) {
+		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss");
+		Date date = new Date();
+		
+		//<PredictedArrivalDateTime>2010-05-30T19:00:48+10:00</PredictedArrivalDateTime>
+		//<RequestDateTime>2010-05-30T18:59:54.2212858+10:00</RequestDateTime>
+		
+		try {
+			String fixedDate = dateString.substring(0, 18);
+			date = df.parse(fixedDate);
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+		}	
+		
+		return date;
+	}
+	
 	
 	public Stop getStopInformation(int tramTrackerID) {
 
@@ -112,20 +136,55 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					
 					NextTram tram = new NextTram();
 
-					tram.setInternalRouteNo(nextPredicted.getProperty(0).toString());
-					tram.setRouteNo(nextPredicted.getProperty(1).toString());
-					tram.setHeadboardRouteNo(nextPredicted.getProperty(2).toString());
-					tram.setVehicleNo(Integer.parseInt(nextPredicted.getProperty(3).toString()));
-					tram.setDestination(nextPredicted.getProperty(4).toString());
-					tram.setHasDisruption(nextPredicted.getProperty(5).toString());
-					tram.setIsTTAvailable(nextPredicted.getProperty(6).toString());
-					tram.setIsLowFloorTram(nextPredicted.getProperty(7).toString());
-					tram.setAirConditioned(nextPredicted.getProperty(8).toString());
-					tram.setDisplayAC(nextPredicted.getProperty(9).toString());
-					tram.setHasSpecialEvent(nextPredicted.getProperty(10).toString());
-					tram.setSpecialEventMessage(nextPredicted.getProperty(11).toString());
-					tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
-					tram.setRequestDateTime(nextPredicted.getProperty(13).toString());
+//					tram.setInternalRouteNo(nextPredicted.getProperty(0).toString());
+//					tram.setRouteNo(nextPredicted.getProperty(1).toString());
+//					tram.setHeadboardRouteNo(nextPredicted.getProperty(2).toString());
+//					tram.setVehicleNo(Integer.parseInt(nextPredicted.getProperty(3).toString()));
+//					tram.setDestination(nextPredicted.getProperty(4).toString());
+//					tram.setHasDisruption(nextPredicted.getProperty(5).toString());
+//					tram.setIsTTAvailable(nextPredicted.getProperty(6).toString());
+//					tram.setIsLowFloorTram(nextPredicted.getProperty(7).toString());
+//					tram.setAirConditioned(nextPredicted.getProperty(8).toString());
+//					tram.setDisplayAC(nextPredicted.getProperty(9).toString());
+//					tram.setHasSpecialEvent(nextPredicted.getProperty(10).toString());
+//					tram.setSpecialEventMessage(nextPredicted.getProperty(11).toString());
+//					tram.setPredictedArrivalDateTime(nextPredicted.getProperty(12).toString());
+//					tram.setRequestDateTime(nextPredicted.getProperty(13).toString());					
+					
+					
+		            int internalRouteNo = Integer.parseInt(nextPredicted.getProperty(0).toString());
+		            String routeNo = nextPredicted.getProperty(1).toString();
+		            String headboardRouteNo = nextPredicted.getProperty(2).toString();
+		            int vehicleNo = Integer.parseInt(nextPredicted.getProperty(3).toString());
+		            String destination = nextPredicted.getProperty(4).toString();
+		            boolean hasDisruption = nextPredicted.getProperty(5).toString().equalsIgnoreCase("true") ? true : false;
+		            boolean isTTAvailable = nextPredicted.getProperty(6).toString().equalsIgnoreCase("true") ? true : false;
+		            boolean isLowFloorTram = nextPredicted.getProperty(7).toString().equalsIgnoreCase("true") ? true : false;
+		            boolean airConditioned = nextPredicted.getProperty(8).toString().equalsIgnoreCase("true") ? true : false;
+		            boolean displayAC = nextPredicted.getProperty(9).toString().equalsIgnoreCase("true") ? true : false;
+		            boolean hasSpecialEvent = nextPredicted.getProperty(10).toString().equalsIgnoreCase("true") ? true : false;
+		            String specialEventMessage = nextPredicted.getProperty(11).toString();
+		            
+		            String predictedArrivalDateTimeString = nextPredicted.getProperty(12).toString();
+		            String requestDateTimeString = nextPredicted.getProperty(13).toString();
+		            
+		            Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+		            Date requestDateTime = parseTimestamp(requestDateTimeString);
+		            
+					tram.setInternalRouteNo(internalRouteNo);
+					tram.setRouteNo(routeNo);
+					tram.setHeadboardRouteNo(headboardRouteNo);
+					tram.setVehicleNo(vehicleNo);
+					tram.setDestination(destination);
+					tram.setHasDisruption(hasDisruption);
+					tram.setIsTTAvailable(isTTAvailable);
+					tram.setIsLowFloorTram(isLowFloorTram);
+					tram.setAirConditioned(airConditioned);
+					tram.setDisplayAC(displayAC);
+					tram.setHasSpecialEvent(hasSpecialEvent);
+					tram.setSpecialEventMessage(specialEventMessage);
+					tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
+					tram.setRequestDateTime(requestDateTime);
 					
 					nextTrams.add(tram);
 			}		

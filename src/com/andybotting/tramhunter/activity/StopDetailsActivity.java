@@ -49,6 +49,7 @@ import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
+import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.GenericUtil;
@@ -168,8 +169,11 @@ public class StopDetailsActivity extends ListActivity {
 			}
 		});
 
-		// Get our TramTracker service
-		ttService = new TramTrackerServiceSOAP(mContext);
+		// Get our TramTracker service, either SOAP (def) or JSON
+		if (mPreferenceHelper.isJSONAPIEnabled())
+			ttService = new TramTrackerServiceJSON(mContext);
+		else
+			ttService = new TramTrackerServiceSOAP(mContext);
 		
 		// Our thread for updating the stops every 60 secs
         mRefreshThread = new Thread(new CountDown());
@@ -426,26 +430,26 @@ public class StopDetailsActivity extends ListActivity {
 						noResults = false;
 						setListAdapter(mListAdapter);
 					}
-				}
 
-        		// If it's the first load of data
-        		if (mFirstDepartureReqest) {
-        			
-					// > 10 because ksoap2 fills in anytype{} instead of null
-        			String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
-					if (specialEventMessage.length() > 10)
-						showSpecialEvent(specialEventMessage);
-        			
-   					if (mPreferenceHelper.isSendStatsEnabled()) {
-   						new Thread() {
-   							public void run() {
-   								uploadStats();
-   							}
-   						}.start();
-   					}
-   					
-   					// Reset the first departure request
-   					mFirstDepartureReqest = false;
+	        		// If it's the first load of data
+	        		if (mFirstDepartureReqest) {
+	        			
+						// > 10 because ksoap2 fills in anytype{} instead of null
+	        			String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
+						if (specialEventMessage.length() > 10)
+							showSpecialEvent(specialEventMessage);
+	        			
+	   					if (mPreferenceHelper.isSendStatsEnabled()) {
+	   						new Thread() {
+	   							public void run() {
+	   								uploadStats();
+	   							}
+	   						}.start();
+	   					}
+	   					
+	   					// Reset the first departure request
+	   					mFirstDepartureReqest = false;
+	        		}
         		}
         		
         		if (noResults) {

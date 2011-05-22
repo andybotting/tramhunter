@@ -9,7 +9,7 @@ import java.util.List;
 public class NextTram implements Comparable<NextTram> { 
 	
 	private Stop originStop;
-	private String internalRouteNo;
+	private int internalRouteNo;
 	private String routeNo;
 	private String headboardRouteNo;
 	private int vehicleNo;
@@ -35,11 +35,11 @@ public class NextTram implements Comparable<NextTram> {
 	}
 
 	// Internal Route Number
-	public void setInternalRouteNo(String _internalRouteNo) {
+	public void setInternalRouteNo(int _internalRouteNo) {
 		internalRouteNo = _internalRouteNo;
 	}
 	
-	public String getInternalRouteNo() {
+	public int getInternalRouteNo() {
 		return internalRouteNo;
 	} 
 	
@@ -81,8 +81,8 @@ public class NextTram implements Comparable<NextTram> {
 
 	
 	// hasDisruption
-	public void setHasDisruption(String _hasDisruption) {
-		hasDisruption = Boolean.parseBoolean(_hasDisruption);
+	public void setHasDisruption(Boolean _hasDisruption) {
+		hasDisruption = _hasDisruption;
 	}
 	
 	public boolean getHasDisruption() {
@@ -90,8 +90,8 @@ public class NextTram implements Comparable<NextTram> {
 	}	
 
 	// isTTAvailable
-	public void setIsTTAvailable(String _isTTAvailable) {
-		isTTAvailable = Boolean.parseBoolean(_isTTAvailable);
+	public void setIsTTAvailable(Boolean _isTTAvailable) {
+		isTTAvailable = _isTTAvailable;
 	}
 	
 	public boolean getIsTTAvailable() {
@@ -99,8 +99,8 @@ public class NextTram implements Comparable<NextTram> {
 	}   
 	
 	// isLowFloorTram
-	public void setIsLowFloorTram(String _isLowFloorTram) {
-		isLowFloorTram = Boolean.parseBoolean(_isLowFloorTram);
+	public void setIsLowFloorTram(Boolean _isLowFloorTram) {
+		isLowFloorTram = _isLowFloorTram;
 	}
 	
 	public boolean getIsLowFloorTram() {
@@ -108,8 +108,8 @@ public class NextTram implements Comparable<NextTram> {
 	}	  
 	
 	// airConditioned
-	public void setAirConditioned(String _airConditioned) {
-		airConditioned = Boolean.parseBoolean(_airConditioned);
+	public void setAirConditioned(Boolean _airConditioned) {
+		airConditioned = _airConditioned;
 	}
 	
 	public boolean getAirConditioned() {
@@ -118,8 +118,8 @@ public class NextTram implements Comparable<NextTram> {
 	
 	
 	// displayAC
-	public void setDisplayAC(String _displayAC) {
-		displayAC = Boolean.parseBoolean(_displayAC);
+	public void setDisplayAC(Boolean _displayAC) {
+		displayAC = _displayAC;
 	}
 	
 	public boolean getDisplayAC() {
@@ -128,8 +128,8 @@ public class NextTram implements Comparable<NextTram> {
 	
 	
 	// hasSpecialEvent
-	public void setHasSpecialEvent(String _hasSpecialEvent) {
-		hasSpecialEvent = Boolean.parseBoolean(_hasSpecialEvent);
+	public void setHasSpecialEvent(Boolean _hasSpecialEvent) {
+		hasSpecialEvent = _hasSpecialEvent;
 	}
 	
 	public boolean getHasSpecialEvent() {
@@ -147,16 +147,16 @@ public class NextTram implements Comparable<NextTram> {
 	
 	
 	// predictedArrivalDateTime
-	public void setPredictedArrivalDateTime(String _predictedArrivalDateTime) {
-		predictedArrivalDateTime = parseDate(_predictedArrivalDateTime);
+	public void setPredictedArrivalDateTime(Date _predictedArrivalDateTime) {
+		predictedArrivalDateTime = _predictedArrivalDateTime;
 	}
 	 public Date getPredictedArrivalDateTime() {
 		 return predictedArrivalDateTime;
 	}	
 	
 	// requestDateTime
-	public void setRequestDateTime(String _requestDateTime) {
-		requestDateTime = parseDate(_requestDateTime);
+	public void setRequestDateTime(Date _requestDateTime) {
+		requestDateTime = _requestDateTime;
 	}
 	
 	public Date getRequestDateTime() {
@@ -179,27 +179,7 @@ public class NextTram implements Comparable<NextTram> {
 
 	public void setFavouritesOnRoute(List<Stop> favouritesOnRoute) {
 		this.favouritesOnRoute = favouritesOnRoute;
-	}
-
-	// Parse the dates
-	public Date parseDate(String dateString) {
-		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss");
-		Date date = new Date();
-		
-		//<PredictedArrivalDateTime>2010-05-30T19:00:48+10:00</PredictedArrivalDateTime>
-		//<RequestDateTime>2010-05-30T18:59:54.2212858+10:00</RequestDateTime>
-		
-		try {
-			String fixedDate = dateString.substring(0, 18);
-			date = df.parse(fixedDate);
-			
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-		}	
-		
-		return date;
-	}
-	
+	}	
 	
 	// Get minutes away
 	public int minutesAway() {
@@ -210,8 +190,6 @@ public class NextTram implements Comparable<NextTram> {
 		int minutes = (int)diff/60000;
 		return minutes;
 	}
-	
-	
 	
 	public String humanMinutesAway() {
 		
@@ -228,8 +206,6 @@ public class NextTram implements Comparable<NextTram> {
 		}
 	}
 	
-	
-	
 	public int compareTo(NextTram otherTram) {
 
 		int thisTramMinutes = this.minutesAway();
@@ -244,10 +220,7 @@ public class NextTram implements Comparable<NextTram> {
 		}
 		return 0; 
 	}
-	
 
-	
-	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 			buffer.append(routeNo + " " + destination + ": " + minutesAway());

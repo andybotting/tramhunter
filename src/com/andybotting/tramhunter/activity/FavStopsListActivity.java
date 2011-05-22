@@ -249,8 +249,6 @@ public class FavStopsListActivity extends ListActivity {
 
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
-						
-			// Only show the routes if this is the favourites view, it's too slow with LOTS of stops
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesListString());
 			
 			return pv;

@@ -17,6 +17,7 @@ public class PreferenceHelper {
 	private static final String KEY_STARRED_STOPS_STRING = "starred_stops_string";
 	private static final String KEY_FIRST_LAUNCH_VERSION = "first_launch_version";
 	private static final String KEY_LAST_UPDATE = "last_update";
+	private static final String KEY_USE_JSON_API = "use_json_api";
 	private static final String KEY_STATS_TIMESTAMP = "stats_timestamp";
 	
 	private final SharedPreferences preferences;
@@ -38,6 +39,10 @@ public class PreferenceHelper {
 	public boolean isTramImageEnabled() {
 		return preferences.getBoolean(SettingsActivity.KEY_TRAM_IMAGE, SettingsActivity.KEY_TRAM_IMAGE_DEFAULT_VALUE);
 	}	
+	
+	public boolean isJSONAPIEnabled()	{
+		return preferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
+	}
 	
 	public boolean isSendStatsEnabled()	{
 		return preferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
