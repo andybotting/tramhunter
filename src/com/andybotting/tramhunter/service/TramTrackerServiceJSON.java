@@ -90,7 +90,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     /**
      * Parse the given {@link InputStream} into a {@link JSONObject}.
      */
-    private static JSONObject parseJsonStream(InputStream is) throws IOException, JSONException {
+    private static JSONObject parseJSONStream(InputStream is) throws IOException, JSONException {
     	JSONObject jsonObject = null;
     	try {
     		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -140,7 +140,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
         Stop stop = new Stop();
     	
         // Parse incoming JSON stream
-        JSONObject stopData = parseJsonStream(is);
+        JSONObject stopData = parseJSONStream(is);
         JSONObject responseObject = stopData.getJSONObject("responseObject");
             
         String flagStopNo = responseObject.getString("FlagStopNo");
@@ -231,7 +231,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     	List<NextTram> nextTrams = new ArrayList<NextTram>();
     	
         // Parse incoming JSON stream
-        JSONObject nextTramsData = parseJsonStream(is);	
+        JSONObject nextTramsData = parseJSONStream(is);	
         JSONArray nextTramsArray = nextTramsData.getJSONArray("responseObject");
         int nextTramsCount = nextTramsArray.length();
         for (int i = 0; i < nextTramsCount; i++) {
@@ -327,8 +327,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		//"PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
 		Long fixedDate = Long.parseLong(timestamp.substring(6, 19));
 		if (LOGV) Log.v(TAG, "Date string: " + fixedDate);
-		Date date = new Date();
-		date.setTime(fixedDate);
+		Date date = new Date(fixedDate);
 		return date;
 	}
 	

@@ -39,11 +39,12 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Favourite;
+import com.andybotting.tramhunter.objects.FavouriteList;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
@@ -69,8 +70,7 @@ public class StopDetailsActivity extends ListActivity {
 
 	private List<NextTram> mNextTrams = new ArrayList<NextTram>();
 	private Stop mStop;
-	private List<Route> mRoutes;
-	private Route mRoute;
+	private Route mRoute = null;
 	private int mTramTrackerId;
     private volatile Thread mRefreshThread;
     
@@ -84,9 +84,9 @@ public class StopDetailsActivity extends ListActivity {
     
     private Context mContext;
     private PreferenceHelper mPreferenceHelper;
+    private FavouriteList mFavouriteList;
     private TramTrackerService ttService;
     
-	private String mErrorMessage;
 	private int mErrorRetry = 0;
 	private final int MAX_ERRORS = 3;
 	private boolean mFirstDepartureReqest = true;
@@ -100,6 +100,10 @@ public class StopDetailsActivity extends ListActivity {
     	}
 	};
 
+	
+	/**
+	 * On create of this class
+	 */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
@@ -145,27 +149,36 @@ public class StopDetailsActivity extends ListActivity {
 		mPreferenceHelper = new PreferenceHelper(mContext);
 		
 		// Get bundle data
+		int routeId = -1;
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
-			mTramTrackerId = extras.getInt("tramTrackerId");	
+			mTramTrackerId = extras.getInt("tramTrackerId");
+			routeId = extras.getInt("routeId", -1);
 		}  
+		
+		// Get our favourite stops list
+		mFavouriteList = new FavouriteList();
 		
 		// Create out DB instance
 		mDB = new TramHunterDB(this);
 		mStop = mDB.getStop(mTramTrackerId);
+		if (routeId > -1)
+			mRoute = mDB.getRoute(routeId);
 
+		// Set the title
 		String title = mStop.getStopName();
 		((TextView) findViewById(R.id.title_text)).setText(title);
 
-		// Display stop data from DB
+		// Display stop data
 		displayStop(mStop);
 		
+		// Star button
 		mStarButton = (CompoundButton)findViewById(R.id.stopStar);
-		mStarButton.setChecked(mPreferenceHelper.isStarred(mTramTrackerId));
-
+		mStarButton.setChecked(mFavouriteList.isFavourite(new Favourite(mStop, mRoute)));
+		
 		mStarButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mPreferenceHelper.setStopStar(mTramTrackerId, mStarButton.isChecked());
+				mFavouriteList.setFavourite(new Favourite(mStop, mRoute), mStarButton.isChecked());
 			}
 		});
 
@@ -217,6 +230,7 @@ public class StopDetailsActivity extends ListActivity {
 		findViewById(R.id.departures_loading).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
 	}
 
+	
     /**
      * Update refresh status icon/views
      */
@@ -226,7 +240,9 @@ public class StopDetailsActivity extends ListActivity {
 	}
 	
 	
-	// Add settings to menu
+	/**
+	 * Create the options for a given menu
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -246,41 +262,61 @@ public class StopDetailsActivity extends ListActivity {
 		return true;
 	}
 
+	
+	/**
+	 * Overide the onMenuOpened method to allow us to dynamically set the menu item
+	 * title on open.
+	 */
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
-		// Ensure the 'Favourite' menu item has the correct text
-		menu.getItem(MENU_ITEM_FAVOURITE).setTitle((mPreferenceHelper.isStarred(mStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
+		boolean isFavourite = mFavouriteList.isFavourite(new Favourite(mStop, mRoute));
+		menu.getItem(MENU_ITEM_FAVOURITE).setTitle(isFavourite ? "Unfavourite" : "Favourite");
 		return super.onMenuOpened(featureId, menu);
 	}
 
-	// Menu actions
+
+	/**
+	 * Menu actions
+	 * @param menuItem
+	 */
 	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) { 
-		case MENU_ITEM_REFRESH:
-			mShowDialog = true;
-			new GetNextTramTimes().execute();
-			return true;
-		case MENU_ITEM_FAVOURITE:
-			mStarButton = (CompoundButton)findViewById(R.id.stopStar);
-			boolean isStarred = mPreferenceHelper.isStarred(mStop.getTramTrackerID());
-			mPreferenceHelper.setStopStar(mTramTrackerId, !isStarred);
-			mStarButton.setChecked(!isStarred);
-			return true;
-		case MENU_ITEM_MAP:
-			// Map view
-			Bundle bundle = new Bundle();
-			StopsList mStopList = new StopsList();
-			mStopList.add(mStop);
-			bundle.putParcelable("stopslist", mStopList);
-			Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, 1);
-			return true;
+	public boolean onOptionsItemSelected(final MenuItem menuItem) {
+		
+		switch (menuItem.getItemId()) { 
+		
+			case MENU_ITEM_REFRESH:
+				mShowDialog = true;
+				new GetNextTramTimes().execute();
+				return true;
+				
+			case MENU_ITEM_FAVOURITE:
+				mStarButton = (CompoundButton)findViewById(R.id.stopStar);
+				Favourite favourite = new Favourite(mStop, mRoute);
+				boolean isFavourite = mFavouriteList.isFavourite(favourite);
+				mFavouriteList.toggleFavourite(favourite);
+				mStarButton.setChecked(!isFavourite);
+				return true;
+				
+			case MENU_ITEM_MAP:
+				// Map view
+				Bundle bundle = new Bundle();
+				StopsList mStopList = new StopsList();
+				mStopList.add(mStop);
+				bundle.putParcelable("stopslist", mStopList);
+				Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, 1);
+				return true;
 		}
+		
 		return false;
 	}
-	   
+
+	
+	/**
+	 * Display the details for a given stop
+	 * @param stop
+	 */
 	private void displayStop(Stop stop) {
 		
 		// Set labels from Stop hash map
@@ -314,10 +350,23 @@ public class StopDetailsActivity extends ListActivity {
 		
 			// Add 'All'
 			mAdapterForSpinner.add("All Routes");
-			for (Route r : mRoutes) {
+			
+			Route r;
+			for (int i = 0; i < mRoutes.size(); i++) {
+				r = mRoutes.get(i);
 				mAdapterForSpinner.add("Route " + r.getNumber());
+				
+				// If we have a route already (e.g. passed from Favourites activity, then
+				// select it right now
+				if (mRoute != null) {
+					if (mRoute.getId() == r.getId()) {
+						// i+1 because we have 'All Route' in position 0
+						mRoutesSpinner.setSelection(i+1);
+					}
+				}
+				
 			}
-
+			
 			mRoutesSpinner.setOnItemSelectedListener(
 				new OnItemSelectedListener() {
 					public void onItemSelected(
@@ -328,9 +377,12 @@ public class StopDetailsActivity extends ListActivity {
 							else {
 								// -1 for the offset of having 'All Routes' first item
 								mRoute = mRoutes.get(position-1);
+								if (LOGV) Log.v(TAG, "Route selected: " + mRoute);
+								
 							}
 							
 							// Refresh the results
+							mStarButton.setChecked(mFavouriteList.isFavourite(new Favourite(mStop, mRoute)));
 					    	mShowDialog = true;
 					    	new GetNextTramTimes().execute();
 	                    }
@@ -345,10 +397,12 @@ public class StopDetailsActivity extends ListActivity {
 		
 	}
 	
-    void showToast(CharSequence msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-	
+
+	/**
+	 * Create a countdown thread
+	 * @author andy
+	 *
+	 */
     private class CountDown implements Runnable {
         public void run() {
         	while(!Thread.currentThread().isInterrupted()){
@@ -365,6 +419,7 @@ public class StopDetailsActivity extends ListActivity {
         }
 	}
 	
+    
     /**
      * Background task for fetching tram times
      */
@@ -385,13 +440,17 @@ public class StopDetailsActivity extends ListActivity {
 		protected List<NextTram> doInBackground(final NextTram... params) {
 			try {
 				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop, mRoute);
-
-				// We'll remove all NextTrams which are longer than
-				// 300 minutes away - e.g. not running on weekend
-				for(int i=0; i < mNextTrams.size(); i++) {
-					if (mNextTrams.get(i).minutesAway() > 300) {
-						mNextTrams.remove(i);
-					}
+				for (int i = 0; i < mNextTrams.size(); i++) {
+					
+//					// We'll remove all NextTrams which are longer than
+//					// 300 minutes away - e.g. not running on weekend
+//					if ( (mNextTrams.get(i).minutesAway() > 300) || (mNextTrams.get(i).minutesAway() < 0) )
+//						mNextTrams.remove(i);
+//
+//					// Remove any entries that show 'anyType{}' - they are errors
+//					if (mNextTrams.get(i).getDestination().matches("anyType{}"))
+//						mNextTrams.remove(i);
+					
 				}
 			} 
 			catch (Exception e) {
@@ -412,7 +471,7 @@ public class StopDetailsActivity extends ListActivity {
             	// Display a toast with the error
         		String error = "Failed to fetch tram times";
         		UIUtils.popToast(mContext, error);
-        		mErrorMessage = null;
+        		//String errorMessage = null;
         		mErrorRetry = 0;
         	}
         	else {
@@ -466,6 +525,7 @@ public class StopDetailsActivity extends ListActivity {
 		}
 	}
 	
+	
 	/**
 	 * Show a dialog message for a given 'Special Event'
 	 * @param message
@@ -480,6 +540,11 @@ public class StopDetailsActivity extends ListActivity {
 	}
 	
 
+	/**
+	 * Create a NextTramsListAdapter for showing our next trams
+	 * @author andy
+	 *
+	 */
 	private class NextTramsListAdapter extends BaseAdapter {
 	
 		public int getCount() {
@@ -533,9 +598,12 @@ public class StopDetailsActivity extends ListActivity {
 			
 	}		
 
-	
+
+	/**
+	 * Upload statistics to our web server
+	 */
     private void uploadStats() {
-    	if (LOGV) Log.v(TAG, "Sending stop request statistics");
+    	if (LOGV) Log.i(TAG, "Sending stop request statistics");
     	
 		// gather all of the device info
     	try {

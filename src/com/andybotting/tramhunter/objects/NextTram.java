@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class NextTram implements Comparable<NextTram> { 
 	
@@ -194,12 +195,19 @@ public class NextTram implements Comparable<NextTram> {
 	public String humanMinutesAway() {
 		
 		int minutes = this.minutesAway();
+		Date now = getRequestDateTime();
+		Date arr = getPredictedArrivalDateTime();
 		
 		if (minutes < 0) {
 			return "Err";
 		}
 		else if (minutes < 1) {
 			return "Now";
+		}
+		else if (minutes > 90) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("Australia/Melbourne"));
+			return dateFormat.format(arr);
 		}
 		else {
 			return Integer.toString(minutes);

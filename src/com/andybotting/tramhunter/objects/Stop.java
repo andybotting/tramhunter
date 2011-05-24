@@ -212,41 +212,6 @@ public class Stop {
 	public String getSuburb() {
 	   return suburb;
 	}   
-
-	
-//	/**
-//	 * @return true if starred
-//	 */
-//	public boolean isStarred() {
-//		return starred;
-//	}
-//
-//	
-//	/**
-//	 * @param starred true to star
-//	 */
-//	public void setStarred(boolean _starred) {
-//		starred = _starred;
-//	}
-//	
-//	/**
-//	 * @param starred true to star
-//	 */
-//	public void setStarred(int _starred) {
-//		if (_starred == 1) {
-//			starred = true;
-//		}
-//	}
-//	
-//	
-//	public void toggleStarred() {
-//		if(starred) {
-//			starred = false;
-//		}
-//		else {
-//			starred = true;
-//		}
-//	}
 	
 	
 	public void setRoutes(List<Route> _routes) {
@@ -262,24 +227,21 @@ public class Stop {
 	public String getRoutesListString() {
 		String routesString = "";
 
-		if(routes!=null&&routes.size()>0){
-			if(routes.size() < 2) {
-				routesString = "Route ";
-			}
-			else {
-				routesString = "Routes ";
-			}
+		if (routes != null && routes.size() > 0){
 			
-			for(int i=0; i < routes.size(); i++) {
+			if (routes.size() < 2)
+				routesString = "Route ";
+			else
+				routesString = "Routes ";
+			
+			for (int i = 0; i < routes.size(); i++) {
 				Route r = routes.get(i);
 				routesString += r.getNumber();
 			
-				if (i < routes.size() -2) {
+				if (i < routes.size() -2)
 					routesString += ", ";
-				}
-				else if (i == routes.size() -2){
+				else if (i == routes.size() -2)
 					routesString += " and ";
-				}
 			}	
 		}
 
@@ -291,7 +253,7 @@ public class Stop {
 	 * @return String representing the stop
 	 */
 	public String toString() {
-		return ("Stop " + tramTrackerID + ": " + getPrimaryName());
+		return ("Stop " + tramTrackerID + " (" + getPrimaryName() + ")");
 	}
 
 

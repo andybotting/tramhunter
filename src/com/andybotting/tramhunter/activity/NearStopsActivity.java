@@ -220,7 +220,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
 			Stop thisStop = stopsListAdapter.getStops().get(info.position);
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
+//			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
 			
 		}
     };
@@ -236,12 +236,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-    			case CONTEXT_MENU_STAR_STOP:
-    				// Toggle favourite
-    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
-    				// Refresh adapter to show fav/unfav change instantly
-    				mStopsListAdapter.notifyDataSetChanged();
-    				return true;
+//    			case CONTEXT_MENU_STAR_STOP:
+//    				// Toggle favourite
+//    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
+//    				// Refresh adapter to show fav/unfav change instantly
+//    				mStopsListAdapter.notifyDataSetChanged();
+//    				return true;
         	}
     	} catch (ClassCastException e) {}
     	    	
@@ -386,11 +386,11 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			((TextView) pv.findViewById(R.id.stopDistanceTextView)).setText(stopDistance);
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(stop.getRoutesString());
 			
-			// Show the star is stop is a favourite
-			if (mPreferenceHelper.isStarred(stop.getTramTrackerID()))
-				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
-			else
-				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
+//			// Show the star is stop is a favourite
+//			if (mPreferenceHelper.isStarred(stop.getTramTrackerID()))
+//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
+//			else
+//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
 			
 			return pv;
 		}

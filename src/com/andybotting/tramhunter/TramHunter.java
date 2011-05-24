@@ -2,7 +2,9 @@ package com.andybotting.tramhunter;
 
 import java.util.UUID;
 import com.andybotting.tramhunter.activity.HomeActivity;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -16,8 +18,27 @@ import android.os.Bundle;
  */
 public class TramHunter extends Activity {
 
+    private static TramHunter instance;
 	public static final String KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH = "PDAL"; 
 
+
+	/**
+	 * Store the application context
+	 */
+    public TramHunter() {
+        instance = this;
+    }
+
+    /**
+     * This allows us to get the context anywhere within the application by importing
+     * TramHunter, and calling TramHunter.getContext() 
+     * @return Context
+     */
+    public static Context getContext() {
+        return instance;
+    }
+	
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

@@ -1,34 +1,39 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/departures_row"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	style="@style/ListItem" >
-	
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    style="@style/ListItem">
+
 	<TextView android:id="@+id/routeNumber"
-		android:layout_width="40dip" 
+		android:layout_width="40dip"
 		android:layout_height="wrap_content"
 		android:textSize="@dimen/text_size_medium" />
 	
-	<TextView android:id="@+id/routeDestination"
-		android:layout_width="205dip"
+	<RelativeLayout
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@+id/routeNumber"
-		android:singleLine="true"
-		android:ellipsize="end"
-		android:textSize="@dimen/text_size_medium" />
-	
-	<ImageView android:id="@+id/tramClass"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"	
-		android:layout_toRightOf="@+id/routeNumber"
-		android:layout_below="@+id/routeDestination" />
+		android:layout_width="0dip"
+		android:layout_weight="10">
+		
+		<TextView android:id="@+id/routeDestination"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			android:ellipsize="end"
+			android:textSize="@dimen/text_size_medium" />
+		
+		<ImageView android:id="@+id/tramClass"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"	
+			android:layout_below="@+id/routeDestination" />
+			
+	</RelativeLayout>	
 	
 	<TextView android:id="@+id/nextTime"
-		android:layout_width="50dip"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:gravity="right"
-		android:layout_toRightOf="@+id/routeDestination"
 		android:textSize="@dimen/text_size_medium" />
-		
-</RelativeLayout>	
 
+</LinearLayout>

@@ -1,11 +1,7 @@
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,26 +17,20 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.andybotting.tramhunter.ui.TouchListView;
-
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Favourite;
+import com.andybotting.tramhunter.objects.FavouriteList;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-import com.andybotting.tramhunter.util.StringUtil;
 
-public class FavStopsListActivity extends ListActivity {
+public class FavouriteActivity extends ListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 	private final static int CONTEXT_MENU_STAR_STOP = 1;
 
-	private StopsListAdapter mListAdapter;
-	private ArrayList<Stop> mStops;
-	private TramHunterDB mDB;
-	private Context mContext;
-	private PreferenceHelper mPreferenceHelper;
-	
+	private FavouritesListAdapter mListAdapter;
+	private FavouriteList mFavourites;	
 	private TouchListView mListView;
 
 	@Override
@@ -55,21 +45,18 @@ public class FavStopsListActivity extends ListActivity {
 		// Home title button
 		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
-		    	UIUtils.goHome(FavStopsListActivity.this);
+		    	UIUtils.goHome(FavouriteActivity.this);
 		    }
 		});	
 
 		// Search title button
 		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
-		    	UIUtils.goSearch(FavStopsListActivity.this);
+		    	UIUtils.goSearch(FavouriteActivity.this);
 		    }
 		});	
-		
-		
-        mContext = this.getBaseContext();
-        mPreferenceHelper = new PreferenceHelper(mContext);
-		mDB = new TramHunterDB(mContext);
+
+		mFavourites = new FavouriteList();
 
 		String title = "Favourite Stops";
 		((TextView) findViewById(R.id.title_text)).setText(title);
@@ -81,26 +68,12 @@ public class FavStopsListActivity extends ListActivity {
 		super.onResume();
 		displayFavStops(false);
 	}
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    	mDB.close();
-    }
 	
-	public void displayFavStops(boolean alertIfNoStops) {
-		mStops = mDB.getFavouriteStops(mContext);
+	
+	public void displayFavStops(boolean alertIfNoFavourites) {
+		if (alertIfNoFavourites && !mFavourites.hasFavourites())
+			alertNoFavourites();
 		
-		if (alertIfNoStops && mStops.size() == 0) {
-			alertNoFavourites();		
-		}
-		else{
-			// Find the routes for our stops
-			for(Stop stop: mStops) {
-				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
-				stop.setRoutes(routes);
-			}
-		}
 		displayStops();
 	}
 
@@ -132,28 +105,40 @@ public class FavStopsListActivity extends ListActivity {
 		alert.show();
 	}
 	
+	
 	public void displayStops() {
+		mFavourites = new FavouriteList();
+		mListAdapter = new FavouritesListAdapter();
+		
 		mListView.setOnItemClickListener(mListView_OnItemClickListener);		
 		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
-		mListAdapter = new StopsListAdapter();
 		setListAdapter(mListAdapter);
 	}
 	
-	private void viewStop(Stop stop){
+	
+	private void viewStop(Stop stop, Route route) {
+		// TODO: Pass the route here
 		int tramTrackerId = stop.getTramTrackerID();
 		Bundle bundle = new Bundle();
 		bundle.putInt("tramTrackerId", tramTrackerId);
-		Intent intent = new Intent(FavStopsListActivity.this, StopDetailsActivity.class);
+		
+		if (route != null)
+			bundle.putInt("routeId", route.getId());
+		
+		Intent intent = new Intent(FavouriteActivity.this, StopDetailsActivity.class);
 		intent.putExtras(bundle);
 		startActivityForResult(intent, 1);
 	}
 	
+	
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
-			viewStop((Stop)mStops.get(position));
+			Favourite favourite = mFavourites.getFavourite(position);
+			viewStop(favourite.getStop(), favourite.getRoute());
 		}
     };
 
+    
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 			AdapterView.AdapterContextMenuInfo info;
@@ -163,26 +148,29 @@ public class FavStopsListActivity extends ListActivity {
 			    return;
 			}
 
-			Stop thisStop = (Stop)mStops.get(info.position);
+			Favourite favourite = mFavourites.getFavourite(info.position);
+			
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
+			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mFavourites.isFavourite(favourite) ? "Unfavourite" : "Favourite"));
 		}
     };
+    
     
     @Override
     public boolean onContextItemSelected (MenuItem item){
     	try {
     		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        	Stop thisStop = (Stop)mStops.get(info.position);
+    		Favourite favourite = mFavourites.getFavourite(info.position);
         	
         	switch (item.getItemId()) {
+        	
     			case CONTEXT_MENU_VIEW_STOP:
-    				viewStop(thisStop);
+    				viewStop(favourite.getStop(), favourite.getRoute());
     				return true;
+    				
     			case CONTEXT_MENU_STAR_STOP:
     				// Toggle favourite
-    				boolean isStarred = mPreferenceHelper.isStarred(thisStop.getTramTrackerID());
-    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !isStarred);
+    				mFavourites.toggleFavourite(favourite);
     				// Refresh the adapter to show fav/unfav changes in list
     				mListAdapter.notifyDataSetChanged();		
     				return true;
@@ -192,33 +180,33 @@ public class FavStopsListActivity extends ListActivity {
 		return super.onContextItemSelected(item);
     }
     
-	private TouchListView.DropListener onDrop=new TouchListView.DropListener() {
+	private TouchListView.DropListener onDrop = new TouchListView.DropListener() {
 		@Override
 		public void drop(int from, int to) {
-			Stop item = mListAdapter.getItem(from);
-			mListAdapter.remove(item);
-			mListAdapter.insert(item, to);
+			Favourite favourite = mListAdapter.getItem(from);
+			mListAdapter.remove(favourite);
+			mListAdapter.insert(favourite, to);
 			mListAdapter.notifyDataSetChanged();
-			mPreferenceHelper.setStarredStopsString(StringUtil.makeStringFromStops(mStops));
+			//mPreferenceHelper.setStarredStopsString(mFavourites.toString());
 		}
 	};
 
-	private class StopsListAdapter extends BaseAdapter {
+	private class FavouritesListAdapter extends BaseAdapter {
 
 		public int getCount() {
-			return mStops.size();
+			return mFavourites.getCount();
 		}
 
-		public void insert(Stop item, int to) {
-			mStops.add(to, item);
+		public void insert(Favourite fav, int to) {
+			mFavourites.addFavourite(fav, to);
 		}
 
-		public void remove(Stop item) {
-			mStops.remove(item);
+		public void remove(Favourite fav) {
+			mFavourites.removeFavourite(fav);
 		}
 
-		public Stop getItem(int position) {
-			return mStops.get(position);
+		public Favourite getItem(int position) {
+			return mFavourites.getFavourite(position);
 		}
 		
 		public long getItemId(int position) {
@@ -235,21 +223,21 @@ public class FavStopsListActivity extends ListActivity {
                 pv = convertView;
             }
 			
-			Stop thisStop = (Stop) mStops.get(position);
+			Favourite favourite = mFavourites.getFavourite(position);
+			Stop stop = favourite.getStop();
 			
-			String stopName = thisStop.getPrimaryName();
-			String stopDetails = "Stop " + thisStop.getFlagStopNumber();
+			String stopName = stop.getPrimaryName();
+			String stopDetails = "Stop " + stop.getFlagStopNumber();
 			// If the stop has a secondary name, add it
-			if (thisStop.getSecondaryName().length() > 0) {
-				stopDetails += ": " + thisStop.getSecondaryName();
-			}
+			if (stop.getSecondaryName().length() > 0)
+				stopDetails += ": " + stop.getSecondaryName();
 			
-			stopDetails += " - " + thisStop.getCityDirection();
-			stopDetails += " (" + thisStop.getTramTrackerID() + ")";
+			stopDetails += " - " + stop.getCityDirection();
+			stopDetails += " (" + stop.getTramTrackerID() + ")";
 
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
-			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesListString());
+			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(favourite.getRouteName());
 			
 			return pv;
 		}

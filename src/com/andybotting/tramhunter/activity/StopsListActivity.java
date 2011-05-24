@@ -154,7 +154,7 @@ public class StopsListActivity extends ListActivity {
 
 			Stop thisStop = (Stop)mStops.get(info.position);
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
+//			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
 		}
     };
     
@@ -168,13 +168,13 @@ public class StopsListActivity extends ListActivity {
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-    			case CONTEXT_MENU_STAR_STOP:
-    				// Toggle favourite
-    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
-    				// Refresh the adapter to show fav/unfav changes in list
-    				mListAdapter.notifyDataSetChanged();
-    				
-    				return true;
+//    			case CONTEXT_MENU_STAR_STOP:
+//    				// Toggle favourite
+//    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
+//    				// Refresh the adapter to show fav/unfav changes in list
+//    				mListAdapter.notifyDataSetChanged();
+//    				
+//    				return true;
         	}
     	} catch (ClassCastException e) {}
     	    	
@@ -223,10 +223,10 @@ public class StopsListActivity extends ListActivity {
 			
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesString());
 				
-			if (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()))
-				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
-			else
-				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
+//			if (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()))
+//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
+//			else
+//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
 			
 			return pv;
 		}

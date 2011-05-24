@@ -15,9 +15,8 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
-import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.map.AndroidBigImage;
-import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
@@ -50,26 +49,23 @@ public class HomeActivity extends Activity {
 	private static final int MENU_SEARCH = 1;
 	private static final int MENU_SETTINGS = 2;
 	
-	private Context mContext;
 	private PreferenceHelper mPreferenceHelper;
-	
 	private FavouriteStopUtil mFavouriteStopUtil;
 	private static String mLastUsedIntentUUID;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		mContext = getBaseContext();
-		mPreferenceHelper = new PreferenceHelper(mContext);
 
-        // Create db instance
-		TramHunterDB db = new TramHunterDB(mContext);
-		db.getDatabase();
-		db.close();
+		mPreferenceHelper = new PreferenceHelper();
+
+//        // Create db instance
+//		TramHunterDB db = new TramHunterDB(mContext);
+//		db.getDatabase();
+//		db.close();
 
         final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        mFavouriteStopUtil = new FavouriteStopUtil(db, locationManager, mContext);
+        mFavouriteStopUtil = new FavouriteStopUtil(locationManager);
 		
 		// Show about dialog window on first launch (or just after an upgrade)
 		if (mPreferenceHelper.isFirstLaunchThisVersion())
@@ -101,19 +97,23 @@ public class HomeActivity extends Activity {
 			else if (activityName.equals("StopsListActivity")) {
 				// Should be renamed to FavStopsListActivity, but causes a problem
 				// on upgrade, so we'll just leave it
-				startActivity(new Intent(this, FavStopsListActivity.class));
+				startActivity(new Intent(this, FavouriteActivity.class));
 			}
 			else if (activityName.equals("ClosestStopsListActivity")) {
-				Stop closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
+				Favourite closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
 				if (closestFavouriteStop != null) {
 					// Go to the closest favourite stop
 					Bundle bundle = new Bundle();
-					bundle.putInt("tramTrackerId", closestFavouriteStop.getTramTrackerID());
+					
+					bundle.putInt("tramTrackerId", closestFavouriteStop.getStop().getTramTrackerID());
+					if (closestFavouriteStop.getRoute() != null)
+						bundle.putInt("routeId", closestFavouriteStop.getRoute().getId());
+					
 					intent = new Intent(HomeActivity.this, StopDetailsActivity.class);
 					intent.putExtras(bundle);
 				}
 				else {
-					GenericUtil.popToast(this, "Unable to determine closest favourite stop!");
+					UIUtils.popToast(this, "Unable to determine closest favourite stop!");
 				}
 			}
 			else if(activityName.equals("NearStopsActivity")) {
@@ -133,21 +133,21 @@ public class HomeActivity extends Activity {
 		    }
 		});	
 		
-		// Starred
+		// Favourite Stops
 		findViewById(R.id.home_btn_starred).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
-		    	startActivity(new Intent(HomeActivity.this, FavStopsListActivity.class));
+		    	startActivity(new Intent(HomeActivity.this, FavouriteActivity.class));
 		    }
 		});
 		
-		// Browse
+		// Browse Stops
 		findViewById(R.id.home_btn_browse).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
 		    	startActivity(new Intent(HomeActivity.this, RoutesListActivity.class));
 		    }
 		});
 		
-		// Nearby
+		// Nearby Stops
 		findViewById(R.id.home_btn_nearby).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
 		    	startActivity(new Intent(HomeActivity.this, NearStopsActivity.class));
@@ -161,14 +161,14 @@ public class HomeActivity extends Activity {
 		    }
 		});
 
-		// Enter TTID
+		// Network Map
 		findViewById(R.id.home_btn_map).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
 		    	startActivity(new Intent(HomeActivity.this, AndroidBigImage.class));
 		    }
 		});
 
-		// Search
+		// Search Stops
 		findViewById(R.id.home_btn_settings).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
 		    	startActivity(new Intent(HomeActivity.this, SettingsActivity.class));

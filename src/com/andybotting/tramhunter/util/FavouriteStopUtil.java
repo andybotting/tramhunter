@@ -5,59 +5,61 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 
-import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.Favourite;
+import com.andybotting.tramhunter.objects.FavouriteList;
 
 public class FavouriteStopUtil {
 	private static final int UNLIMITED_METRES_AWAY = 0;
 	
-	private final TramHunterDB db;
 	private final LocationManager locationManager;
-	private final Context context;
-
-	public FavouriteStopUtil(TramHunterDB db, LocationManager locationManager, Context context) {
-		this.db = db;
+	
+	public FavouriteStopUtil(LocationManager locationManager) {
 		this.locationManager = locationManager;
-		this.context = context;
 	}
 
-	public Stop getClosestFavouriteStop() {
-		final List<Stop> closestFavourites = getClosestFavouriteStops(1, UNLIMITED_METRES_AWAY);
+	
+	public Favourite getClosestFavouriteStop() {
+		final List<Favourite> closestFavourites = getClosestFavourites(1, UNLIMITED_METRES_AWAY);
 		return (closestFavourites.isEmpty()) ? null : closestFavourites.get(0);
 	}
 
-	public List<Stop> getClosestFavouriteStops(final int maxNumberOfStops, final int maxMetresAway) {
-		final List<Stop> stops = db.getFavouriteStops(context);
-		List<Stop> closestFavourites = new ArrayList<Stop>();
-		if (!stops.isEmpty()) {
-			// Get the location
+	
+	public List<Favourite> getClosestFavourites(final int maxNumberOfStops, final int maxMetresAway) {
+		
+		FavouriteList favouriteList = new FavouriteList();
+		List<Favourite> closestFavourites = new ArrayList<Favourite>();
+		
+		if (favouriteList.hasFavourites()) {
+			
+			// Get our list of favourites
+			List<Favourite> favourites = favouriteList.getFavouriteItems();
+			
+			// Get our last location
 			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			
+			SortedMap<Double, Favourite> sortedFavouriteMap = new TreeMap<Double, Favourite>();
+			
 			if (location != null) {
-				// Order favourites by location
-				SortedMap<Double, Stop> sortedStopMap = new TreeMap<Double, Stop>();
-		
-				for(Stop stop : stops){
-					double distance = location.distanceTo(stop.getLocation());
+			
+				for (Favourite favourite : favourites) {
+					double distance = location.distanceTo(favourite.getStop().getLocation());
 					if (maxMetresAway == UNLIMITED_METRES_AWAY || distance <= maxMetresAway)
-					{
-						sortedStopMap.put(distance, stop);
-					}
+						sortedFavouriteMap.put(distance, favourite);
+					
 				}
 				
-				final List<Stop> sortedStopList = new ArrayList<Stop>(sortedStopMap.values());
-				int numToReturn = (maxNumberOfStops <= sortedStopList.size()) ? maxNumberOfStops : sortedStopList.size();
-				closestFavourites = sortedStopList.subList(0, numToReturn);
+				final List<Favourite> sortedFavouriteList = new ArrayList<Favourite>(sortedFavouriteMap.values());
+				int numToReturn = (maxNumberOfStops <= sortedFavouriteList.size()) ? maxNumberOfStops : sortedFavouriteList.size();
+				closestFavourites = sortedFavouriteList.subList(0, numToReturn);
 				
-				for (Stop stop : closestFavourites) {
-					stop.setRoutes(db.getRoutesForStop(stop.getTramTrackerID()));
-				}
+				
 			}
+			
 		}
+
 		return closestFavourites;
 	}
 	
