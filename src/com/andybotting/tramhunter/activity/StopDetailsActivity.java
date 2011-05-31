@@ -50,6 +50,7 @@ import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
+import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.ui.UIUtils;
@@ -87,6 +88,7 @@ public class StopDetailsActivity extends ListActivity {
     private FavouriteList mFavouriteList;
     private TramTrackerService ttService;
     
+    private String mErrorMessage = null;
 	private int mErrorRetry = 0;
 	private final int MAX_ERRORS = 3;
 	private boolean mFirstDepartureReqest = true;
@@ -425,7 +427,6 @@ public class StopDetailsActivity extends ListActivity {
      */
 	private class GetNextTramTimes extends AsyncTask<NextTram, Void, List<NextTram>> {
 
-		// Can use UI thread here
 		@Override
 		protected void onPreExecute() {
 			// Show the spinner in the title bar
@@ -435,47 +436,44 @@ public class StopDetailsActivity extends ListActivity {
 			showRefreshSpinner(true);
 		}
 
-		// Automatically done on worker thread (separate from UI thread)
 		@Override
 		protected List<NextTram> doInBackground(final NextTram... params) {
 			try {
 				mNextTrams = ttService.getNextPredictedRoutesCollection(mStop, mRoute);
+
 				for (int i = 0; i < mNextTrams.size(); i++) {
-					
-//					// We'll remove all NextTrams which are longer than
-//					// 300 minutes away - e.g. not running on weekend
-//					if ( (mNextTrams.get(i).minutesAway() > 300) || (mNextTrams.get(i).minutesAway() < 0) )
-//						mNextTrams.remove(i);
-//
-//					// Remove any entries that show 'anyType{}' - they are errors
-//					if (mNextTrams.get(i).getDestination().matches("anyType{}"))
-//						mNextTrams.remove(i);
-					
+					// Remove any entries that show 'anyType{}' - they are errors
+					if (mNextTrams.get(i).getDestination().matches("anyType"))
+						mNextTrams.remove(i);
 				}
 			} 
-			catch (Exception e) {
-				// Need some better exception handling
+			catch (TramTrackerServiceException e) {
+				// Retry a couple of times before error
 				if (mErrorRetry < MAX_ERRORS) {
 					mErrorRetry++;
+					if (LOGV) Log.e(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e);
 					this.doInBackground(params);
 				}
-			}
-			
+				else {
+					// Save the error message for the toast
+					mErrorMessage = e.getMessage();
+				}
+			}			
 			return mNextTrams;
 		}
 
-		// Can use UI thread here
 		@Override
 		protected void onPostExecute(List<NextTram> nextTrams) {
         	if (mErrorRetry == MAX_ERRORS) {
-            	// Display a toast with the error
-        		String error = "Failed to fetch tram times";
-        		UIUtils.popToast(mContext, error);
-        		//String errorMessage = null;
+
+        		// Toast: Error fetching departure information
+        		if (mFirstDepartureReqest) 
+        			UIUtils.popToast(mContext, getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
+        		
+        		mErrorMessage = null;
         		mErrorRetry = 0;
         	}
         	else {
-        		
         		boolean noResults = true;
        		
 				if (nextTrams.size() > 0) {
@@ -492,7 +490,6 @@ public class StopDetailsActivity extends ListActivity {
 
 	        		// If it's the first load of data
 	        		if (mFirstDepartureReqest) {
-	        			
 						// > 10 because ksoap2 fills in anytype{} instead of null
 	        			String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
 						if (specialEventMessage.length() > 10)

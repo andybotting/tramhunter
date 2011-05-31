@@ -11,9 +11,9 @@ import com.andybotting.tramhunter.objects.Stop;
  */
 public interface TramTrackerService {
 
-	Stop getStopInformation(int tramTrackerID);
+	Stop getStopInformation(int tramTrackerID) throws TramTrackerServiceException;
 
-	List<NextTram> getNextPredictedRoutesCollection(Stop stop, Route route);
+	List<NextTram> getNextPredictedRoutesCollection(Stop stop, Route route) throws TramTrackerServiceException;
 	
 	String getGUID();
 

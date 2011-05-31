@@ -199,17 +199,27 @@ public class NextTram implements Comparable<NextTram> {
 		Date arr = getPredictedArrivalDateTime();
 		
 		if (minutes < 0) {
+			// Anything less than 0 is an error
 			return "Err";
 		}
 		else if (minutes < 1) {
+			// Less than 1 minute
 			return "Now";
 		}
+		else if (minutes > 600) {
+			// Tue 6:54 AM
+			SimpleDateFormat dateFormat = new SimpleDateFormat("EE h:mm a");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("Australia/Melbourne"));
+			return dateFormat.format(arr);
+		}
 		else if (minutes > 90) {
+			// 6:54 AM
 			SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
 			dateFormat.setTimeZone(TimeZone.getTimeZone("Australia/Melbourne"));
 			return dateFormat.format(arr);
 		}
 		else {
+			// 2 (just minutes)
 			return Integer.toString(minutes);
 		}
 	}
