@@ -49,5 +49,8 @@
     <string name="search_results">Search for \'<xliff:g id="string">%s</xliff:g>\': </string>
 
     <string name="no_favourite_stops">You currently have no favourite tram stops.\n\nTo add favourite tram stops simply click the favourite star when browsing tram stops.\n\nDo you want to browse some now?</string>	
+
+	<!-- Dialog -->
+	<string name="dialog_error_fetching">Error fetching departure times</string>
 	
 </resources>
