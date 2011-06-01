@@ -52,5 +52,7 @@
 
 	<!-- Dialog -->
 	<string name="dialog_error_fetching">Error fetching departure times</string>
-	
+	<string name="dialog_set_name">Set stop name</string>
+	<string name="dialog_set_name_message">Set a custom name for \'<xliff:g id="name">%1$s</xliff:g>\'</string>
+			
 </resources>

@@ -98,6 +98,25 @@ public class Favourite {
 		}
 	} 
 	
+	
+	/**
+	 * Return true if the favourite has a custom name
+	 * @return boolean
+	 */
+	public boolean hasName() {
+		if (name != null)
+			return true;
+		return false;
+	}
+	
+	
+	/**
+	 * Clear a custom stop name
+	 */
+	public void clearName() {
+		name = null;
+	}
+	
 	/**
 	 * If a specific route has not been set, then we just show all the routes for
 	 * that 'favourited' stop. Otherwise, show them all as normal.
