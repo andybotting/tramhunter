@@ -49,7 +49,7 @@ public class FavouriteList {
 		if (favouriteString.length() > 1) {
 			
 			// Convert any old favourites - if not a JSON Array
-			if (!favouriteString.contains("{"))
+			if (!favouriteString.contains("["))
 				favouriteString = convertOldFavourites(favouriteString);
 
 			try {
@@ -90,25 +90,27 @@ public class FavouriteList {
 	 * @return JSONArray
 	 */
 	private String convertOldFavourites(String favouriteString) {
-
-		JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObject;
-		int tramTrackerId;
 		
-		StringTokenizer tokenizer = new StringTokenizer(favouriteString, ",");
-        while (tokenizer.hasMoreTokens()) {
-            tramTrackerId = Integer.parseInt(tokenizer.nextToken());
-            
-    		try {
-    			jsonObject = new JSONObject();
-    			jsonObject.put("stop", tramTrackerId);
-    			jsonArray.put(jsonObject);
-    		} catch (JSONException e) {
-    			e.printStackTrace();
-    			return "";
-    		}
-        }
-		return jsonArray.toString();
+		try {
+			JSONArray jsonArray = new JSONArray();
+			JSONObject jsonObject;
+			int tramTrackerId;
+			
+			StringTokenizer tokenizer = new StringTokenizer(favouriteString, ",");
+	        while (tokenizer.hasMoreTokens()) {
+	            tramTrackerId = Integer.parseInt(tokenizer.nextToken());
+	          	jsonObject = new JSONObject();
+				jsonObject.put("stop", tramTrackerId);
+				jsonArray.put(jsonObject);
+	        }
+			return jsonArray.toString();
+		
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "";
 	}
 		
 		

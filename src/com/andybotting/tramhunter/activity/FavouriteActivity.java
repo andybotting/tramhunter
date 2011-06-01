@@ -31,8 +31,9 @@ public class FavouriteActivity extends ListActivity {
     private static final String TAG = "FavouriteActivity";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 	
-	private final static int CONTEXT_MENU_VIEW_STOP = 1;
 	private final static int CONTEXT_MENU_SET_NAME = 0;
+	private final static int CONTEXT_MENU_VIEW_STOP = 1;
+	private final static int CONTEXT_MENU_UNFAVOURITE = 2;
 
 	private FavouritesListAdapter mListAdapter;
 	private FavouriteList mFavourites;	
@@ -218,8 +219,11 @@ public class FavouriteActivity extends ListActivity {
 
 			Favourite favourite = mFavourites.getFavourite(info.position);
 			
-			menu.add(0, CONTEXT_MENU_SET_NAME, 0, "Set Stop Name");
-			menu.add(0, CONTEXT_MENU_VIEW_STOP, 1, "View Stop");
+			menu.setHeaderIcon(R.drawable.icon);
+			menu.setHeaderTitle(favourite.getName());
+			menu.add(0, CONTEXT_MENU_SET_NAME, CONTEXT_MENU_SET_NAME, "Set Stop Name");
+			menu.add(0, CONTEXT_MENU_VIEW_STOP, CONTEXT_MENU_VIEW_STOP, "View Stop");
+			menu.add(0, CONTEXT_MENU_UNFAVOURITE, CONTEXT_MENU_UNFAVOURITE, "Unfavourite Stop");
 		}
     };
     
@@ -238,11 +242,16 @@ public class FavouriteActivity extends ListActivity {
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(favourite.getStop(), favourite.getRoute());
     				return true;
-    				
     			case CONTEXT_MENU_SET_NAME:
     				// Toggle favourite
     				nameStop(favourite);
     				return true;
+    			case CONTEXT_MENU_UNFAVOURITE:
+    				// Toggle favourite
+    				mFavourites.removeFavourite(favourite);
+    				mFavourites.writeFavourites();
+    				displayStops();
+    				return true;	
         	}
     	} catch (ClassCastException e) {}
     	    	
