@@ -207,7 +207,7 @@ public class FavouriteActivity extends ListActivity {
 	
 	
 	/**
-	 * 
+	 * List item click listener
 	 */
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
@@ -218,7 +218,7 @@ public class FavouriteActivity extends ListActivity {
 
     
     /**
-     * 
+     * Context menu items
      */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -241,7 +241,7 @@ public class FavouriteActivity extends ListActivity {
     
     
     /**
-     * 
+     * Action a context menu item
      */
     @Override
     public boolean onContextItemSelected (MenuItem item){

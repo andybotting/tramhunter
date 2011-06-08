@@ -40,11 +40,9 @@ import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.PreferenceHelper;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -55,7 +53,6 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -63,16 +60,16 @@ import android.widget.AdapterView.OnItemClickListener;
 public class SearchActivity extends ListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
-	private final static int CONTEXT_MENU_STAR_STOP = 1;
 	
 	private ListView mListView;
 	private StopsListAdapter mListAdapter;
 	private List<Stop> mStops;
 	private TramHunterDB mDB;
-
-	private Context mContext;
-	private PreferenceHelper mPreferenceHelper;
 	
+	
+	/**
+	 * On Create
+	 */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,11 +82,15 @@ public class SearchActivity extends ListActivity {
 		    	UIUtils.goHome(SearchActivity.this);
 		    }
 		});	
-        
-		mContext = this.getBaseContext();
-        mPreferenceHelper = new PreferenceHelper(mContext);
-		mDB = new TramHunterDB(mContext);
-        
+    
+		// Search title button
+		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
+		    public void onClick(View v) {
+		    	UIUtils.goSearch(SearchActivity.this);
+		    }
+		});	
+
+		mDB = new TramHunterDB();
 
 		// Test our intent action in case it's a search
 		Intent intent = getIntent();
@@ -118,6 +119,10 @@ public class SearchActivity extends ListActivity {
     }
 
 	
+	/**
+	 * Start the activity to view a stop
+	 * @param stop
+	 */
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
 		
@@ -129,12 +134,20 @@ public class SearchActivity extends ListActivity {
 		startActivityForResult(intent, 1);
 	}
 	
+	
+	/**
+	 * List item click action
+	 */
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			viewStop((Stop)mStops.get(position));
 		}
     };
 
+    
+    /**
+     * Create the context menu
+     */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 			AdapterView.AdapterContextMenuInfo info;
@@ -145,11 +158,16 @@ public class SearchActivity extends ListActivity {
 			}
 
 			Stop thisStop = (Stop)mStops.get(info.position);
+			menu.setHeaderIcon(R.drawable.icon);
+			menu.setHeaderTitle(thisStop.getStopName());
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-//			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
 		}
     };
     
+    
+    /**
+     * Context menu actions
+     */
     @Override
     public boolean onContextItemSelected (MenuItem item){
     	try {
@@ -160,12 +178,6 @@ public class SearchActivity extends ListActivity {
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-//    			case CONTEXT_MENU_STAR_STOP:
-//    				// Toggle favourite
-//    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
-//    				// Refresh the adapter to show fav/unfav changes in list
-//    				mListAdapter.notifyDataSetChanged();
-//    				return true;
         	}
     	} catch (ClassCastException e) {}
     	    	
@@ -173,6 +185,11 @@ public class SearchActivity extends ListActivity {
     }
     
     
+    /**
+     * Stops list adapter
+     * @author andy
+     *
+     */
 	private class StopsListAdapter extends BaseAdapter {
 
 		public int getCount() {
@@ -212,19 +229,10 @@ public class SearchActivity extends ListActivity {
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesString());
-
-//			if (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()))
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
-//			else
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
-
 			
 			return pv;
 		}
 			
 	}
-    
-    
-    
 
 }

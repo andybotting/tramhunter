@@ -4,7 +4,6 @@ package com.andybotting.tramhunter.activity;
 import java.util.List;
 
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -26,22 +24,21 @@ import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class StopsListActivity extends ListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
-	private final static int CONTEXT_MENU_STAR_STOP = 1;
 	
 	private ListView mListView;
 	private StopsListAdapter mListAdapter;
 	private List<Stop> mStops;
 	private TramHunterDB mDB;
 	private Destination mDestination;
-	private Context mContext;
-	private PreferenceHelper mPreferenceHelper;
+
 	
-	
+	/**
+	 * On Create
+	 */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
@@ -67,9 +64,7 @@ public class StopsListActivity extends ListActivity {
 		});	
 		
 		
-        mContext = this.getBaseContext();
-        mPreferenceHelper = new PreferenceHelper(mContext);
-		mDB = new TramHunterDB(mContext);
+		mDB = new TramHunterDB();
 		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null) {
@@ -93,17 +88,31 @@ public class StopsListActivity extends ListActivity {
 		
 	}
 
+	
+	/**
+	 * Close the DB connection if this activity finishes
+	 */
     @Override
     protected void onDestroy() {
         super.onDestroy();
     	mDB.close();
     }
 	
+    
+    /**
+     * Display the list of stops for a search
+     * @param search
+     */
 	public void displaySearchStops(String search) {
 		mStops = mDB.getStopsForSearch(search);
 		displayStops();
 	}
 	
+	
+	/**
+	 * Display the list of stops for a destination
+	 * @param destinationId
+	 */
 	public void displayStopsForDestination(long destinationId) {
 		mStops = mDB.getStopsForDestination(destinationId);
 		
@@ -118,6 +127,10 @@ public class StopsListActivity extends ListActivity {
 		displayStops();
 	}
 	
+	
+	/**
+	 * Display the list of stops
+	 */
 	public void displayStops() {
 		
 		mListView.setOnItemClickListener(mListView_OnItemClickListener);		
@@ -126,6 +139,11 @@ public class StopsListActivity extends ListActivity {
 		setListAdapter(mListAdapter);
 	}
 	
+	
+	/**
+	 * Start the activity to view a stop
+	 * @param stop
+	 */
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
 		
@@ -137,12 +155,20 @@ public class StopsListActivity extends ListActivity {
 		startActivityForResult(intent, 1);
 	}
 	
+	
+	/**
+	 * List item click action
+	 */
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			viewStop((Stop)mStops.get(position));
 		}
     };
 
+    
+    /**
+     * Create the context menu
+     */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 			AdapterView.AdapterContextMenuInfo info;
@@ -153,11 +179,16 @@ public class StopsListActivity extends ListActivity {
 			}
 
 			Stop thisStop = (Stop)mStops.get(info.position);
+			menu.setHeaderIcon(R.drawable.icon);
+			menu.setHeaderTitle(thisStop.getStopName());
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-//			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
 		}
     };
     
+    
+    /**
+     * Context menu actions
+     */
     @Override
     public boolean onContextItemSelected (MenuItem item){
     	try {
@@ -168,13 +199,6 @@ public class StopsListActivity extends ListActivity {
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-//    			case CONTEXT_MENU_STAR_STOP:
-//    				// Toggle favourite
-//    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
-//    				// Refresh the adapter to show fav/unfav changes in list
-//    				mListAdapter.notifyDataSetChanged();
-//    				
-//    				return true;
         	}
     	} catch (ClassCastException e) {}
     	    	
@@ -222,12 +246,7 @@ public class StopsListActivity extends ListActivity {
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
 			
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesString());
-				
-//			if (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()))
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
-//			else
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
-			
+
 			return pv;
 		}
 			
