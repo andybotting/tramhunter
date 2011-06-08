@@ -32,6 +32,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+
 <resources>
     <item type="id" name="title_container" />
     <item type="id" name="title_logo" />

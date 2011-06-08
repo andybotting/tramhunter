@@ -32,6 +32,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+
 <resources>
     <!-- Base application theme is the default theme. -->
     <style name="Theme" parent="android:Theme.Light"></style>
