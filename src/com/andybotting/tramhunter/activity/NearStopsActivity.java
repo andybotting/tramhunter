@@ -42,8 +42,10 @@ import com.andybotting.tramhunter.util.PreferenceHelper;
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
+    private static final String TAG = "NearStopsActivity";
+    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
+	
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
-	private final static int CONTEXT_MENU_STAR_STOP = 1;
 	
 	private final static int MENU_MAP = 0;
 	
@@ -54,8 +56,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private LocationManager mLocationManager;
 	private Location mLastKnownLocation;
 
-	private Context mContext;
-	private PreferenceHelper mPreferenceHelper;
+	//private Context mContext;
+	//private PreferenceHelper mPreferenceHelper;
 	private TramHunterDB mDB;
 		
 	// Maximum stops to list
@@ -67,6 +69,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private boolean mIsListeningForNetworkLocation;
 	private boolean mIsCalculatingStopDistances;
 	
+	
+	/**
+	 * 
+	 */
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	 
 
@@ -100,24 +106,33 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Set the title
 		((TextView) findViewById(R.id.title_text)).setText(mTitle);
 
-		mContext = this.getBaseContext();
-		mPreferenceHelper = new PreferenceHelper(mContext);
-		mDB = new TramHunterDB(mContext);
+		//mContext = this.getBaseContext();
+		//mPreferenceHelper = new PreferenceHelper();
+		mDB = new TramHunterDB();
 		
 		// Get our stops from the DB
 		mAllStops = mDB.getAllStops();
 		
 		// Make our Near Stops List for the map
 		mNearStopsList = new StopsList();
-
+		
 		// Get the location
 		mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-		
+
+		displayNearStops();
+	}	
+	
+	
+	/**
+	 * 
+	 */
+	private void displayNearStops() {
+		startLocationListening(true);
 	  	Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 	  	
-	  	Log.d("Testing", "Location Services Enabled: " + 
-	  			" Network:" + mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) +
-	  			" GPS:" + mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+	  	if (LOGV) Log.i(TAG, "Enabled Location Services:" + 
+	  			" Network=" + mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) +
+	  			" GPS=" + mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
 	  	
 	  	if (location != null) {		
 	  		new StopDistanceCalculator(location).execute();			
@@ -130,29 +145,68 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	  	    }
 	  	    
 	  	}
-	}	
-
+	}
+	
+	
+	/**
+	 * On activity resume
+	 */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        displayNearStops();
+    }
+	
+    
+    /**
+     * On activity pause
+     */
+    @Override
+    protected void onPause() {
+    	super.onPause();
+        stopLocationListening();
+	}
+    
+    
+    /**
+     * On activity destroy
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    	stopLocationListening();
+    	mDB.close();
+    }
+	
+	
+	/**
+	 * Build an alert dialog
+	 */
     private void buildAlertNoLocationServices() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("You do not have GPS or Wireless network location services enabled.\n\nWould you like to enable them now?")
-        .setTitle("No Location Services")
-        .setCancelable(false)
-        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, final int id) {
-                launchGPSOptions(); 
-            }
-        })
-        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, final int id) {
-                dialog.cancel();
-                finish();
-            }
-        });
+        	.setTitle("No Location Services")
+        	.setCancelable(false)
+        	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        		public void onClick(final DialogInterface dialog, final int id) {
+        			launchGPSOptions(); 
+        		}
+        	})
+        	.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        		public void onClick(final DialogInterface dialog, final int id) {
+        			dialog.cancel();
+        			finish();
+        		}
+        	});
+        
         final AlertDialog alert = builder.create();
         alert.show();
     }
 	
 	
+    /**
+     * Open up the location settings
+     */
     private void launchGPSOptions() {
         final ComponentName toLaunch = new ComponentName("com.android.settings","com.android.settings.SecuritySettings");
         final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -164,6 +218,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
     
 	
+    /**
+     * 
+     * @param stop
+     */
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
 		
@@ -175,7 +233,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		startActivityForResult(intent, 1);
 	}
 	
-	// Add menu
+	
+	/**
+	 * 
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -186,7 +247,10 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		return true;
 	}
 	
-	// Menu actions
+	
+	/**
+	 * 
+	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
@@ -200,7 +264,11 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		return false;
 
 	}
-		
+
+
+	/**
+	 * 
+	 */
 	private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
 			StopsListAdapter stopsListAdapter = (StopsListAdapter)adapterView.getAdapter();
@@ -208,23 +276,20 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		}
     };
     
+    
+    /**
+     * 
+     */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-			AdapterView.AdapterContextMenuInfo info;
-			try {
-			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-			} catch (ClassCastException e) {
-			    return;
-			}
-
-			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
-			Stop thisStop = stopsListAdapter.getStops().get(info.position);
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-//			menu.add(0, CONTEXT_MENU_STAR_STOP, 0, (mPreferenceHelper.isStarred(thisStop.getTramTrackerID()) ? "Unfavourite" : "Favourite"));
-			
 		}
     };
     
+    
+    /**
+     * 
+     */
     @Override
     public boolean onContextItemSelected (MenuItem item){
     	try {
@@ -236,19 +301,20 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     			case CONTEXT_MENU_VIEW_STOP:
     				viewStop(thisStop);
     				return true;
-//    			case CONTEXT_MENU_STAR_STOP:
-//    				// Toggle favourite
-//    				mPreferenceHelper.setStopStar(thisStop.getTramTrackerID(), !mPreferenceHelper.isStarred(thisStop.getTramTrackerID()));
-//    				// Refresh adapter to show fav/unfav change instantly
-//    				mStopsListAdapter.notifyDataSetChanged();
-//    				return true;
         	}
     	} catch (ClassCastException e) {}
     	    	
 		return super.onContextItemSelected(item);
     }
-    	
+    
+    
+    /**
+     * 
+     * @author andy
+     *
+     */
 	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
+		
 		private final Location mLocation;
 		private boolean mRefreshListOnly;
 		
@@ -259,7 +325,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Can use UI thread here
 		protected void onPreExecute() {
 			mIsCalculatingStopDistances = true;
-			mRefreshListOnly = !mShowBusy;			
+//			mRefreshListOnly = !mShowBusy;			
 			if (mShowBusy) {
 				// Show the dialog window
 				mListView.setVisibility(View.GONE);
@@ -290,30 +356,24 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 				if(sortedStops.size() >= MAXSTOPS)
 	    			break;
 	    	}
-	    	
-			// Find the routes for our nearest stops
-			for(Stop stop: sortedStops) {
-				// Add this stop to our near StopsList
-				mNearStopsList.add(stop);
-				List<Route> routes = mDB.getRoutesForStop(stop.getTramTrackerID());
-				stop.setRoutes(routes);
-			}
-			
-			return sortedStops;
+
+	    	return sortedStops;
 		}
 		
 		// Can use UI thread here
 		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
-			if (mRefreshListOnly) {
-				// Just update the list
-				StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
-				stopsListAdapter.updateStopList(sortedStops, mLocation);
-			}
-			else {
+			StopsListAdapter stopsListAdapter;
+			
+//			if (mRefreshListOnly) {
+//				// Just update the list
+//				stopsListAdapter = (StopsListAdapter) getListAdapter();
+//				stopsListAdapter.updateStopList(sortedStops, mLocation);
+//			}
+//			else {
 				// Refresh the entire list
-				mStopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
-				setListAdapter(mStopsListAdapter);	
-			}
+				stopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
+				setListAdapter(stopsListAdapter);	
+//			}
 			
 			// If we've just been showing the loading screen
 			if (mListView.getVisibility() == View.GONE) {
@@ -324,7 +384,14 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			mIsCalculatingStopDistances = false;
 		}
 	}
-		  
+
+	
+	
+	/**
+	 * 
+	 * @author andy
+	 *
+	 */
 	private class StopsListAdapter extends BaseAdapter {
 		
 		private ArrayList<Stop> mStops;
@@ -386,39 +453,18 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 			((TextView) pv.findViewById(R.id.stopDistanceTextView)).setText(stopDistance);
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(stop.getRoutesString());
 			
-//			// Show the star is stop is a favourite
-//			if (mPreferenceHelper.isStarred(stop.getTramTrackerID()))
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.VISIBLE);
-//			else
-//				((ImageView) pv.findViewById(R.id.starImageView)).setVisibility(View.INVISIBLE);
-			
 			return pv;
 		}
 			
 	}	
 	
-    @Override
-    protected void onPause() {
-    	super.onPause();
-        stopLocationListening();
-	}
     
-    @Override
-    protected void onResume() {
-        super.onResume();
-        startLocationListening(true);
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    	stopLocationListening();
-    	mDB.close();
-    }
-    
+	/**
+	 * 
+	 */
     public void onLocationChanged(Location location) {
 
-    	if (location != null)     	{	
+    	if (location != null) {	
         	// If this is a GPS location then ignore and unsubscribe from network location updates.
         	if (location.getProvider().equals("gps") && mIsListeningForNetworkLocation) {
         		stopLocationListening();
@@ -440,6 +486,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     	}
     }
     
+    
+    /**
+     * 
+     * @param location
+     * @return
+     */
     private boolean shouldCalculateNewDistance(Location location) {
 		boolean result = false;
 		
@@ -452,29 +504,52 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     	
     	return result && (!mIsCalculatingStopDistances);
     }
-                
+
+    
+    /**
+     * 
+     */
     private void stopLocationListening() {
+    	if (LOGV) Log.i(TAG, "Stopping location listening");
     	if (mLocationManager != null) {
     		mLocationManager.removeUpdates(this);
     	}
 	}
     
+    
+    /**
+     * 
+     * @param subscribeToNetworkLocation
+     */
     private void startLocationListening(boolean subscribeToNetworkLocation) {
+    	if (LOGV) Log.i(TAG, "Starting location listening");
     	if (mLocationManager != null) {
     		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
         	mIsListeningForNetworkLocation = subscribeToNetworkLocation;
         	
         	if(subscribeToNetworkLocation)       		
-        	mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
+        		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
     	}
 	}
 
+    
+    /**
+     * 
+     */
 	@Override
 	public void onProviderDisabled(String provider) {}
 
+	
+	/**
+	 * 
+	 */
 	@Override
 	public void onProviderEnabled(String provider) {}
 
+	
+	/**
+	 * 
+	 */
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {}
 	

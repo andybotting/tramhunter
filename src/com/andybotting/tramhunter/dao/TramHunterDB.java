@@ -296,8 +296,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	@Override
 	public synchronized void close() {
-		if (mDB.isOpen())
-			mDB.close();
+		if (mDB != null)
+			if (mDB.isOpen())
+				mDB.close();
 		
 		super.close();
 	}

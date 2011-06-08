@@ -163,14 +163,26 @@ public class FavouriteActivity extends ListActivity {
 		alert.setView(input);
 		alert.setTitle(R.string.dialog_set_name);
 		alert.setIcon(R.drawable.icon);
+
+		// Set the initial stop name in the text field
+		if (favourite.hasName())
+			input.setText(favourite.getName());
+		else
+			input.setText(favourite.getStop().getStopName());
 		
 		final CharSequence message = getString(R.string.dialog_set_name_message, favourite.getName());
 		alert.setMessage(message);
-
+		
+		// Save the new stop name
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				String name = input.getText().toString().trim();
-				favourite.setName(name);
+				String customName = input.getText().toString().trim();
+				 
+				if (customName.matches(favourite.getStop().getStopName()))
+					favourite.setName(null);
+				else
+					favourite.setName(customName);
+				
 				mFavourites.writeFavourites();
 				displayStops();
 			}
@@ -178,7 +190,7 @@ public class FavouriteActivity extends ListActivity {
 
         alert.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-            	favourite.clearName();
+            	favourite.setName(null);
 				mFavourites.writeFavourites();
 				displayStops();
             }
