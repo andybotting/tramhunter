@@ -82,13 +82,6 @@ public class SearchActivity extends ListActivity {
 		    	UIUtils.goHome(SearchActivity.this);
 		    }
 		});	
-    
-		// Search title button
-		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goSearch(SearchActivity.this);
-		    }
-		});	
 
 		mDB = new TramHunterDB();
 

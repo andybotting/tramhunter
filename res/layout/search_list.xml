@@ -14,13 +14,6 @@
         <ImageView style="@style/TitleBarSeparator" />
         
         <TextView style="@style/TitleBarText" />
-        
-		<ImageView style="@style/TitleBarSeparator" />
-        
-        <ImageButton android:id="@+id/title_btn_search"
-        	style="@style/TitleBarAction"
-            android:contentDescription="@string/description_search"
-            android:src="@drawable/ic_title_search" />
             
     </LinearLayout>
 	
