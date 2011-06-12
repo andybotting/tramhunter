@@ -146,14 +146,42 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     	}
 		return jsonObject;
     }
+    
+    
+    private static JSONObject getResponseObject(InputStream is) throws IOException, JSONException, TramTrackerServiceException {
+    	
+    	JSONObject responseObject = null;
+    	JSONObject serviceData = parseJSONStream(is);
+    	
+        if (serviceData.getBoolean("isError"))
+        	throw new TramTrackerServiceException("TramTracker Service Error");
+        else
+        	responseObject = serviceData.getJSONObject("responseObject");
+        
+        return responseObject;
+    }
 
+    
+    private static JSONArray getResponseArray(InputStream is) throws IOException, JSONException, TramTrackerServiceException {
+    	
+    	JSONArray responseArray = null;
+    	JSONObject serviceData = parseJSONStream(is);
+    	
+        if (serviceData.getBoolean("isError"))
+        	throw new TramTrackerServiceException("TramTracker Service Error");
+        else
+        	 responseArray = serviceData.getJSONArray("responseObject");
+        
+        return responseArray;
+    }
+    
     
     /**
      * Parse the given {@link InputStream} into {@link Stop}
      * assuming a JSON format.
      * @return Stop
      */
-    public static Stop parseStopInformation(InputStream is) throws TramTrackerServiceException {
+    public static Stop parseStopInformation(JSONObject responseObject) throws TramTrackerServiceException {
 		//	{
 		//	   "responseObject":[
 		//	      {
@@ -177,11 +205,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     	
     	try {
 	        Stop stop = new Stop();
-	    	
-	        // Parse incoming JSON stream
-	        JSONObject stopData = parseJSONStream(is);
-	        JSONObject responseObject = stopData.getJSONObject("responseObject");
-	            
+
 	        String flagStopNo = responseObject.getString("FlagStopNo");
 	        String stopName = responseObject.getString("StopName");
 	        String cityDirection = responseObject.getString("CityDirection");
@@ -207,12 +231,15 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		try {
 			Stop stop = null;
 			String url = BASE_URL + "/GetStopInformation.aspx?s=" + tramTrackerID;
-			InputStream httpData = getJSONData(url);
-			stop = parseStopInformation(httpData);
+			InputStream jsonData = getJSONData(url);
+			JSONObject responseObject = getResponseObject(jsonData);
+			stop = parseStopInformation(responseObject);
 			stop.setTramTrackerID(tramTrackerID);
 			return stop;
 		} 
 		catch (Exception e) {
+			// Throw a TramTrackerServiceException to encapsulate all
+			// other exceptions
 			throw new TramTrackerServiceException(e);
 		}
 	}
@@ -224,7 +251,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
      * assuming a JSON format.
      * @return Stop
      */
-    public static List<NextTram> parseNextPredictedRoutesCollection(InputStream is) throws TramTrackerServiceException {
+    public static List<NextTram> parseNextPredictedRoutesCollection(JSONArray responseArray) throws TramTrackerServiceException {
 
 		//	[{
 		//	    "responseObject": [
@@ -269,17 +296,12 @@ public class TramTrackerServiceJSON implements TramTrackerService {
     	
     	try {
 	    	List<NextTram> nextTrams = new ArrayList<NextTram>();
-	    	
-	        // Parse incoming JSON stream
-	        JSONObject nextTramsData = parseJSONStream(is);	
-	        JSONArray nextTramsArray = nextTramsData.getJSONArray("responseObject");
 	        
-	        int nextTramsCount = nextTramsArray.length();
-	        for (int i = 0; i < nextTramsCount; i++) {
+	        int responseObjectCount = responseArray.length();
+	        for (int i = 0; i < responseObjectCount; i++) {
 	        	
-	        	JSONObject responseObject = nextTramsArray.getJSONObject(i);
-	        	
-	
+	        	JSONObject responseObject = responseArray.getJSONObject(i);
+
 	            int internalRouteNo = responseObject.getInt("InternalRouteNo");
 	            String routeNo = responseObject.getString("RouteNo");
 	            String headboardRouteNo = responseObject.getString("HeadboardRouteNo");
@@ -346,8 +368,9 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			else
 				url.append("&r=" + route.getNumber());
 			
-			InputStream httpData = getJSONData(url.toString());
-			nextTrams = parseNextPredictedRoutesCollection(httpData);
+			InputStream jsonData = getJSONData(url.toString());
+			JSONArray responseArray = getResponseArray(jsonData);
+			nextTrams = parseNextPredictedRoutesCollection(responseArray);
 			
 			return nextTrams;
 			

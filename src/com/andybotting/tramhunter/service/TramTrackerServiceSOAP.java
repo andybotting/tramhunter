@@ -171,52 +171,58 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 
 		if (result != null) {
 				
-			SoapObject result1 = (SoapObject)result.getProperty("diffgram");
-			SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
-
-			
-			for (int i = 0; i < result2.getPropertyCount(); i++) {
+			try {
+				SoapObject result1 = (SoapObject)result.getProperty("diffgram");
+				SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
+	
 				
-					SoapObject nextPredicted = (SoapObject)result2.getProperty(i);
+				for (int i = 0; i < result2.getPropertyCount(); i++) {
 					
-					NextTram tram = new NextTram();
-					
-		            int internalRouteNo = Integer.parseInt(nextPredicted.getProperty(0).toString());
-		            String routeNo = nextPredicted.getProperty(1).toString();
-		            String headboardRouteNo = nextPredicted.getProperty(2).toString();
-		            int vehicleNo = Integer.parseInt(nextPredicted.getProperty(3).toString());
-		            String destination = nextPredicted.getProperty(4).toString();
-		            boolean hasDisruption = nextPredicted.getProperty(5).toString().equalsIgnoreCase("true") ? true : false;
-		            boolean isTTAvailable = nextPredicted.getProperty(6).toString().equalsIgnoreCase("true") ? true : false;
-		            boolean isLowFloorTram = nextPredicted.getProperty(7).toString().equalsIgnoreCase("true") ? true : false;
-		            boolean airConditioned = nextPredicted.getProperty(8).toString().equalsIgnoreCase("true") ? true : false;
-		            boolean displayAC = nextPredicted.getProperty(9).toString().equalsIgnoreCase("true") ? true : false;
-		            boolean hasSpecialEvent = nextPredicted.getProperty(10).toString().equalsIgnoreCase("true") ? true : false;
-		            String specialEventMessage = nextPredicted.getProperty(11).toString();
-		            String predictedArrivalDateTimeString = nextPredicted.getProperty(12).toString();
-		            String requestDateTimeString = nextPredicted.getProperty(13).toString();
-		            
-		            // Parse timestamps
-		            Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
-		            Date requestDateTime = parseTimestamp(requestDateTimeString);
-		            
-					tram.setInternalRouteNo(internalRouteNo);
-					tram.setRouteNo(routeNo);
-					tram.setHeadboardRouteNo(headboardRouteNo);
-					tram.setVehicleNo(vehicleNo);
-					tram.setDestination(destination);
-					tram.setHasDisruption(hasDisruption);
-					tram.setIsTTAvailable(isTTAvailable);
-					tram.setIsLowFloorTram(isLowFloorTram);
-					tram.setAirConditioned(airConditioned);
-					tram.setDisplayAC(displayAC);
-					tram.setHasSpecialEvent(hasSpecialEvent);
-					tram.setSpecialEventMessage(specialEventMessage);
-					tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
-					tram.setRequestDateTime(requestDateTime);
-					
-					nextTrams.add(tram);
-			}		
+						SoapObject nextPredicted = (SoapObject)result2.getProperty(i);
+						
+						NextTram tram = new NextTram();
+						
+			            int internalRouteNo = Integer.parseInt(nextPredicted.getProperty(0).toString());
+			            String routeNo = nextPredicted.getProperty(1).toString();
+			            String headboardRouteNo = nextPredicted.getProperty(2).toString();
+			            int vehicleNo = Integer.parseInt(nextPredicted.getProperty(3).toString());
+			            String destination = nextPredicted.getProperty(4).toString();
+			            boolean hasDisruption = nextPredicted.getProperty(5).toString().equalsIgnoreCase("true") ? true : false;
+			            boolean isTTAvailable = nextPredicted.getProperty(6).toString().equalsIgnoreCase("true") ? true : false;
+			            boolean isLowFloorTram = nextPredicted.getProperty(7).toString().equalsIgnoreCase("true") ? true : false;
+			            boolean airConditioned = nextPredicted.getProperty(8).toString().equalsIgnoreCase("true") ? true : false;
+			            boolean displayAC = nextPredicted.getProperty(9).toString().equalsIgnoreCase("true") ? true : false;
+			            boolean hasSpecialEvent = nextPredicted.getProperty(10).toString().equalsIgnoreCase("true") ? true : false;
+			            String specialEventMessage = nextPredicted.getProperty(11).toString();
+			            String predictedArrivalDateTimeString = nextPredicted.getProperty(12).toString();
+			            String requestDateTimeString = nextPredicted.getProperty(13).toString();
+			            
+			            // Parse timestamps
+			            Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+			            Date requestDateTime = parseTimestamp(requestDateTimeString);
+			            
+						tram.setInternalRouteNo(internalRouteNo);
+						tram.setRouteNo(routeNo);
+						tram.setHeadboardRouteNo(headboardRouteNo);
+						tram.setVehicleNo(vehicleNo);
+						tram.setDestination(destination);
+						tram.setHasDisruption(hasDisruption);
+						tram.setIsTTAvailable(isTTAvailable);
+						tram.setIsLowFloorTram(isLowFloorTram);
+						tram.setAirConditioned(airConditioned);
+						tram.setDisplayAC(displayAC);
+						tram.setHasSpecialEvent(hasSpecialEvent);
+						tram.setSpecialEventMessage(specialEventMessage);
+						tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
+						tram.setRequestDateTime(requestDateTime);
+						
+						nextTrams.add(tram);
+				}
+				
+			}	
+			catch (Exception e) {
+				throw new TramTrackerServiceException("No results");
+			}
 			
 		}
 		else {
