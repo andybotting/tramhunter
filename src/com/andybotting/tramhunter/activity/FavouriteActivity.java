@@ -39,7 +39,6 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -61,9 +60,6 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.ui.UIUtils;
 
 public class FavouriteActivity extends ListActivity {
-	
-    private static final String TAG = "FavouriteActivity";
-    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 	
 	private final static int CONTEXT_MENU_SET_NAME = 0;
 	private final static int CONTEXT_MENU_VIEW_STOP = 1;
@@ -134,16 +130,13 @@ public class FavouriteActivity extends ListActivity {
 			.setCancelable(false)
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					// Action for 'Yes' Button				
 					startActivity(routeListIntent);
 					finish();
 				}
 			})
 			.setNegativeButton("No", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					//  Action for 'NO' Button
 					dialog.cancel();				
-					// TODO: getParent() instead?
 					finish();
 				}
 			});
@@ -202,7 +195,7 @@ public class FavouriteActivity extends ListActivity {
 		if (favourite.hasName())
 			input.setText(favourite.getName());
 		else
-			input.setText(favourite.getStop().getStopName());
+			input.setText(favourite.getStop().getPrimaryName());
 		
 		final CharSequence message = getString(R.string.dialog_set_name_message, favourite.getName());
 		alert.setMessage(message);
@@ -212,7 +205,7 @@ public class FavouriteActivity extends ListActivity {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				String customName = input.getText().toString().trim();
 				 
-				if (customName.matches(favourite.getStop().getStopName()))
+				if (customName.matches(favourite.getStop().getPrimaryName()))
 					favourite.setName(null);
 				else
 					favourite.setName(customName);

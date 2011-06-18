@@ -90,13 +90,8 @@ public class HomeActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+	
 		mPreferenceHelper = new PreferenceHelper();
-
-//        // Create db instance
-//		TramHunterDB db = new TramHunterDB(mContext);
-//		db.getDatabase();
-//		db.close();
 
         final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mFavouriteStopUtil = new FavouriteStopUtil(locationManager);

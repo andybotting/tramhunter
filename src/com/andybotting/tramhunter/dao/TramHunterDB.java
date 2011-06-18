@@ -53,12 +53,10 @@ import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.andybotting.tramhunter.TramHunter;
+import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
-
-import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramHunterDB extends SQLiteOpenHelper {
 	
@@ -75,7 +73,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// 	App Version v0.1.00 = DB Version 100
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 890;
+	private static final int DATABASE_VERSION = 893;
 	
 	
 	private SQLiteDatabase mDB = null;
@@ -108,23 +106,22 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		+ "JOIN routes ON destinations.route_id = routes._id";
 
 
-	/**
-	 * Constructor for TramHunterDB providing a context
-	 * @param context
-	 */
-    public TramHunterDB(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		mContext = context;
-		if (LOGV) Log.v(TAG, "Instantiating TramHunter database");
-	}
+//	/**
+//	 * Constructor for TramHunterDB providing a context
+//	 * @param context
+//	 */
+//    public TramHunterDB(Context context) {
+//		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+//		mContext = context;
+//	}
 
 
     /**
      * Constructor for TramHunterDB without providing a context
      */
     public TramHunterDB() {
-		super(TramHunter.getContext(), DATABASE_NAME, null, DATABASE_VERSION);
-		mContext = TramHunter.getContext();
+		super(TramHunterApplication.getContext(), DATABASE_NAME, null, DATABASE_VERSION);
+		mContext = TramHunterApplication.getContext();
 	}
 
  
@@ -138,7 +135,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		if (LOGV) Log.v(TAG, "Getting DB");
 		db = getExternalStorageDB();
 		if (db == null) {
-			if (LOGV) Log.v(TAG, "DB from SD Card failed, using internal");
+			if (LOGV) Log.w(TAG, "DB from SD Card failed, using internal");
 			db = getInternalStorageDB();
 		}
 
@@ -151,7 +148,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * @return SQLiteDatabase
 	 */
 	private SQLiteDatabase getInternalStorageDB() {
-		if (LOGV) Log.v(TAG, "Getting DB from device internal storage");
+		if (LOGV) Log.i(TAG, "Getting DB from device internal storage");
 
 		SQLiteDatabase db = null;
 		String dbFile = DATABASE_INTERNAL_PATH + DATABASE_NAME;
@@ -181,7 +178,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * @return SQLiteDatabase
 	 */
 	private SQLiteDatabase getExternalStorageDB() {
-		if (LOGV) Log.v(TAG, "Getting DB from external storage (SD Card)");
+		if (LOGV) Log.i(TAG, "Getting DB from external storage (SD Card)");
 
 		SQLiteDatabase db = null;
 
@@ -191,7 +188,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
         // Build the directory on the SD Card, if it doesn't exist
         File appDbDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + AUTHORITY + "/files");
         if (!appDbDir.exists()) {
-        	if (LOGV) Log.v(TAG, "Making dirs");
+        	if (LOGV) Log.v(TAG, "Making database directory on SD Card");
         	appDbDir.mkdirs();
         }
 

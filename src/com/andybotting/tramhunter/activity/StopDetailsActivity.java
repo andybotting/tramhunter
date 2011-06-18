@@ -117,7 +117,6 @@ public class StopDetailsActivity extends ListActivity {
 	private Spinner mRoutesSpinner;
 	private ArrayAdapter<CharSequence> mAdapterForSpinner;
     
-    private Context mContext;
     private PreferenceHelper mPreferenceHelper;
     private FavouriteList mFavouriteList;
     private TramTrackerService ttService;
@@ -181,8 +180,7 @@ public class StopDetailsActivity extends ListActivity {
 		mListView.setVisibility(View.GONE);
 		
 		// Preferences
-		mContext = getBaseContext();
-		mPreferenceHelper = new PreferenceHelper(mContext);
+		mPreferenceHelper = new PreferenceHelper();
 		
 		// Get bundle data
 		int routeId = -1;
@@ -196,7 +194,7 @@ public class StopDetailsActivity extends ListActivity {
 		mFavouriteList = new FavouriteList();
 		
 		// Create out DB instance
-		mDB = new TramHunterDB(this);
+		mDB = new TramHunterDB();
 		mStop = mDB.getStop(mTramTrackerId);
 		if (routeId > -1)
 			mRoute = mDB.getRoute(routeId);
@@ -219,10 +217,10 @@ public class StopDetailsActivity extends ListActivity {
 		});
 
 		// Get our TramTracker service, either SOAP (def) or JSON
-		if (mPreferenceHelper.isJSONAPIEnabled())
-			ttService = new TramTrackerServiceJSON(mContext);
-		else
-			ttService = new TramTrackerServiceSOAP(mContext);
+//		if (mPreferenceHelper.isJSONAPIEnabled())
+//			ttService = new TramTrackerServiceJSON();
+//		else
+		ttService = new TramTrackerServiceSOAP();
 		
 		// Our thread for updating the stops every 60 secs
         mRefreshThread = new Thread(new CountDown());
@@ -502,7 +500,7 @@ public class StopDetailsActivity extends ListActivity {
 
         		// Toast: Error fetching departure information
         		if (mFirstDepartureReqest) 
-        			UIUtils.popToast(mContext, getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
+        			UIUtils.popToast(getApplicationContext(), getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
         		
         		mErrorMessage = null;
         		mErrorRetry = 0;
@@ -566,7 +564,7 @@ public class StopDetailsActivity extends ListActivity {
         dialogBuilder.setTitle("Special Event");
         dialogBuilder.setMessage(message);
         dialogBuilder.setPositiveButton("OK", null);
-        dialogBuilder.setIcon(R.drawable.icon);
+        dialogBuilder.setIcon(R.drawable.ic_dialog_alert);
         dialogBuilder.show();
 	}
 	
@@ -606,7 +604,7 @@ public class StopDetailsActivity extends ListActivity {
 			((TextView) pv.findViewById(R.id.nextTime)).setText(thisTram.humanMinutesAway());
 			
 			if (mPreferenceHelper.isTramImageEnabled()) {
-				mDB = new TramHunterDB(getBaseContext());
+				mDB = new TramHunterDB();
 				
 				int tramNumber = thisTram.getVehicleNo();
 				if (LOGV) Log.v(TAG, thisTram.toString() + " has tram number: " + tramNumber);
@@ -667,7 +665,6 @@ public class StopDetailsActivity extends ListActivity {
 			try {
 				post.setEntity(new UrlEncodedFormEntity(pairs));
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	
@@ -675,12 +672,10 @@ public class StopDetailsActivity extends ListActivity {
 				HttpResponse response = client.execute(post);
 				response.getStatusLine().getStatusCode();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

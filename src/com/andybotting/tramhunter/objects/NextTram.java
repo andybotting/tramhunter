@@ -34,8 +34,6 @@
 
 package com.andybotting.tramhunter.objects;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -229,7 +227,6 @@ public class NextTram implements Comparable<NextTram> {
 	public String humanMinutesAway() {
 		
 		int minutes = this.minutesAway();
-		Date now = getRequestDateTime();
 		Date arr = getPredictedArrivalDateTime();
 		
 		if (minutes < 0) {

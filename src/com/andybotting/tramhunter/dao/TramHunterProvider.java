@@ -106,7 +106,7 @@ public class TramHunterProvider extends ContentProvider {
 		MatrixCursor cursor = new MatrixCursor(COLUMNS);
           
 		// Inefficient use of the DB!
-		TramHunterDB mDB = new TramHunterDB(getContext()); 
+		TramHunterDB mDB = new TramHunterDB(); 
 		List<Stop> stops = mDB.getStopsForSearch(processedQuery);
 		mDB.close();
         

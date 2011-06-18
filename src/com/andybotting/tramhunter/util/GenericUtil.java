@@ -38,19 +38,13 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
-
 public class GenericUtil {
 
-    public static void logDebug(String message){
-    	// Log some text thats EASY to see in logcat
-    	if(message!=null)
-    		Log.v("Debug", "########## " +  message);
-    }
-	
-    
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 */
     private static String convertToHex(byte[] data) {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < data.length; i++) {
@@ -67,6 +61,14 @@ public class GenericUtil {
         return buf.toString();
     }
  
+    
+    /**
+     * 
+     * @param text
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
     public static String MD5(String text) throws NoSuchAlgorithmException, UnsupportedEncodingException  {
         MessageDigest md;
         md = MessageDigest.getInstance("MD5");

@@ -56,13 +56,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
+import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
 
-    private static final String TAG = "TramTrackerService";
+    private static final String TAG = "TTServiceJSON";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 	
 	private static final String BASE_URL = "http://extranetdev.yarratrams.com.au/pidsservicejson/Controller";
@@ -73,15 +74,9 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	//private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 	
 	private Context mContext;
-
-	// Not needed until we start using the GUID
-	//private PreferenceHelper mPreferenceHelper;
 	
-	String guid = "";
-
-	public TramTrackerServiceJSON(Context context) {
-		this.mContext = context;
-		//this.mPreferenceHelper = new PreferenceHelper(mContext);
+	public TramTrackerServiceJSON() {
+		mContext = TramHunterApplication.getContext();
 	}
 	
 	/**
@@ -390,14 +385,13 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	private static Date parseTimestamp(String timestamp) {
 		//"PredictedArrivalDateTime": "\/Date(1305384840000+1000)\/",
 		Long fixedDate = Long.parseLong(timestamp.substring(6, 19));
-		if (LOGV) Log.v(TAG, "Date string: " + fixedDate);
 		Date date = new Date(fixedDate);
 		return date;
 	}
 	
 
 	public String getGUID() {
-		return guid;
+		return null;
 	}
 
 

@@ -125,7 +125,7 @@ public class Favourite {
 	public String getName() {
 		
 		if (name == null) {
-			return stop.getStopName();
+			return stop.getPrimaryName();
 		}
 		else {
 			return name;

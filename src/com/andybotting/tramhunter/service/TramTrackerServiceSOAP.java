@@ -47,7 +47,6 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.andybotting.tramhunter.objects.NextTram;
@@ -58,7 +57,7 @@ import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
 	
-    private static final String TAG = "TramTrackerService";
+    private static final String TAG = "TTServiceSOAP";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
 	private static final String NAMESPACE = "http://www.yarratrams.com.au/pidsservice/";
@@ -68,15 +67,12 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String CLIENTVERSION = "0.6.0";
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 	
-	private Context mContext;
 	private PreferenceHelper mPreferenceHelper;
 	
 	String guid = "";
 
-	
-	public TramTrackerServiceSOAP(Context context) {
-		this.mContext = context;
-		this.mPreferenceHelper = new PreferenceHelper(mContext);
+	public TramTrackerServiceSOAP() {
+		this.mPreferenceHelper = new PreferenceHelper();
 	}
 	
 	
@@ -289,7 +285,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 			
 			// If we don't have a GUID yet, get from from TramTracker
 			if (guid == "") {
-				Log.d("Testing","GUID is null, methodName is " + methodName);
+				if (LOGV) Log.d(TAG, "GUID is null, methodName is " + methodName);
 				
 				if (methodName != "GetNewClientGuid") {
 					getNewClientGuid();

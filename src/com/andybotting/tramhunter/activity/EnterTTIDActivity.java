@@ -94,7 +94,7 @@ public class EnterTTIDActivity extends Activity {
 					toast.show();
 				}
 				
-				TramHunterDB db = new TramHunterDB(context);
+				TramHunterDB db = new TramHunterDB();
 				
 				// Check to make sure we get 1 result for our TramTrackerID search
 				if (tramTrackerId >= 8000) {

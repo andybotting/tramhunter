@@ -34,45 +34,30 @@
 
 package com.andybotting.tramhunter;
 
-import java.util.UUID;
-import com.andybotting.tramhunter.activity.HomeActivity;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
+import android.app.Application;
+import android.content.Context;
 
 /**
- * @author necros
- * Allows the default activity to be launched via the home screen without issues when the user backtracks to the home screen or
- * the screen is rotated on the home screen. By using a seperat starting activity we can run this activity and the home in a seperate task
- * therefore ALWAYS starting a NEW home activity when the app icon is clicked.
- * 
- * DO NOT MOVE/RENAME THIS FILE! EVER!!! It will break the app upgrades (i.e. Icon will not work and ALL USERS will need to completely reinstall).
+ * This class is primarily used to provide an application context for 
+ * getting access to application resources, like DB and assets
+ * @author andy
  */
-public class TramHunter extends Activity {
+public class TramHunterApplication extends Application {
+
+	public static final String NAME = "TramHunter";
+	public static final int VERSION = 893;
 	
-	public static final String KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH = "PDAL"; 
+    private static TramHunterApplication instance;
     
-    /**
-     *     
-     */
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Intent next = new Intent(this, HomeActivity.class);
-		// Use a unique UUID each time we load the home activity from the launcher
-		next.putExtra(KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH, UUID.randomUUID().toString());
-		startActivity(next);
-		finish();
-	}
-	
-	/**
-	 * 
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		finish();
-	}
+
+    public TramHunterApplication() {
+        instance = this;
+    }
+
+    public static Context getContext() {
+    	if (instance == null)
+    		instance = new TramHunterApplication();
+        return instance;
+    }
 
 }

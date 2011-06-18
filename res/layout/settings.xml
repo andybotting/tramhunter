@@ -50,9 +50,9 @@
 		android:entryValues="@array/defaultActivityEntryValues">
 	</ListPreference>
 	
-	<CheckBoxPreference android:key="useJSONAPI"
-		android:title="Use experimental TramTracker API"
-		android:defaultValue="false" />
+<!--	<CheckBoxPreference android:key="useJSONAPI"-->
+<!--		android:title="Use JSON API"-->
+<!--		android:defaultValue="false" />-->
 
 	<CheckBoxPreference android:key="sendUsageStats"
 		android:title="Send Usage Stats" 

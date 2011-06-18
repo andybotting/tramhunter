@@ -118,7 +118,7 @@ public class RoutesListActivity extends ExpandableListActivity {
 		
 	public void displayRoutes() {
 				
-		TramHunterDB db = new TramHunterDB(this);
+		TramHunterDB db = new TramHunterDB();
 		routes = db.getRoutes();
 		db.close();
 				

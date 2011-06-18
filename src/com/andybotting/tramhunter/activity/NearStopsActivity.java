@@ -43,7 +43,6 @@ import java.util.Map.Entry;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -61,18 +60,14 @@ import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-
  
 public class NearStopsActivity extends ListActivity implements LocationListener {
 	
@@ -86,7 +81,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private ListView mListView;
 	private List<Stop> mAllStops;
 	private StopsList mNearStopsList;
-	private StopsListAdapter mStopsListAdapter;
 	private LocationManager mLocationManager;
 	private Location mLastKnownLocation;
 
@@ -105,7 +99,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	
 	/**
-	 * 
+	 * On Create
 	 */
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	 
@@ -158,7 +152,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	
 	/**
-	 * 
+	 * Display nearby stops
 	 */
 	private void displayNearStops() {
 		startLocationListening(true);
@@ -253,8 +247,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
 	
     /**
-     * 
-     * @param stop
+     * View a stop
      */
 	private void viewStop(Stop stop){
 		int tramTrackerId = stop.getTramTrackerID();
@@ -269,7 +262,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	
 	/**
-	 * 
+	 * Create options menu
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -283,7 +276,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	
 	/**
-	 * 
+	 * Options item select
 	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
@@ -301,7 +294,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 
 	/**
-	 * 
+	 * On click of menu item
 	 */
 	private OnItemClickListener listView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
@@ -312,7 +305,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
     
     /**
-     * 
+     * Create context menu
      */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -322,7 +315,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
     
     /**
-     * 
+     * On select of context menu item
      */
     @Override
     public boolean onContextItemSelected (MenuItem item){
@@ -343,15 +336,13 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     
     
     /**
-     * 
+     * Stop distance calculator
      * @author andy
      *
      */
 	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
 		
 		private final Location mLocation;
-		private boolean mRefreshListOnly;
-		
 		public StopDistanceCalculator(Location location){
 			mLocation = location;
 		}
@@ -359,7 +350,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Can use UI thread here
 		protected void onPreExecute() {
 			mIsCalculatingStopDistances = true;
-//			mRefreshListOnly = !mShowBusy;			
 			if (mShowBusy) {
 				// Show the dialog window
 				mListView.setVisibility(View.GONE);
@@ -397,17 +387,9 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Can use UI thread here
 		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
 			StopsListAdapter stopsListAdapter;
-			
-//			if (mRefreshListOnly) {
-//				// Just update the list
-//				stopsListAdapter = (StopsListAdapter) getListAdapter();
-//				stopsListAdapter.updateStopList(sortedStops, mLocation);
-//			}
-//			else {
-				// Refresh the entire list
-				stopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
-				setListAdapter(stopsListAdapter);	
-//			}
+			// Refresh the entire list
+			stopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
+			setListAdapter(stopsListAdapter);	
 			
 			// If we've just been showing the loading screen
 			if (mListView.getVisibility() == View.GONE) {
@@ -422,9 +404,8 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
 	
 	/**
-	 * 
+	 *  
 	 * @author andy
-	 *
 	 */
 	private class StopsListAdapter extends BaseAdapter {
 		
@@ -434,12 +415,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		public StopsListAdapter(ArrayList<Stop> stops, Location location){
 			mStops = stops;
 			mLocation = location;
-		}
-		
-		public void updateStopList(ArrayList<Stop> stops, Location location){
-			mStops = stops;
-			mLocation = location;
-			this.notifyDataSetChanged();			
 		}
 		
 		public ArrayList<Stop> getStops() {
@@ -494,7 +469,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	
     
 	/**
-	 * 
+	 * On location changed
 	 */
     public void onLocationChanged(Location location) {
 
