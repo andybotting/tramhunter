@@ -15,8 +15,10 @@
 *R.java
 
 # specific dirs
-bin/
-gen/
+bin/*
+!bin/.keep
+gen/*
+!gen/.keep
 
 # python pyc
 *.pyc
