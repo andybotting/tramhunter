@@ -23,3 +23,8 @@ gen/*
 # python pyc
 *.pyc
 
+# Mac DS Store
+.DS_Store
+
+# Eclipse settings dir
+.settings

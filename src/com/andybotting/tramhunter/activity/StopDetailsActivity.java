@@ -1,22 +1,22 @@
-/*  
- * Copyright 2010 Andy Botting <andy@andybotting.com>  
- *  
+/*
+ * Copyright 2010 Andy Botting <andy@andybotting.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *  
- * This file is distributed in the hope that it will be useful, but  
- * WITHOUT ANY WARRANTY; without even the implied warranty of  
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  
- * General Public License for more details.  
- *  
- * You should have received a copy of the GNU General Public License  
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
- *  
- * This file incorporates work covered by the following copyright and  
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
  * permission notice:
- * 
+ *
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,9 @@ package com.andybotting.tramhunter.activity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -47,8 +49,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -63,17 +68,22 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
@@ -85,21 +95,20 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
-import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class StopDetailsActivity extends ListActivity {
-	
+
     private static final String TAG = "StopDetailsActivity";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
-		
+
 	private final static int MENU_ITEM_REFRESH = 0;
 	private final static int MENU_ITEM_FAVOURITE = 1;
 	private final static int MENU_ITEM_MAP = 2;
-	
+
 	private TramHunterDB mDB;
 	private CompoundButton mStarButton;
 
@@ -108,110 +117,191 @@ public class StopDetailsActivity extends ListActivity {
 	private Route mRoute = null;
 	private int mTramTrackerId;
     private volatile Thread mRefreshThread;
-    
+
     boolean mLoadingError = false;
     boolean mShowDialog = true;
-    
+
 	private ListAdapter mListAdapter;
 	private ListView mListView;
 	private Spinner mRoutesSpinner;
 	private ArrayAdapter<CharSequence> mAdapterForSpinner;
-    
+
     private PreferenceHelper mPreferenceHelper;
     private FavouriteList mFavouriteList;
     private TramTrackerService ttService;
-    
+
     private String mErrorMessage = null;
 	private int mErrorRetry = 0;
 	private final int MAX_ERRORS = 3;
 	private boolean mFirstDepartureReqest = true;
-	
+
 	private static final int REFRESH_SECONDS = 60;
-     
+
     // Handle the timer
     Handler UpdateHandler = new Handler() {
-    	public void handleMessage(Message msg) {
+    	@Override
+      public void handleMessage(final Message msg) {
     		new GetNextTramTimes().execute();
     	}
 	};
 
-	
+
 	/**
 	 * On create of this class
 	 */
 	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);	  
-		
-		setContentView(R.layout.stop_details);	
-		
+	public void onCreate(final Bundle icicle) {
+		super.onCreate(icicle);
+
+		setContentView(R.layout.stop_details);
+
 		// Home title button
 		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
+		    @Override
+        public void onClick(final View v) {
 		    	UIUtils.goHome(StopDetailsActivity.this);
 		    }
-		});	
+		});
 
 		// Refresh title button
 		findViewById(R.id.title_btn_refresh).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
+		    @Override
+        public void onClick(final View v) {
 		    	mShowDialog = true;
 		    	new GetNextTramTimes().execute();
 		    }
-		});	
-		
+		});
+
 		// Map title button
 		findViewById(R.id.title_btn_map).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-				Bundle bundle = new Bundle();
-				StopsList mStopList = new StopsList();
+		    @Override
+        public void onClick(final View v) {
+				final Bundle bundle = new Bundle();
+				final StopsList mStopList = new StopsList();
 				mStopList.add(mStop);
 				bundle.putParcelable("stopslist", mStopList);
-				Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 				intent.putExtras(bundle);
 				startActivityForResult(intent, 1);
 		    }
-		});			
-		
-		
-        // Set up our list
-        mListAdapter = new NextTramsListAdapter();
+		});
+
+
+    // Set up our list
+    mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
 		mListView.setVisibility(View.GONE);
-		
+
+		// long click on list item implementation
+    mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+      @Override
+      public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+          final int position, final long id) {
+
+        final Dialog dialog = new Dialog(StopDetailsActivity.this);
+        dialog.setTitle(R.string.app_name);
+        dialog.setContentView(R.layout.notification_dialog);
+
+        final Button notificationBtn = (Button) dialog.findViewById(R.id.setNotifBtn);
+
+        // set notification dialog click implementation
+        notificationBtn.setOnClickListener(new OnClickListener() {
+
+          @Override
+          public void onClick(final View v) {
+            final EditText notificationText = (EditText) dialog.findViewById(R.id.txtNotification);
+            final CharSequence inputText = notificationText.getText();
+
+            if (inputIsNotValid(inputText)) {
+              Toast.makeText(StopDetailsActivity.this, R.string.dialog_error_msg, Toast.LENGTH_LONG)
+                  .show();
+              return;
+            }
+
+            final int minutesToAdd = Integer.parseInt(inputText.toString());
+            final Calendar currentDateTime = calculateAlarmDateTime(position, minutesToAdd);
+
+            final Intent intent = new Intent(StopDetailsActivity.this, TramNotification.class);
+
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                StopDetailsActivity.this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+            final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, currentDateTime.getTimeInMillis(),
+                pendingIntent);
+
+            dialog.dismiss();
+
+            final CharSequence message = getString(R.string.dialog_notification_trigger_msg,
+                minutesToAdd);
+            Toast.makeText(StopDetailsActivity.this, message, Toast.LENGTH_LONG).show();
+          }
+
+          private boolean inputIsNotValid(final CharSequence inputMinutes) {
+            if (null == inputMinutes) {
+              return true;
+            }
+
+            final String inputMinStr = inputMinutes.toString();
+            return !inputMinStr.matches("\\d");
+          }
+
+          private Calendar calculateAlarmDateTime(final int chosenTramListIndex,
+              final int minutesToAdd) {
+            final Calendar currentDateTime = new GregorianCalendar();
+
+            final NextTram tram = mNextTrams.get(chosenTramListIndex);
+            currentDateTime.setTime(tram.getPredictedArrivalDateTime());
+            currentDateTime.add(Calendar.MINUTE, minutesToAdd * -1);
+
+            Log.d(TAG, "Scheduling to: " + currentDateTime);
+            return currentDateTime;
+          }
+
+        });
+
+        dialog.show();
+        return true;
+      }
+
+    });
+
 		// Preferences
 		mPreferenceHelper = new PreferenceHelper();
-		
+
 		// Get bundle data
 		int routeId = -1;
-		Bundle extras = getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if(extras != null) {
 			mTramTrackerId = extras.getInt("tramTrackerId");
 			routeId = extras.getInt("routeId", -1);
-		}  
-		
+		}
+
 		// Get our favourite stops list
 		mFavouriteList = new FavouriteList();
-		
+
 		// Create out DB instance
 		mDB = new TramHunterDB();
 		mStop = mDB.getStop(mTramTrackerId);
-		if (routeId > -1)
-			mRoute = mDB.getRoute(routeId);
+		if (routeId > -1) {
+      mRoute = mDB.getRoute(routeId);
+    }
 
 		// Set the title
-		String title = mStop.getStopName();
+		final String title = mStop.getStopName();
 		((TextView) findViewById(R.id.title_text)).setText(title);
 
 		// Display stop data
 		displayStop(mStop);
-		
+
 		// Star button
 		mStarButton = (CompoundButton)findViewById(R.id.stopStar);
 		mStarButton.setChecked(mFavouriteList.isFavourite(new Favourite(mStop, mRoute)));
-		
+
 		mStarButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
+			@Override
+      public void onClick(final View v) {
 				mFavouriteList.setFavourite(new Favourite(mStop, mRoute), mStarButton.isChecked());
 			}
 		});
@@ -221,14 +311,14 @@ public class StopDetailsActivity extends ListActivity {
 //			ttService = new TramTrackerServiceJSON();
 //		else
 		ttService = new TramTrackerServiceSOAP();
-		
+
 		// Our thread for updating the stops every 60 secs
         mRefreshThread = new Thread(new CountDown());
         mRefreshThread.setDaemon(true);
-        mRefreshThread.start();	
+        mRefreshThread.start();
 
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -240,7 +330,7 @@ public class StopDetailsActivity extends ListActivity {
 		super.onStop();
 		mRefreshThread.interrupt();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -249,61 +339,62 @@ public class StopDetailsActivity extends ListActivity {
 		}
 	}
 
-	
+
     /**
      * Update refresh status icon/views
      */
-	private void showLoadingView(boolean isRefreshing) {
-		
+	private void showLoadingView(final boolean isRefreshing) {
+
 		// Only 1 entry means an error, so make it < 2
-		if (mListAdapter.getCount() < 2)
-			mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
-		else
-			mListView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+		if (mListAdapter.getCount() < 2) {
+      mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+    } else {
+      mListView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+    }
 
 		findViewById(R.id.departures_loading).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
 	}
 
-	
+
     /**
      * Update refresh status icon/views
      */
-	private void showRefreshSpinner(boolean isRefreshing) {
+	private void showRefreshSpinner(final boolean isRefreshing) {
 		findViewById(R.id.title_btn_refresh).setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 		findViewById(R.id.title_refresh_progress).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
 	}
-	
-	
+
+
 	/**
 	 * Create the options for a given menu
 	 */
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		
+
 		menu.add(0, MENU_ITEM_REFRESH, 0, "Refresh");
-		MenuItem menuItem1 = menu.findItem(MENU_ITEM_REFRESH);
+		final MenuItem menuItem1 = menu.findItem(MENU_ITEM_REFRESH);
 		menuItem1.setIcon(R.drawable.ic_menu_refresh);
 
 		menu.add(0, MENU_ITEM_FAVOURITE, 0, ""); // Title set in onMenuOpened()
-		MenuItem menuItem2 = menu.findItem(MENU_ITEM_FAVOURITE);
+		final MenuItem menuItem2 = menu.findItem(MENU_ITEM_FAVOURITE);
 		menuItem2.setIcon(R.drawable.ic_menu_star);
-		
+
 		menu.add(0, MENU_ITEM_MAP, 0, "Map");
-		MenuItem menuItem3 = menu.findItem(MENU_ITEM_MAP);
+		final MenuItem menuItem3 = menu.findItem(MENU_ITEM_MAP);
 		menuItem3.setIcon(R.drawable.ic_menu_mapmode);
-		
+
 		return true;
 	}
 
-	
+
 	/**
 	 * Overide the onMenuOpened method to allow us to dynamically set the menu item
 	 * title on open.
 	 */
 	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		boolean isFavourite = mFavouriteList.isFavourite(new Favourite(mStop, mRoute));
+	public boolean onMenuOpened(final int featureId, final Menu menu) {
+		final boolean isFavourite = mFavouriteList.isFavourite(new Favourite(mStop, mRoute));
 		menu.getItem(MENU_ITEM_FAVOURITE).setTitle(isFavourite ? "Unfavourite" : "Favourite");
 		return super.onMenuOpened(featureId, menu);
 	}
@@ -315,47 +406,47 @@ public class StopDetailsActivity extends ListActivity {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem menuItem) {
-		
-		switch (menuItem.getItemId()) { 
-		
+
+		switch (menuItem.getItemId()) {
+
 			case MENU_ITEM_REFRESH:
 				mShowDialog = true;
 				new GetNextTramTimes().execute();
 				return true;
-				
+
 			case MENU_ITEM_FAVOURITE:
 				mStarButton = (CompoundButton)findViewById(R.id.stopStar);
-				Favourite favourite = new Favourite(mStop, mRoute);
-				boolean isFavourite = mFavouriteList.isFavourite(favourite);
+				final Favourite favourite = new Favourite(mStop, mRoute);
+				final boolean isFavourite = mFavouriteList.isFavourite(favourite);
 				mFavouriteList.toggleFavourite(favourite);
 				mStarButton.setChecked(!isFavourite);
 				return true;
-				
+
 			case MENU_ITEM_MAP:
 				// Map view
-				Bundle bundle = new Bundle();
-				StopsList mStopList = new StopsList();
+				final Bundle bundle = new Bundle();
+				final StopsList mStopList = new StopsList();
 				mStopList.add(mStop);
 				bundle.putParcelable("stopslist", mStopList);
-				Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 				intent.putExtras(bundle);
 				startActivityForResult(intent, 1);
 				return true;
 		}
-		
+
 		return false;
 	}
 
-	
+
 	/**
 	 * Display the details for a given stop
 	 * @param stop
 	 */
-	private void displayStop(Stop stop) {
-		
+	private void displayStop(final Stop stop) {
+
 		// Set labels from Stop hash map
-		String firstLineText = stop.getPrimaryName();	
-		
+		final String firstLineText = stop.getPrimaryName();
+
 		String secondLineText = "Stop " + stop.getFlagStopNumber();
 		// If the stop has a secondary name, add it
 		if (stop.getSecondaryName().length() > 0) {
@@ -363,13 +454,13 @@ public class StopDetailsActivity extends ListActivity {
 		}
 		secondLineText += " - " + stop.getCityDirection();
 		secondLineText += " (" + stop.getTramTrackerID() + ")";
-		
+
 		//initialiseDatabase();
 		final List<Route> mRoutes = mDB.getRoutesForStop(mTramTrackerId);
 		stop.setRoutes(mRoutes);
-		
-		String thirdLineText = stop.getRoutesString();
-			
+
+		final String thirdLineText = stop.getRoutesString();
+
 		((TextView)findViewById(R.id.stopNameTextView)).setText(firstLineText);
 		((TextView)findViewById(R.id.stopDetailsTextView)).setText(secondLineText);
 		((TextView)findViewById(R.id.stopRoutesTextView)).setText(thirdLineText);
@@ -381,15 +472,15 @@ public class StopDetailsActivity extends ListActivity {
 			mAdapterForSpinner = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
 			mAdapterForSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mRoutesSpinner.setAdapter(mAdapterForSpinner);
-		
+
 			// Add 'All'
 			mAdapterForSpinner.add("All Routes");
-			
+
 			Route r;
 			for (int i = 0; i < mRoutes.size(); i++) {
 				r = mRoutes.get(i);
 				mAdapterForSpinner.add("Route " + r.getNumber());
-				
+
 				// If we have a route already (e.g. passed from Favourites activity, then
 				// select it right now
 				if (mRoute != null) {
@@ -398,39 +489,43 @@ public class StopDetailsActivity extends ListActivity {
 						mRoutesSpinner.setSelection(i+1);
 					}
 				}
-				
+
 			}
-			
+
 			mRoutesSpinner.setOnItemSelectedListener(
 				new OnItemSelectedListener() {
-					public void onItemSelected(
-						AdapterView<?> parent, View view, int position, long id) {
+					@Override
+          public void onItemSelected(
+						final AdapterView<?> parent, final View view, final int position, final long id) {
 							if (id == 0) {
 								mRoute = null;
 							}
 							else {
 								// -1 for the offset of having 'All Routes' first item
 								mRoute = mRoutes.get(position-1);
-								if (LOGV) Log.v(TAG, "Route selected: " + mRoute);
-								
+								if (LOGV) {
+                  Log.v(TAG, "Route selected: " + mRoute);
+                }
+
 							}
-							
+
 							// Refresh the results
 							mStarButton.setChecked(mFavouriteList.isFavourite(new Favourite(mStop, mRoute)));
 					    	mShowDialog = true;
 					    	new GetNextTramTimes().execute();
 	                    }
-	
-						public void onNothingSelected(AdapterView<?> parent) {
+
+						@Override
+            public void onNothingSelected(final AdapterView<?> parent) {
 	                    	mRoute = null;
 						}
 				}
 			);
 		}
-		
-		
+
+
 	}
-	
+
 
 	/**
 	 * Create a countdown thread
@@ -438,22 +533,23 @@ public class StopDetailsActivity extends ListActivity {
 	 *
 	 */
     private class CountDown implements Runnable {
+        @Override
         public void run() {
         	while(!Thread.currentThread().isInterrupted()){
-        		Message m = new Message();
+        		final Message m = new Message();
         		UpdateHandler.sendMessage(m);
         		try {
         			// 60 Seconds
         			Thread.sleep(REFRESH_SECONDS * 1000);
-        		} 
-        		catch (InterruptedException e) {
+        		}
+        		catch (final InterruptedException e) {
         			Thread.currentThread().interrupt();
         		}
         	}
         }
 	}
-	
-    
+
+
     /**
      * Background task for fetching tram times
      */
@@ -462,9 +558,10 @@ public class StopDetailsActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			// Show the spinner in the title bar
-			if (mShowDialog)
-				showLoadingView(true);
-			
+			if (mShowDialog) {
+        showLoadingView(true);
+      }
+
 			showRefreshSpinner(true);
 		}
 
@@ -475,45 +572,49 @@ public class StopDetailsActivity extends ListActivity {
 
 				for (int i = 0; i < mNextTrams.size(); i++) {
 					// Remove any entries that show 'anyType{}' - they are errors
-					if (mNextTrams.get(i).getDestination().matches("anyType"))
-						mNextTrams.remove(i);
+					if (mNextTrams.get(i).getDestination().matches("anyType")) {
+            mNextTrams.remove(i);
+          }
 				}
-			} 
-			catch (TramTrackerServiceException e) {
+			}
+			catch (final TramTrackerServiceException e) {
 				// Retry a couple of times before error
 				if (mErrorRetry < MAX_ERRORS) {
 					mErrorRetry++;
-					if (LOGV) Log.e(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e);
+					if (LOGV) {
+            Log.e(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e);
+          }
 					this.doInBackground(params);
 				}
 				else {
 					// Save the error message for the toast
 					mErrorMessage = e.getMessage();
 				}
-			}			
+			}
 			return mNextTrams;
 		}
 
 		@Override
-		protected void onPostExecute(List<NextTram> nextTrams) {
+		protected void onPostExecute(final List<NextTram> nextTrams) {
         	if (mErrorRetry == MAX_ERRORS) {
 
         		// Toast: Error fetching departure information
-        		if (mFirstDepartureReqest) 
-        			UIUtils.popToast(getApplicationContext(), getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
-        		
+        		if (mFirstDepartureReqest) {
+              UIUtils.popToast(getApplicationContext(), getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
+            }
+
         		mErrorMessage = null;
         		mErrorRetry = 0;
         	}
         	else {
         		boolean noResults = true;
-       		
+
 				if (nextTrams.size() > 0) {
 					mLoadingError = false;
-					
+
 					// Sort trams by minutesAway
 					Collections.sort(nextTrams);
-					
+
 					// Show trams list, only if more than one tram.
 					if (nextTrams.size() > 1) {
 						noResults = false;
@@ -523,51 +624,53 @@ public class StopDetailsActivity extends ListActivity {
 	        		// If it's the first load of data
 	        		if (mFirstDepartureReqest) {
 						// > 10 because ksoap2 fills in anytype{} instead of null
-	        			String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
-						if (specialEventMessage.length() > 10)
-							showSpecialEvent(specialEventMessage);
-	        			
+	        			final String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
+						if (specialEventMessage.length() > 10) {
+              showSpecialEvent(specialEventMessage);
+            }
+
 	   					if (mPreferenceHelper.isSendStatsEnabled()) {
 	   						new Thread() {
-	   							public void run() {
+	   							@Override
+                  public void run() {
 	   								uploadStats();
 	   							}
 	   						}.start();
 	   					}
-	   					
+
 	   					// Reset the first departure request
 	   					mFirstDepartureReqest = false;
 	        		}
         		}
-        		
+
         		if (noResults) {
         			mListView.getEmptyView().setVisibility(noResults ? View.VISIBLE : View.GONE);
        				mListView.setVisibility(noResults ? View.VISIBLE : View.GONE);
         		}
 
         	}
-        	        	
+
         	// Hide the loading spinners
         	showLoadingView(false);
         	showRefreshSpinner(false);
     		mShowDialog = false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Show a dialog message for a given 'Special Event'
 	 * @param message
 	 */
-	private void showSpecialEvent(String message) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+	private void showSpecialEvent(final String message) {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Special Event");
         dialogBuilder.setMessage(message);
         dialogBuilder.setPositiveButton("OK", null);
         dialogBuilder.setIcon(R.drawable.ic_dialog_alert);
         dialogBuilder.show();
 	}
-	
+
 
 	/**
 	 * Create a NextTramsListAdapter for showing our next trams
@@ -575,47 +678,55 @@ public class StopDetailsActivity extends ListActivity {
 	 *
 	 */
 	private class NextTramsListAdapter extends BaseAdapter {
-	
-		public int getCount() {
+
+		@Override
+    public int getCount() {
 			return mNextTrams.size();
 		}
 
-		public Object getItem(int position) {
+		@Override
+    public Object getItem(final int position) {
 			return position;
 		}
 
-		public long getItemId(int position) {
+		@Override
+    public long getItemId(final int position) {
 			return position;
 		}
 
-		public View getView(int position, View convertView, ViewGroup parent) {
+		@Override
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
         	View pv;
             if(convertView == null) {
-    			LayoutInflater inflater = getLayoutInflater();
+    			final LayoutInflater inflater = getLayoutInflater();
     			pv = inflater.inflate(R.layout.stop_details_row, parent, false);
             }
             else {
                 pv = convertView;
             }
-            
-			NextTram thisTram = (NextTram) mNextTrams.get(position);
+
+			final NextTram thisTram = mNextTrams.get(position);
 			((TextView) pv.findViewById(R.id.routeNumber)).setText(thisTram.getRouteNo());
 			((TextView) pv.findViewById(R.id.routeDestination)).setText(thisTram.getDestination());
 			((TextView) pv.findViewById(R.id.nextTime)).setText(thisTram.humanMinutesAway());
-			
+
 			if (mPreferenceHelper.isTramImageEnabled()) {
 				mDB = new TramHunterDB();
-				
-				int tramNumber = thisTram.getVehicleNo();
-				if (LOGV) Log.v(TAG, thisTram.toString() + " has tram number: " + tramNumber);
-				
-				if (tramNumber > 0) {
-					String tramClass = mDB.getTramClass(tramNumber);
-					String tramClassImage = UIUtils.getTramImage(tramClass);
 
-					if (tramClassImage != null) {	
-						if (LOGV) Log.v(TAG, "Tram Class: " + tramClass + " Tram Image: " + tramClassImage);
-						int resID = getResources().getIdentifier(tramClassImage, "drawable", getPackageName());
+				final int tramNumber = thisTram.getVehicleNo();
+				if (LOGV) {
+          Log.v(TAG, thisTram.toString() + " has tram number: " + tramNumber);
+        }
+
+				if (tramNumber > 0) {
+					final String tramClass = mDB.getTramClass(tramNumber);
+					final String tramClassImage = UIUtils.getTramImage(tramClass);
+
+					if (tramClassImage != null) {
+						if (LOGV) {
+              Log.v(TAG, "Tram Class: " + tramClass + " Tram Image: " + tramClassImage);
+            }
+						final int resID = getResources().getIdentifier(tramClassImage, "drawable", getPackageName());
 						((ImageView) pv.findViewById(R.id.tramClass)).setPadding(3, 5, 3, 3);
 						((ImageView) pv.findViewById(R.id.tramClass)).setBackgroundResource(resID);
 					}
@@ -624,38 +735,40 @@ public class StopDetailsActivity extends ListActivity {
 			}
 			return pv;
         }
-			
-	}		
+
+	}
 
 
 	/**
 	 * Upload statistics to our web server
 	 */
     private void uploadStats() {
-    	if (LOGV) Log.i(TAG, "Sending stop request statistics");
-    	
+    	if (LOGV) {
+        Log.i(TAG, "Sending stop request statistics");
+      }
+
 		// gather all of the device info
     	try {
-			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String device_uuid = tm.getDeviceId();
+			final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			final String device_uuid = tm.getDeviceId();
 			String device_id = "00000000000000000000000000000000";
 			if (device_uuid != null) {
 				device_id = GenericUtil.MD5(device_uuid);
 			}
-			
-			LocationManager mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-			Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-	
+
+			final LocationManager mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+			final Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
 			// post the data
-			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/stop/send");
+			final HttpClient client = new DefaultHttpClient();
+			final HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/stop/send");
 			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-	
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+
+			final List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			pairs.add(new BasicNameValuePair("device_id", device_id));
-			pairs.add(new BasicNameValuePair("guid", ttService.getGUID()));	
+			pairs.add(new BasicNameValuePair("guid", ttService.getGUID()));
 			pairs.add(new BasicNameValuePair("ttid", String.valueOf(mStop.getTramTrackerID())));
-			
+
 			if (location != null) {
 				pairs.add(new BasicNameValuePair("latitude", String.valueOf(location.getLatitude())));
 				pairs.add(new BasicNameValuePair("longitude", String.valueOf(location.getLongitude())));
@@ -664,21 +777,21 @@ public class StopDetailsActivity extends ListActivity {
 
 			try {
 				post.setEntity(new UrlEncodedFormEntity(pairs));
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-	
+
 			try {
-				HttpResponse response = client.execute(post);
+				final HttpResponse response = client.execute(post);
 				response.getStatusLine().getStatusCode();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
-	
-		} catch (Exception e) {
+
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-		
+
     }
 
 }

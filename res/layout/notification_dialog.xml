@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:baselineAligned="false"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:text="@string/dialog_notify_me"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/txtNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:hint="@string/dialog_notification_hint"
+        android:inputType="number" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/setNotifBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:text="@string/dialog_set_notification" />
+
+</LinearLayout>
