@@ -49,7 +49,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
-import com.andybotting.tramhunter.map.AndroidBigImage;
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
@@ -193,7 +192,7 @@ public class HomeActivity extends Activity {
 		// Network Map
 		findViewById(R.id.home_btn_map).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
-		    	startActivity(new Intent(HomeActivity.this, AndroidBigImage.class));
+		    	startActivity(new Intent(HomeActivity.this, NetworkMapActivity.class));
 		    }
 		});
 
