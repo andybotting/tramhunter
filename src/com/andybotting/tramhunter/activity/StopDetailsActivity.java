@@ -36,7 +36,9 @@ package com.andybotting.tramhunter.activity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -47,8 +49,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -64,15 +69,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.andybotting.tramhunter.R;
@@ -83,6 +93,7 @@ import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
+import com.andybotting.tramhunter.service.TramNotification;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
@@ -166,7 +177,7 @@ public class StopDetailsActivity extends ListActivity {
 				StopsList mStopList = new StopsList();
 				mStopList.add(mStop);
 				bundle.putParcelable("stopslist", mStopList);
-				Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 				intent.putExtras(bundle);
 				startActivityForResult(intent, 1);
 		    }
@@ -178,12 +189,88 @@ public class StopDetailsActivity extends ListActivity {
 		mListView = getListView();
 		mListView.setVisibility(View.GONE);
 		
+		// long click on list item implementation
+	    mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+	      @Override
+	      public boolean onItemLongClick(final AdapterView<?> parent, final View view,
+	          final int position, final long id) {
+
+	        final Dialog dialog = new Dialog(StopDetailsActivity.this);
+	        dialog.setTitle(R.string.app_name);
+	        dialog.setContentView(R.layout.notification_dialog);
+
+	        final Button notificationBtn = (Button) dialog.findViewById(R.id.setNotifBtn);
+
+	        // set notification dialog click implementation
+	        notificationBtn.setOnClickListener(new OnClickListener() {
+
+	          @Override
+	          public void onClick(final View v) {
+	            final EditText notificationText = (EditText) dialog.findViewById(R.id.txtNotification);
+	            final CharSequence inputText = notificationText.getText();
+
+	            if (inputIsNotValid(inputText)) {
+	              Toast.makeText(StopDetailsActivity.this, R.string.dialog_error_msg, Toast.LENGTH_LONG)
+	                  .show();
+	              return;
+	            }
+
+	            final int minutesToAdd = Integer.parseInt(inputText.toString());
+	            final Calendar currentDateTime = calculateAlarmDateTime(position, minutesToAdd);
+
+	            final Intent intent = new Intent(StopDetailsActivity.this, TramNotification.class);
+
+	            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+	                StopDetailsActivity.this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+	            final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+	            alarmManager.set(AlarmManager.RTC_WAKEUP, currentDateTime.getTimeInMillis(),
+	                pendingIntent);
+
+	            dialog.dismiss();
+
+	            final CharSequence message = getString(R.string.dialog_notification_trigger_msg,
+	                minutesToAdd);
+	            Toast.makeText(StopDetailsActivity.this, message, Toast.LENGTH_LONG).show();
+	          }
+
+	          private boolean inputIsNotValid(final CharSequence inputMinutes) {
+	            if (null == inputMinutes) {
+	              return true;
+	            }
+
+	            final String inputMinStr = inputMinutes.toString();
+	            return !inputMinStr.matches("\\d");
+	          }
+
+	          private Calendar calculateAlarmDateTime(final int chosenTramListIndex,
+	              final int minutesToAdd) {
+	            final Calendar currentDateTime = new GregorianCalendar();
+
+	            final NextTram tram = mNextTrams.get(chosenTramListIndex);
+	            currentDateTime.setTime(tram.getPredictedArrivalDateTime());
+	            currentDateTime.add(Calendar.MINUTE, minutesToAdd * -1);
+
+	            Log.d(TAG, "Scheduling to: " + currentDateTime);
+	            return currentDateTime;
+	          }
+
+	        });
+
+	        dialog.show();
+	        return true;
+	      }
+
+	    });
+		
+
 		// Preferences
 		mPreferenceHelper = new PreferenceHelper();
 		
 		// Get bundle data
 		int routeId = -1;
-		Bundle extras = getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if(extras != null) {
 			mTramTrackerId = extras.getInt("tramTrackerId");
 			routeId = extras.getInt("routeId", -1);
@@ -199,7 +286,7 @@ public class StopDetailsActivity extends ListActivity {
 			mRoute = mDB.getRoute(routeId);
 
 		// Set the title
-		String title = mStop.getStopName();
+		final String title = mStop.getStopName();
 		((TextView) findViewById(R.id.title_text)).setText(title);
 
 		// Display stop data
@@ -336,7 +423,7 @@ public class StopDetailsActivity extends ListActivity {
 				StopsList mStopList = new StopsList();
 				mStopList.add(mStop);
 				bundle.putParcelable("stopslist", mStopList);
-				Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
 				intent.putExtras(bundle);
 				startActivityForResult(intent, 1);
 				return true;

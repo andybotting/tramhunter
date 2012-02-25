@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2010 Andy Botting <andy@andybotting.com>  
-    
+    Copyright 2012 Andy Botting <andy@andybotting.com>
+    Copyright 2012 Tarcio Saraiva <tarcio@gmail.com>
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-     
+
     This file is distributed in the hope that it will be useful, but  
     WITHOUT ANY WARRANTY; without even the implied warranty of  
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU  
     General Public License for more details.  
-     
+
     You should have received a copy of the GNU General Public License  
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  
-    
+
     This file incorporates work covered by the following copyright and  
     permission notice:
-
+    
     Copyright 2010 Google Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,16 +33,39 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:baselineAligned="false"
+    android:orientation="vertical" >
 
-<resources>
-    <dimen name="title_height">40dip</dimen>
-    
-    <dimen name="welcome_message_height">20dip</dimen>
- 
-    <dimen name="text_size_tiny">12sp</dimen>   
-    <dimen name="text_size_small">14sp</dimen>
-    <dimen name="text_size_medium">18sp</dimen>
-    <dimen name="text_size_large">22sp</dimen>
-    
-    <dimen name="margin_dialog">5sp</dimen>
-</resources>
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:text="@string/dialog_notify_me"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/black"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/txtNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:hint="@string/dialog_notification_hint"
+        android:inputType="number" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/setNotifBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_dialog"
+        android:text="@string/dialog_set_notification" />
+
+</LinearLayout>

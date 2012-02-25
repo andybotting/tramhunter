@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2010 Andy Botting <andy@andybotting.com>  
+    Copyright 2012 Andy Botting <andy@andybotting.com>  
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,5 +88,14 @@
 	<string name="dialog_error_fetching">Error fetching departure times</string>
 	<string name="dialog_set_name">Set stop name</string>
 	<string name="dialog_set_name_message">Set a custom name for \'<xliff:g id="name">%1$s</xliff:g>\'</string>
+	
+	<!-- Set Notification Dialog -->
+	<string name="dialog_notify_me">Notify me when tram is</string>
+	<string name="dialog_set_notification">Set!</string>
+	<string name="dialog_notification_hint">Enter minutes due</string>
+	
+	<string name="notification_title">Your tram is getting closer</string>
+	<string name="dialog_error_msg">Please enter a valid number</string>
+	<string name="dialog_notification_trigger_msg">You will be notified when your tram is <xliff:g id="name">%1$s</xliff:g> minute(s) due!</string>	   
     
 </resources>
