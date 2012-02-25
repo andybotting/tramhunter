@@ -1,6 +1,6 @@
 /*  
- * Copyright 2012 Andy Botting <andy@andybotting.com> 
  * Copyright 2012 Tarcio Saraiva <tarcio@gmail.com> 
+ * Copyright 2012 Andy Botting <andy@andybotting.com> 
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,32 +47,31 @@ import com.andybotting.tramhunter.activity.HomeActivity;
 
 public class TramNotification extends BroadcastReceiver {
 
-  private NotificationManager notificationManager;
+	private NotificationManager notificationManager;
 
-  @Override
-  public void onReceive(final Context context, final Intent intent) {
-    notificationManager = (NotificationManager) context
-        .getSystemService(Context.NOTIFICATION_SERVICE);
+	@Override
+	public void onReceive(final Context context, final Intent intent) {
+	notificationManager = (NotificationManager) context
+		.getSystemService(Context.NOTIFICATION_SERVICE);
 
-    // creating a new notification
-    final int icon = R.drawable.icon;
-    final CharSequence tickerText = context.getString(R.string.notification_title);
+		// creating a new notification
+		final int icon = R.drawable.icon;
+		final CharSequence tickerText = context.getString(R.string.notification_title);
 
-    final Notification notification = new Notification(icon, tickerText, System.currentTimeMillis());
-    notification.defaults |= Notification.DEFAULT_VIBRATE;
-    notification.defaults |= Notification.DEFAULT_SOUND;
+		final Notification notification = new Notification(icon, tickerText, System.currentTimeMillis());
+		notification.defaults |= Notification.DEFAULT_VIBRATE;
+		notification.defaults |= Notification.DEFAULT_SOUND;
 
-    // define the notification message and intent
-    final CharSequence contentTitle = context.getString(R.string.notification_title);
-    final CharSequence contentText = "Run Forrest, run!";
+		// define the notification message and intent
+		final CharSequence contentTitle = context.getString(R.string.notification_title);
+		final CharSequence contentText = "Run Forrest, run!";
 
-    final Intent notificationIntent = new Intent(context, HomeActivity.class);
-    final PendingIntent contentIntent = PendingIntent
-        .getActivity(context, 0, notificationIntent, 0);
+		final Intent notificationIntent = new Intent(context, HomeActivity.class);
+		final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-    notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
-    notificationManager.notify(1, notification);
-  }
+		notificationManager.notify(1, notification);
+	}
 
 }
