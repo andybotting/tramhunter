@@ -73,7 +73,7 @@ public class FavouriteActivity extends ListActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);	  
 		
-		setContentView(R.layout.stops_list);
+		setContentView(R.layout.favourite_list);
 		
 		mListView = (TouchListView) getListView();
 		mListView.setDropListener(onDrop);
@@ -344,7 +344,7 @@ public class FavouriteActivity extends ListActivity {
 			View pv;
             if(convertView == null) {
     			LayoutInflater inflater = getLayoutInflater();
-    			pv = inflater.inflate(R.layout.touch_list_row2, parent, false);
+    			pv = inflater.inflate(R.layout.favourite_list_row, parent, false);
             }
             else {
                 pv = convertView;

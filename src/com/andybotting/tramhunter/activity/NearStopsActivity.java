@@ -134,8 +134,6 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		// Set the title
 		((TextView) findViewById(R.id.title_text)).setText(mTitle);
 
-		//mContext = this.getBaseContext();
-		//mPreferenceHelper = new PreferenceHelper();
 		mDB = new TramHunterDB();
 		
 		// Get our stops from the DB
@@ -374,9 +372,11 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	    		Stop stop = item.getValue();
 	    		
 	    		// Don't show terminus stops > 8000
-				if (stop.getTramTrackerID() < 8000)
+				if (stop.getTramTrackerID() < 8000) {
 					sortedStops.add(stop);
-	    		
+					mNearStopsList.add(stop);
+				}
+				
 				if(sortedStops.size() >= MAXSTOPS)
 	    			break;
 	    	}

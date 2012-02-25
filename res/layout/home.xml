@@ -62,6 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:padding="6dip">
+        
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"

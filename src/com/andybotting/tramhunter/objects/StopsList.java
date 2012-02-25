@@ -66,11 +66,8 @@ public class StopsList extends ArrayList<Stop> implements Parcelable{
 	private void readFromParcel(Parcel in) {
 		this.clear();
 
-		//First we have to read the list size
+		// First we have to read the list size
 		int size = in.readInt();
-
-		//Reading remember that we wrote first the Name and later the Phone Number.
-		//Order is fundamental
 		
 		for (int i = 0; i < size; i++) {
 			Stop s = new Stop();
@@ -96,9 +93,9 @@ public class StopsList extends ArrayList<Stop> implements Parcelable{
 
 	public void writeToParcel(Parcel dest, int flags) {
 		int size = this.size();
-		//We have to write the list size, we need him recreating the list
+		// We have to write the list size, we need him recreating the list
 		dest.writeInt(size);
-		//We decided arbitrarily to write first the Name and later the Phone Number.
+		
 		for (int i = 0; i < size; i++) {
 			Stop s = this.get(i);
 			

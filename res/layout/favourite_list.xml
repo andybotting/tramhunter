@@ -33,30 +33,42 @@
     limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="64dip"
-    android:gravity="center_vertical"
-    android:ignoreGravity="@+id/icon">
-    <ImageView android:id="@+id/icon"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-				android:src="@drawable/grabber"
-		/>
-		<TextView android:id="@+id/label"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_width="wrap_content"
-        android:paddingLeft="9dip"
-        android:paddingRight="9dip"
-        android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="true"
-				android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@id/icon"
-				android:layout_centerVertical="true"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-		/>
-</RelativeLayout>
+    android:layout_height="fill_parent">
+
+    <LinearLayout style="@style/TitleBar">
+    
+        <ImageButton android:id="@+id/title_btn_home" 
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_home"
+            android:src="@drawable/ic_title_home" />
+
+        <ImageView style="@style/TitleBarSeparator" />
+        
+        <TextView style="@style/TitleBarText" />
+        
+		<ImageView style="@style/TitleBarSeparator" />
+        
+        <ImageButton android:id="@+id/title_btn_search"
+        	style="@style/TitleBarAction"
+            android:contentDescription="@string/description_search"
+            android:src="@drawable/ic_title_search" />
+            
+    </LinearLayout>
+	
+	<com.andybotting.tramhunter.ui.TouchListView
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:tlv="http://schemas.android.com/apk/res/com.andybotting.tramhunter"
+	
+		android:id="@android:id/list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:drawSelectorOnTop="false"
+		tlv:normal_height="64dip"
+		tlv:grabber="@+id/icon"
+		tlv:remove_mode="slideRight"
+	/>
+
+</LinearLayout>

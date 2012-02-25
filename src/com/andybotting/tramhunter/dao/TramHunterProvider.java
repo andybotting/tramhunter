@@ -49,7 +49,7 @@ import java.util.List;
 import com.andybotting.tramhunter.objects.Stop;
 
 /**
- * Provides search suggestions for a list of words and their definitions.
+ * Provides search suggestions for tram stops
  */
 public class TramHunterProvider extends ContentProvider {
 

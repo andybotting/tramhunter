@@ -61,7 +61,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	private ListPreference mDefaultLaunchActivity;
 	private CheckBoxPreference mDisplayWelcomeMessage;
 	private CheckBoxPreference mDisplayTramImage;
-	private CheckBoxPreference mUseJSONAPI;
+//	private CheckBoxPreference mUseJSONAPI;
 	private CheckBoxPreference mSendStats;
 	
     @Override

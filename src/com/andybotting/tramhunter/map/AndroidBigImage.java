@@ -63,6 +63,9 @@ public class AndroidBigImage extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Force a garbage collection so hopefully we have enough VM heap
+        System.gc();
+        
         requestWindowFeature(Window.FEATURE_NO_TITLE); 
         setContentView(R.layout.network_map);
         androidBigImageView = (AndroidBigImageView)findViewById(R.id.map_view);

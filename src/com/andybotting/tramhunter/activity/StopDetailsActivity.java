@@ -85,7 +85,6 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
-import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.GenericUtil;
@@ -435,7 +434,6 @@ public class StopDetailsActivity extends ListActivity {
 	/**
 	 * Create a countdown thread
 	 * @author andy
-	 *
 	 */
     private class CountDown implements Runnable {
         public void run() {

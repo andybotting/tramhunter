@@ -70,10 +70,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
     
 	// Update this with the App Version Code (App Version x 100)
 	// E.g. 
-	// 	App Version v0.1.00 = DB Version 100
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 893;
+	private static final int DATABASE_VERSION = 900;
 	
 	
 	private SQLiteDatabase mDB = null;
@@ -105,15 +104,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		+ "JOIN destination_stops ON destination_stops.destination_id = destinations._id "
 		+ "JOIN routes ON destinations.route_id = routes._id";
 
-
-//	/**
-//	 * Constructor for TramHunterDB providing a context
-//	 * @param context
-//	 */
-//    public TramHunterDB(Context context) {
-//		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-//		mContext = context;
-//	}
 
 
     /**

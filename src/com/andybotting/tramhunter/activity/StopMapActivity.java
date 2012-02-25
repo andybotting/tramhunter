@@ -41,6 +41,7 @@ import java.util.List;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -77,6 +78,8 @@ public class StopMapActivity extends MapActivity {
 		if(extras != null) {
 			mStops = extras.getParcelable("stopslist");
 		} 
+		
+		Log.e("Testing", "Stops: " + mStops);
 
 		String title = "Stops Map";
 		if(mStops.size() == 1)
