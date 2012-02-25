@@ -1,5 +1,5 @@
 /*  
- * Copyright 2010 Andy Botting <andy@andybotting.com>  
+ * Copyright 2012 Andy Botting <andy@andybotting.com>
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
  */
 
 /*  
- * Copyright 2010 Andy Botting <andy@andybotting.com>  
+ * Copyright 2012 Andy Botting <andy@andybotting.com>
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
