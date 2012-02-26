@@ -241,7 +241,7 @@ public class StopDetailsActivity extends ListActivity {
 	            }
 
 	            final String inputMinStr = inputMinutes.toString();
-	            return !inputMinStr.matches("\\d");
+	            return !inputMinStr.matches("\\d{1,2}");
 	          }
 
 	          private Calendar calculateAlarmDateTime(final int chosenTramListIndex,
