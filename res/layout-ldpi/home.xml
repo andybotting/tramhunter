@@ -122,23 +122,28 @@
         </LinearLayout>
         
 	</LinearLayout>
-			
-		
-	<LinearLayout
-        android:id="@+id/welcomeMessage"
+
+    <LinearLayout
+        android:id="@+id/info_window_loading"
         android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:orientation="horizontal"
-    	android:background="@color/background2"
-    	android:padding="5dip"
+        android:layout_height="@dimen/info_window_height"
+        android:orientation="horizontal"
+        android:background="#eee"
         android:gravity="center">
 
-        <TextView android:id="@+id/welcomeMessageText"
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size_tiny"
-			android:textColor="@color/foreground1" />
-            
-    </LinearLayout>	
+            android:paddingRight="6dip"
+            android:indeterminate="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_size_small"
+            android:text="@string/label_loading_tweets"/>
+
+    </LinearLayout>
+
 
 </LinearLayout>

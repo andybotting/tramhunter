@@ -36,7 +36,7 @@
 <resources>
     <dimen name="title_height">40dip</dimen>
     
-    <dimen name="welcome_message_height">20dip</dimen>
+    <dimen name="info_window_height">80dip</dimen>
  
     <dimen name="text_size_tiny">12sp</dimen>   
     <dimen name="text_size_small">14sp</dimen>

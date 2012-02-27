@@ -51,6 +51,8 @@ public class PreferenceHelper {
 	private static final String KEY_STARRED_STOPS_STRING = "starred_stops_string";
 	private static final String KEY_FIRST_LAUNCH_VERSION = "first_launch_version";
 	private static final String KEY_LAST_UPDATE = "last_update";
+	private static final String KEY_LAST_TWITTER_UPDATE = "last_twitter_update";
+	private static final String KEY_LAST_TWITTER_DATA = "last_twitter_data";
 	private static final String KEY_STATS_TIMESTAMP = "stats_timestamp";
 	
 	private final SharedPreferences mPreferences;
@@ -152,6 +154,42 @@ public class PreferenceHelper {
 		editor.putLong(KEY_LAST_UPDATE, now.getTime());
 		editor.commit();
 	}	
+	
+    /**
+     * Return a long representing the last update
+     */
+	public long getLastTwitterUpdateTimestamp() {
+		return mPreferences.getLong(KEY_LAST_TWITTER_UPDATE, 0);
+	}
+	
+    /**
+     * Set a long representing the last stats send date
+     */	
+	public void setLastTwitterUpdateTimestamp() {
+		Date now = new Date();
+		SharedPreferences.Editor editor = mPreferences.edit();	
+		editor.putLong(KEY_LAST_TWITTER_UPDATE, now.getTime());
+		editor.commit();
+	}	
+	
+	
+	/**
+     * Return a string representing the starred station/lines
+     */
+	public String getLastTwitterData() {
+		return mPreferences.getString(KEY_LAST_TWITTER_DATA, "");
+	}	
+	
+	
+    /**
+     * Set a string representing the starred station/lines
+     */	
+	public void setLastTwitterData(String twitterData) {
+		SharedPreferences.Editor editor = mPreferences.edit();
+		editor.putString(KEY_LAST_TWITTER_DATA, twitterData);
+		editor.commit();
+	}
+	
 	
 	/**
      * Return a long representing the last stats send date

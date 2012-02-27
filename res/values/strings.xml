@@ -62,7 +62,8 @@
     <string name="btn_map">Network\nMap</string>
     
     <string name="label_no_results">No Results</string>      
-    <string name="label_loading">Loading...</string>  
+    <string name="label_loading">Loading...</string> 
+    <string name="label_loading_tweets">Loading tweets...</string> 
     <string name="label_select_route">Select Route</string>      
 
 	<!-- Menu item labels -->

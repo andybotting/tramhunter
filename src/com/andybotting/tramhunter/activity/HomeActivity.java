@@ -37,7 +37,6 @@ package com.andybotting.tramhunter.activity;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -50,6 +49,9 @@ import org.apache.http.message.BasicNameValuePair;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
 import com.andybotting.tramhunter.objects.Favourite;
+import com.andybotting.tramhunter.objects.Tweet;
+import com.andybotting.tramhunter.service.YarraTramsTwitter;
+import com.andybotting.tramhunter.ui.InfoWindow;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
@@ -64,12 +66,18 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+
 import android.widget.TextView;
 
 public class HomeActivity extends Activity {
@@ -86,6 +94,32 @@ public class HomeActivity extends Activity {
 	private FavouriteStopUtil mFavouriteStopUtil;
 	private static String mLastUsedIntentUUID;
 	
+	private static final int MAX_FETCH_ERRORS = 3;
+	private static final int INFO_CHANGE_SECS = 5;
+	private static final int TWITTER_UPDATE_MINS = 10;
+	
+	private List<Tweet> mTweets;
+    private View mInfoLoadingView;
+    private View mInfoWindowView;
+    List<View> mInfoWindows = new ArrayList<View>();
+    private int mInfoWindowId = 0;
+    private boolean mInfoWindowFirstUpdate = true;
+    
+    private volatile Thread mRefreshThread;
+    private String mErrorMessage;    
+	private int mErrorRetry = 0;
+	
+    // Handler for Info Window update
+    Handler UpdateHandler = new Handler() {
+    	public void handleMessage(Message msg) {
+    		if (!mInfoWindowFirstUpdate)
+    			changeInfoWindow();
+    		else
+    			mInfoWindowFirstUpdate = false;
+    	}
+	};
+	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -154,6 +188,20 @@ public class HomeActivity extends Activity {
 		
 		setContentView(R.layout.home);
 		
+		long lastUpdate = mPreferenceHelper.getLastTwitterUpdateTimestamp();
+        long timeDiff = UIUtils.dateDiff(lastUpdate);
+		
+		// Kick off an update
+        if (timeDiff > TWITTER_UPDATE_MINS * 60000) {
+        	new GetTweets().execute();
+        }
+        else {
+			getInfoWindows();
+			changeInfoWindow();
+			startRefreshThread();
+        }
+		
+		
 		// Search button
 		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View v) {
@@ -203,39 +251,42 @@ public class HomeActivity extends Activity {
 		    }
 		});
 		
-		// Show or hide the welcome quote
-		View welcomeMessage = findViewById(R.id.welcomeMessage);
-        if (welcomeMessage != null) {
-			if(mPreferenceHelper.isWelcomeQuoteEnabled()) {
-				findViewById(R.id.welcomeMessage).setVisibility(View.VISIBLE);
-				setRandomWelcomeMessage();
-			}
-			else {
-				findViewById(R.id.welcomeMessage).setVisibility(View.GONE);
-			}
-        }
+		mInfoLoadingView = findViewById(R.id.info_window_loading);
+		
+//		// Show or hide the welcome quote
+//		View welcomeMessage = findViewById(R.id.welcomeMessage);
+//        if (welcomeMessage != null) {
+//			if(mPreferenceHelper.isWelcomeQuoteEnabled()) {
+//				findViewById(R.id.welcomeMessage).setVisibility(View.VISIBLE);
+//				setRandomWelcomeMessage();
+//			}
+//			else {
+//				findViewById(R.id.welcomeMessage).setVisibility(View.GONE);
+//			}
+//        }
+   
 	}	
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setRandomWelcomeMessage();
+		//setRandomWelcomeMessage();
 	}
 
-	private String getRandomWelcomeMessage(){
-		Random r = new Random(System.currentTimeMillis());
-		String[] welcomeMessages = getResources().getStringArray(R.array.welcomeMessages);
-		return welcomeMessages[r.nextInt(welcomeMessages.length - 1)];
-	}
-	
-	private void setRandomWelcomeMessage() {
-		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessageText);
-		if (welcomeMessageTextView != null) {
-			String welcomeText = "";
-			welcomeText = '"' + getRandomWelcomeMessage()+ '"';
-	        welcomeMessageTextView.setText(welcomeText);
-		}
-    }
+//	private String getRandomWelcomeMessage(){
+//		Random r = new Random(System.currentTimeMillis());
+//		String[] welcomeMessages = getResources().getStringArray(R.array.welcomeMessages);
+//		return welcomeMessages[r.nextInt(welcomeMessages.length - 1)];
+//	}
+//	
+//	private void setRandomWelcomeMessage() {
+//		TextView welcomeMessageTextView = (TextView) findViewById(R.id.welcomeMessageText);
+//		if (welcomeMessageTextView != null) {
+//			String welcomeText = "";
+//			welcomeText = '"' + getRandomWelcomeMessage()+ '"';
+//	        welcomeMessageTextView.setText(welcomeText);
+//		}
+//    }
 	
 	public void showAbout() {
 		// Get the package name
@@ -300,7 +351,211 @@ public class HomeActivity extends Activity {
 		return false;
 
 	}
+	
+	
+	/**
+	 * 
+	 */
+    public synchronized void startRefreshThread() {
+		// Start update status timer, if not already running
+		if(mRefreshThread == null) {
+			if (LOGV) Log.v(TAG, "Starting refresh thread");
+            mRefreshThread = new Thread(new InfoWindowTimer());
+            mRefreshThread.setDaemon(true);
+    		mRefreshThread.start();
+    		mInfoWindowFirstUpdate = true;
+    	}
+    }
 
+    /**
+     * 
+     */
+    public synchronized void stopRefreshThread(){
+    	if(mRefreshThread != null){
+    		if (LOGV) Log.v(TAG, "Stopping refresh thread");
+    		Thread killThread = mRefreshThread;
+    		mRefreshThread = null;
+    		killThread.interrupt();
+    		mInfoWindowFirstUpdate = true;
+    	}
+    }
+
+
+    /**
+     *     
+     * @author andy
+     *
+     */
+    private class InfoWindowTimer implements Runnable {
+        public void run() {
+        	while(!Thread.currentThread().isInterrupted()){
+        		Message m = new Message();
+        		UpdateHandler.sendMessage(m);
+        		try {
+        			// 5 seconds
+        			Thread.sleep(INFO_CHANGE_SECS * 1000);
+        		} 
+        		catch (InterruptedException e) {
+        			Thread.currentThread().interrupt();
+        		}
+        	}
+        }
+	}
+ 
+    
+    /**
+     * 
+     * @return
+     */
+    public View makeErrorInfoWindow() {
+		View infoView = getLayoutInflater().inflate(R.layout.info_window, null);
+		((TextView) infoView.findViewById(R.id.info_window_title)).setText("Tube Status");
+		((TextView) infoView.findViewById(R.id.info_window_subtitle)).setText("Error fetching twitter feed.");
+//		((ImageButton) infoView.findViewById(R.id.info_window_icon)).setImageResource(R.drawable.info_window_weekend);
+		return infoView;
+    }
+    
+    
+    /**
+     * 
+     * @return
+     */
+    public View makeUpdateInfoWindow() {
+		View infoView = getLayoutInflater().inflate(R.layout.info_window, null);
+		((TextView) infoView.findViewById(R.id.info_window_title)).setText("Tube Status");
+		((TextView) infoView.findViewById(R.id.info_window_subtitle)).setText("Hit refresh to update Tube Line status.");
+//		((ImageButton) infoView.findViewById(R.id.info_window_icon)).setImageResource(R.drawable.info_window_weekend);
+		return infoView;
+    }
+    
+    
+    /**
+     * 
+     */
+    public void getInfoWindows() {
+   	   	
+    	InfoWindow infoWindow = new InfoWindow(this);
+    	
+    	if (LOGV) Log.v(TAG, "infoWindow=" + infoWindow);
+    	
+    	mInfoWindows = infoWindow.getInfoWindows(mTweets);
+    	
+    	if (LOGV) Log.v(TAG, "mInfoWindows=" + mInfoWindows);
+    }
+    
+    
+    /**
+     * Make a status window
+     */
+    public void setInfoWindow(View infoView) {
+		
+        if (mInfoLoadingView == null) // Landscape orientation
+        	return;
+        
+        ViewGroup homeRoot = (ViewGroup) findViewById(R.id.home_root);
+        
+        mInfoWindowView = findViewById(R.id.info_window);
+        if (mInfoWindowView != null) {
+            homeRoot.removeView(mInfoWindowView);
+            mInfoWindowView = null;
+        }
+        
+        mInfoWindowView = infoView;
+
+        homeRoot.addView(infoView, new LayoutParams(
+        		LayoutParams.FILL_PARENT,
+                (int) getResources().getDimension(R.dimen.info_window_height)));
+        
+   		mInfoLoadingView.setVisibility(View.GONE);        
+   		mInfoWindowView.setVisibility(View.VISIBLE);
+    }    
+    
+    
+    /**
+     * 
+     */
+    public void changeInfoWindow() {
+    	if (LOGV) Log.v(TAG, "Changing info windows. Size=" + mInfoWindows.size());
+    	
+    	if (mInfoWindows.size() > 0) {
+    		if (mInfoWindowId == mInfoWindows.size()-1)
+    			mInfoWindowId = 0;
+    		else
+    			mInfoWindowId++;
+    		setInfoWindow(mInfoWindows.get(mInfoWindowId));
+    	}
+    }
+    
+    
+    /**
+     * Change UI widgets when updating status data
+     */
+    private void updateRefreshStatus(boolean isRefreshing) {
+
+        if (mInfoWindowView != null) {
+        	mInfoWindowView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+        	mInfoLoadingView.setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
+        }
+        else {
+        	if (LOGV) Log.v(TAG, "mInfoWindowView is null");
+        }
+        	
+    }
+    
+	
+    /**
+     * Async task for updating tube status data
+     */
+    private class GetTweets extends AsyncTask<Void, Void, Void> {
+
+        protected void onPreExecute() {
+        	stopRefreshThread();
+        	updateRefreshStatus(true);
+        }
+
+        protected Void doInBackground(Void... unused) {
+        	
+        	mTweets = new ArrayList<Tweet>();
+        	YarraTramsTwitter twitter = new YarraTramsTwitter();
+        	
+        	try {
+                if (LOGV) Log.v(TAG, "Updating Tube Status");
+                mTweets = twitter.getTweets();
+			} catch (Exception e) {
+			    mErrorMessage = e.getMessage();
+			}
+        	return null;
+        }
+
+        protected void onPostExecute(Void unused) {
+        	// Display a toast with the error
+        	if (mErrorMessage != null) {
+        		if (mErrorRetry == MAX_FETCH_ERRORS) {
+        			if (LOGV) Log.v(TAG, "Maximum errors reached!");
+        			setInfoWindow(makeErrorInfoWindow());
+        			updateRefreshStatus(false);
+        			mErrorMessage = null;
+        			mErrorRetry = 0;
+        		}
+        		else {
+        			if (LOGV) Log.v(TAG, "Error number: " + mErrorRetry);
+        			new GetTweets().execute();
+        		}
+        		// Increment error
+        		mErrorMessage = null;
+        		mErrorRetry++;
+        	}
+        	else {
+        		getInfoWindows();
+        		changeInfoWindow();
+        		startRefreshThread();
+        		updateRefreshStatus(false);
+        	}
+        }
+    }	
+	
+	
+	
 	
     /**
      * Check last time stats were sent, and send again if time greater than a week
