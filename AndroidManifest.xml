@@ -122,6 +122,12 @@
 		<meta-data android:name="android.app.default_searchable" 
 			android:value=".activity.SearchActivity" />
         
+<receiver android:name=".service.TramNotification">
+      <intent-filter>
+        <action android:name="intentname"></action>
+      </intent-filter>
+    </receiver>
+
 		<uses-library android:name="com.google.android.maps" />
 	</application>
 	
