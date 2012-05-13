@@ -34,6 +34,15 @@
 -->
 
 <resources>
+    
+	<item type="id" name="menu_about" />
+	<item type="id" name="menu_search" />	
+	<item type="id" name="menu_settings" />
+	<item type="id" name="menu_refresh" />	
+	<item type="id" name="menu_favourite" />	
+	<item type="id" name="menu_map" />
+	
+	
     <item type="id" name="title_container" />
     <item type="id" name="title_logo" />
     <item type="id" name="title_text" />

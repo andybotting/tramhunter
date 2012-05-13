@@ -34,6 +34,7 @@
 
 package com.andybotting.tramhunter.activity;
 
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.andybotting.tramhunter.R;
 
 import android.content.SharedPreferences;
@@ -43,7 +44,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 
-public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class SettingsActivity extends SherlockPreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_DEFAULT_LAUNCH_ACTIVITY = "defaultLaunchActivity";
 	
 	public static final String KEY_WELCOME_MESSAGE = "displayWelcomeMessage";

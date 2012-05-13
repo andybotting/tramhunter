@@ -33,40 +33,12 @@
     limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/home_root"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<com.google.android.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:id="@+id/mapView"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:enabled="true"
+	android:clickable="true"
+	android:apiKey="0JD_--tKzziu8rZn4MD1xWIMhBClngwbk6a2-sg" />
 
-    <LinearLayout style="@style/TitleBar">
-        <ImageButton android:id="@+id/title_btn_home" 
-        	style="@style/TitleBarAction"
-            android:contentDescription="@string/description_home"
-            android:src="@drawable/ic_title_home" />
-
-        <ImageView style="@style/TitleBarSeparator" />
-        
-        <TextView style="@style/TitleBarText" />
-        
-		<ImageView style="@style/TitleBarSeparator" />
-        
-        <ImageButton android:id="@+id/title_btn_myloc"
-        	style="@style/TitleBarAction"
-            android:contentDescription="@string/description_myloc"
-            android:src="@drawable/ic_title_myloc" />
-            
-    </LinearLayout>
-
-
-	<com.google.android.maps.MapView 
-		android:id="@+id/mapView"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:enabled="true"
-		android:clickable="true"
-	  	android:apiKey="0srPkV4tljqUqqo3XSMeuXCcHOSbthBD8bdBh-g" />
-<!--	debug	android:apiKey="0srPkV4tljqUhXPwRfsf4RPYYX2ZFeAYwH_1Htw" />-->
-
-
-</LinearLayout>
+	<!--PROD   	android:apiKey="0srPkV4tljqUqqo3XSMeuXCcHOSbthBD8bdBh-g" /> -->

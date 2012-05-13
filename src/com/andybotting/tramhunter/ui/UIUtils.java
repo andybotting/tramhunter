@@ -153,15 +153,7 @@ public class UIUtils {
 	    }
 	}
 
-    /**
-     * Helper for creating toasts. You could call it a toaster.
-     */
-    public static void popToast(Context context, CharSequence text) {
-    	int duration = Toast.LENGTH_LONG;
-    	Toast toast = Toast.makeText(context, text, duration);
-    	toast.show();	
-    }
-    
+	
     /**
      * Get the tram image name from a given class
      * @param tramClass

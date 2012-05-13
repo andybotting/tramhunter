@@ -34,16 +34,13 @@
 
 package com.andybotting.tramhunter.activity;
 
-
 import java.util.List;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
@@ -51,15 +48,20 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Destination;
+import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.Stop;
-import com.andybotting.tramhunter.ui.UIUtils;
 
-public class StopsListActivity extends ListActivity {
+public class StopsListActivity extends SherlockListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 	
@@ -81,23 +83,15 @@ public class StopsListActivity extends ListActivity {
 		String searchQuery = null;
 		
 		setContentView(R.layout.stops_list);
+		
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
+		
 		mListView = (ListView) getListView();
-		
-		// Home title button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goHome(StopsListActivity.this);
-		    }
-		});	
-
-		// Search title button
-		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goSearch(StopsListActivity.this);
-		    }
-		});	
-		
-		
+			
 		mDB = new TramHunterDB();
 		
 		Bundle extras = getIntent().getExtras();
@@ -109,14 +103,14 @@ public class StopsListActivity extends ListActivity {
 		// Are we looking for stops for a route, or fav stops?
 		if(searchQuery != null) {
 			final CharSequence title = getString(R.string.search_results, searchQuery);
-			((TextView) findViewById(R.id.title_text)).setText(title);
+			actionBar.setTitle(title);
 			displaySearchStops(searchQuery);
 		}
 		else if (destinationId != -1) {
 			Log.d("Testing", "Getting destination: " + destinationId);
 			mDestination = mDB.getDestination(destinationId);
 			String title = "Route " + mDestination.getRouteNumber() + " to " + mDestination.getDestination();
-			((TextView) findViewById(R.id.title_text)).setText(title);
+			actionBar.setTitle(title);
 			displayStopsForDestination(destinationId);
 		}
 		
@@ -188,57 +182,65 @@ public class StopsListActivity extends ListActivity {
 		
 		startActivityForResult(intent, 1);
 	}
-	
-	
+
+    
 	/**
 	 * List item click action
 	 */
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
-			viewStop((Stop)mStops.get(position));
+			Stop stop = mStops.get(position);
+			viewStop(stop);
 		}
     };
-
+  
     
     /**
      * Create the context menu
      */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
-		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-			AdapterView.AdapterContextMenuInfo info;
-			try {
-			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-			} catch (ClassCastException e) {
-			    return;
-			}
-
-			Stop thisStop = (Stop)mStops.get(info.position);
-			menu.setHeaderIcon(R.drawable.icon);
-			menu.setHeaderTitle(thisStop.getStopName());
-			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
-		}
+	    public void onCreateContextMenu(ContextMenu contextMenu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+	        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+	        Stop stop = mStops.get(info.position);
+	        contextMenu.setHeaderTitle(stop.getStopName());
+	        contextMenu.add(0, CONTEXT_MENU_VIEW_STOP, 0, R.string.title_view_stop);
+	    }  
     };
     
     
     /**
-     * Context menu actions
+     * Action a context menu item
      */
     @Override
-    public boolean onContextItemSelected (MenuItem item){
-    	try {
-    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        	Stop thisStop = (Stop)mStops.get(info.position);
-        	
-        	switch (item.getItemId()) {
-    			case CONTEXT_MENU_VIEW_STOP:
-    				viewStop(thisStop);
-    				return true;
-        	}
-    	} catch (ClassCastException e) {}
-    	    	
+    public boolean onContextItemSelected (android.view.MenuItem item){
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		Stop stop = mStops.get(info.position);
+    	
+    	switch (item.getItemId()) {
+    	
+			case CONTEXT_MENU_VIEW_STOP:
+				viewStop(stop);
+				return true;	
+    	}
+    	
 		return super.onContextItemSelected(item);
-    }
+    }    
      
+    
+	/**
+	 * Menu actions
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+
+        case android.R.id.home:
+            finish();
+            return true;
+		}
+
+		return false;
+	}
     
     
     /**

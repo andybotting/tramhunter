@@ -36,12 +36,11 @@ package com.andybotting.tramhunter.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,23 +52,28 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
-import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.ui.UIUtils;
+
  
-public class NearStopsActivity extends ListActivity implements LocationListener {
+public class NearStopsActivity extends SherlockListActivity implements LocationListener {
 	
     private static final String TAG = "NearStopsActivity";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
@@ -96,7 +100,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	private boolean mShowBusy = true;
 	private boolean mIsListeningForNetworkLocation;
 	private boolean mIsCalculatingStopDistances;
-	
+
 	
 	/**
 	 * On Create
@@ -106,23 +110,11 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 
 		setContentView(R.layout.near_stops_list);
 		
-		// Home title button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goHome(NearStopsActivity.this);
-		    }
-		});	
-
-		// Map title button
-		findViewById(R.id.title_btn_map).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-				Bundle bundle = new Bundle();
-				bundle.putParcelable("stopslist", mNearStopsList);
-				Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
-				intent.putExtras(bundle);
-				startActivityForResult(intent, 1);
-		    }
-		});
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setTitle(mTitle);
 		
 		mIsListeningForNetworkLocation = true;
 		mIsCalculatingStopDistances = false;
@@ -130,9 +122,7 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		mListView = (ListView)this.findViewById(android.R.id.list);
 		mListView.setOnItemClickListener(listView_OnItemClickListener);
 		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
-		
-		// Set the title
-		((TextView) findViewById(R.id.title_text)).setText(mTitle);
+
 
 		mDB = new TramHunterDB();
 		
@@ -258,18 +248,15 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 		startActivityForResult(intent, 1);
 	}
 	
-	
+
 	/**
-	 * Create options menu
+	 * Options menu
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		menu.add(0, MENU_MAP, 0, "Map");
-		MenuItem menuItem0 = menu.findItem(0);
-		menuItem0.setIcon(R.drawable.ic_menu_mapmode);
-		
-		return true;
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.near_stops, menu);
+        return super.onCreateOptionsMenu(menu);
 	}
 	
 	
@@ -279,15 +266,20 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_MAP:
+		
+		case R.id.menu_map:
 			Bundle bundle = new Bundle();
 			bundle.putParcelable("stopslist", mNearStopsList);
 			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
 			intent.putExtras(bundle);
-			startActivityForResult(intent, 1);
+			startActivityForResult(intent, -1);
+			
+        case android.R.id.home:
+            finish();
+            
 		}
+		
 		return false;
-
 	}
 
 
@@ -312,25 +304,25 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
     };
     
     
-    /**
-     * On select of context menu item
-     */
-    @Override
-    public boolean onContextItemSelected (MenuItem item){
-    	try {
-    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
-			Stop thisStop = stopsListAdapter.getStops().get(info.position);
-        	
-        	switch (item.getItemId()) {
-    			case CONTEXT_MENU_VIEW_STOP:
-    				viewStop(thisStop);
-    				return true;
-        	}
-    	} catch (ClassCastException e) {}
-    	    	
-		return super.onContextItemSelected(item);
-    }
+//    /**
+//     * On select of context menu item
+//     */
+//    @Override
+//    public boolean onContextItemSelected (MenuItem item){
+//    	try {
+//    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+//			StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
+//			Stop thisStop = stopsListAdapter.getStops().get(info.position);
+//        	
+//        	switch (item.getItemId()) {
+//    			case CONTEXT_MENU_VIEW_STOP:
+//    				viewStop(thisStop);
+//    				return true;
+//        	}
+//    	} catch (ClassCastException e) {}
+//    	    	
+//		return super.onContextItemSelected(item);
+//    }
     
     
     /**
@@ -484,14 +476,12 @@ public class NearStopsActivity extends ListActivity implements LocationListener 
         		new StopDistanceCalculator(location).execute();
         		mLastKnownLocation = location;
         	}
-        	
-        	if(location.hasAccuracy()) {
-        		((TextView) findViewById(R.id.title_text)).setText(mTitle + " (±" + (int)location.getAccuracy() + "m)");
-        	}
-        	else {
-        		((TextView) findViewById(R.id.title_text)).setText(mTitle);
-        	}
-        	
+//        	
+//        	if(location.hasAccuracy())
+//        		mActionbar.setTitle(mTitle + " (±" + (int)location.getAccuracy() + "m)");
+//        	else
+//        		mActionbar.setTitle(mTitle);
+//        		((TextView) findViewById(R.id.title_text)).setText(mTitle);
     	}
     }
     

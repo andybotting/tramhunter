@@ -52,7 +52,6 @@ import org.apache.http.message.BasicNameValuePair;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -65,11 +64,12 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
@@ -85,7 +85,14 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.R.layout;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.FavouriteList;
@@ -101,14 +108,10 @@ import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
-public class StopDetailsActivity extends ListActivity {
+public class StopDetailsActivity extends SherlockListActivity {
 	
     private static final String TAG = "StopDetailsActivity";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
-		
-	private final static int MENU_ITEM_REFRESH = 0;
-	private final static int MENU_ITEM_FAVOURITE = 1;
-	private final static int MENU_ITEM_MAP = 2;
 	
 	private TramHunterDB mDB;
 	private CompoundButton mStarButton;
@@ -118,9 +121,6 @@ public class StopDetailsActivity extends ListActivity {
 	private Route mRoute = null;
 	private int mTramTrackerId;
     private volatile Thread mRefreshThread;
-    
-    boolean mLoadingError = false;
-    boolean mShowDialog = true;
     
 	private ListAdapter mListAdapter;
 	private ListView mListView;
@@ -137,10 +137,23 @@ public class StopDetailsActivity extends ListActivity {
 	private boolean mFirstDepartureReqest = true;
 	
 	private static final int REFRESH_SECONDS = 60;
+	
+	// Menu items
+	private MenuItem mRefreshItem;
+	private MenuItem mFavouriteItem;
+	
+	// Refresh
+    //private boolean mLoadingError = false;
+    private boolean mShowDialog = true;
+	private boolean mIsRefreshing = false;
+	private ImageView mRefreshView;
+	
+	private Animation mRotateClockwise;
      
     // Handle the timer
     Handler UpdateHandler = new Handler() {
     	public void handleMessage(Message msg) {
+    		mShowDialog = false;
     		new GetNextTramTimes().execute();
     	}
 	};
@@ -151,118 +164,92 @@ public class StopDetailsActivity extends ListActivity {
 	 */
 	@Override
 	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);	  
-		
-		setContentView(R.layout.stop_details);	
-		
-		// Home title button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goHome(StopDetailsActivity.this);
-		    }
-		});	
+		super.onCreate(icicle);
 
-		// Refresh title button
-		findViewById(R.id.title_btn_refresh).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	mShowDialog = true;
-		    	new GetNextTramTimes().execute();
-		    }
-		});	
-		
-		// Map title button
-		findViewById(R.id.title_btn_map).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-				Bundle bundle = new Bundle();
-				StopsList mStopList = new StopsList();
-				mStopList.add(mStop);
-				bundle.putParcelable("stopslist", mStopList);
-				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-				intent.putExtras(bundle);
-				startActivityForResult(intent, 1);
-		    }
-		});			
-		
-		
-        // Set up our list
-        mListAdapter = new NextTramsListAdapter();
+		setContentView(R.layout.stop_details);
+
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		// Load the animation
+		mRotateClockwise = AnimationUtils.loadAnimation(this, R.anim.refresh_rotate);
+		mRotateClockwise.setAnimationListener(rotateListener);
+
+		// Set up our list
+		mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
 		mListView.setVisibility(View.GONE);
-		
+
 		// long click on list item implementation
-	    mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-	      @Override
-	      public boolean onItemLongClick(final AdapterView<?> parent, final View view,
-	          final int position, final long id) {
+			@Override
+			public boolean onItemLongClick(final AdapterView<?> parent, final View view, final int position, final long id) {
 
-	        final Dialog dialog = new Dialog(StopDetailsActivity.this);
-	        dialog.setTitle(R.string.app_name);
-	        dialog.setContentView(R.layout.notification_dialog);
+				final Dialog dialog = new Dialog(StopDetailsActivity.this);
+				dialog.setTitle(R.string.app_name);
+				dialog.setContentView(R.layout.notification_dialog);
 
-	        final Button notificationBtn = (Button) dialog.findViewById(R.id.setNotifBtn);
+				final Button notificationBtn = (Button) dialog.findViewById(R.id.setNotifBtn);
 
-	        // set notification dialog click implementation
-	        notificationBtn.setOnClickListener(new OnClickListener() {
+				// set notification dialog click implementation
+				notificationBtn.setOnClickListener(new OnClickListener() {
 
-	          @Override
-	          public void onClick(final View v) {
-	            final EditText notificationText = (EditText) dialog.findViewById(R.id.txtNotification);
-	            final CharSequence inputText = notificationText.getText();
+					@Override
+					public void onClick(final View v) {
+						final EditText notificationText = (EditText) dialog.findViewById(R.id.txtNotification);
+						final CharSequence inputText = notificationText.getText();
 
-	            if (inputIsNotValid(inputText)) {
-	              Toast.makeText(StopDetailsActivity.this, R.string.dialog_error_msg, Toast.LENGTH_LONG)
-	                  .show();
-	              return;
-	            }
+						if (inputIsNotValid(inputText)) {
+							Toast.makeText(StopDetailsActivity.this, R.string.dialog_error_msg, Toast.LENGTH_LONG).show();
+							return;
+						}
 
-	            final int minutesToAdd = Integer.parseInt(inputText.toString());
-	            final Calendar currentDateTime = calculateAlarmDateTime(position, minutesToAdd);
+						final int minutesToAdd = Integer.parseInt(inputText.toString());
+						final Calendar currentDateTime = calculateAlarmDateTime(position, minutesToAdd);
 
-	            final Intent intent = new Intent(StopDetailsActivity.this, TramNotification.class);
+						final Intent intent = new Intent(StopDetailsActivity.this, TramNotification.class);
 
-	            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
-	                StopDetailsActivity.this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+						final PendingIntent pendingIntent = PendingIntent.getBroadcast(StopDetailsActivity.this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-	            final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-	            alarmManager.set(AlarmManager.RTC_WAKEUP, currentDateTime.getTimeInMillis(),
-	                pendingIntent);
+						final AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+						alarmManager.set(AlarmManager.RTC_WAKEUP, currentDateTime.getTimeInMillis(), pendingIntent);
 
-	            dialog.dismiss();
+						dialog.dismiss();
 
-	            final CharSequence message = getString(R.string.dialog_notification_trigger_msg,
-	                minutesToAdd);
-	            Toast.makeText(StopDetailsActivity.this, message, Toast.LENGTH_LONG).show();
-	          }
+						final CharSequence message = getString(R.string.dialog_notification_trigger_msg, minutesToAdd);
+						Toast.makeText(StopDetailsActivity.this, message, Toast.LENGTH_LONG).show();
+					}
 
-	          private boolean inputIsNotValid(final CharSequence inputMinutes) {
-	            if (null == inputMinutes) {
-	              return true;
-	            }
+					private boolean inputIsNotValid(final CharSequence inputMinutes) {
+						if (null == inputMinutes) {
+							return true;
+						}
 
-	            final String inputMinStr = inputMinutes.toString();
-	            return !inputMinStr.matches("\\d{1,2}");
-	          }
+						final String inputMinStr = inputMinutes.toString();
+						return !inputMinStr.matches("\\d{1,2}");
+					}
 
-	          private Calendar calculateAlarmDateTime(final int chosenTramListIndex,
-	              final int minutesToAdd) {
-	            final Calendar currentDateTime = new GregorianCalendar();
+					private Calendar calculateAlarmDateTime(final int chosenTramListIndex, final int minutesToAdd) {
+						final Calendar currentDateTime = new GregorianCalendar();
 
-	            final NextTram tram = mNextTrams.get(chosenTramListIndex);
-	            currentDateTime.setTime(tram.getPredictedArrivalDateTime());
-	            currentDateTime.add(Calendar.MINUTE, minutesToAdd * -1);
+						final NextTram tram = mNextTrams.get(chosenTramListIndex);
+						currentDateTime.setTime(tram.getPredictedArrivalDateTime());
+						currentDateTime.add(Calendar.MINUTE, minutesToAdd * -1);
 
-	            Log.d(TAG, "Scheduling to: " + currentDateTime);
-	            return currentDateTime;
-	          }
+						Log.d(TAG, "Scheduling to: " + currentDateTime);
+						return currentDateTime;
+					}
 
-	        });
+				});
 
-	        dialog.show();
-	        return true;
-	      }
+				dialog.show();
+				return true;
+			}
 
-	    });
+		});
 		
 
 		// Preferences
@@ -287,7 +274,7 @@ public class StopDetailsActivity extends ListActivity {
 
 		// Set the title
 		final String title = mStop.getStopName();
-		((TextView) findViewById(R.id.title_text)).setText(title);
+		actionBar.setTitle(title);
 
 		// Display stop data
 		displayStop(mStop);
@@ -298,7 +285,8 @@ public class StopDetailsActivity extends ListActivity {
 		
 		mStarButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mFavouriteList.setFavourite(new Favourite(mStop, mRoute), mStarButton.isChecked());
+				toggleFavourite();
+				//mFavouriteList.setFavourite(new Favourite(mStop, mRoute), mStarButton.isChecked());
 			}
 		});
 
@@ -335,6 +323,125 @@ public class StopDetailsActivity extends ListActivity {
 		}
 	}
 
+
+	/**
+	 * Options menu
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.stop_details, menu);
+        
+        // Get our refresh item for animating later
+        mRefreshItem = menu.findItem(R.id.menu_refresh);
+        mFavouriteItem = menu.findItem(R.id.menu_favourite);
+        
+        // Set favourite/unfavourite text for menu item
+        boolean isFavourite = mFavouriteList.isFavourite(new Favourite(mStop, mRoute));
+
+		// Set the favourite/unfavourite item icon
+        mFavouriteItem.setIcon(isFavourite ? 
+        		R.drawable.ic_action_unstar : R.drawable.ic_action_star);
+        
+        // Set the favourite/unfavourite item label
+        mFavouriteItem.setTitle(isFavourite ? 
+        		R.string.menu_item_unfavourite : R.string.menu_item_unfavourite);
+
+        return super.onCreateOptionsMenu(menu);
+	}	
+
+	
+	/**
+	 * Menu actions
+	 * @param menuItem
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		
+		case R.id.menu_favourite:
+			toggleFavourite();
+			return true;
+
+		case R.id.menu_map:
+			showMap();
+			return true;
+			
+		case R.id.menu_refresh:
+			mShowDialog = true; // Show the 'loading' view if specifically clicked
+			new GetNextTramTimes().execute();
+			return true;
+			
+        case android.R.id.home:
+            finish();
+            return true;
+            
+        default:
+            return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	
+	/**
+	 * Toggle favourite stop status
+	 */
+	private void toggleFavourite() {
+		
+		// Build a new favourite object
+		Favourite favourite = new Favourite(mStop, mRoute);
+		
+		boolean isFavourite = mFavouriteList.isFavourite(favourite);
+		
+		mStarButton = (CompoundButton) findViewById(R.id.stopStar);
+		mFavouriteList.toggleFavourite(favourite);
+		mStarButton.setChecked(!isFavourite);
+		
+		// Set the favourite/unfavourite item icon
+        mFavouriteItem.setIcon(isFavourite ? 
+        		R.drawable.ic_action_unstar : R.drawable.ic_action_star);
+        
+        // Set the favourite/unfavourite item label
+        mFavouriteItem.setTitle(isFavourite ? 
+        		R.string.menu_item_unfavourite : R.string.menu_item_unfavourite);
+		
+		// Toast message
+		int toastMessage = isFavourite ? 
+				R.string.toast_favourite_removed : R.string.toast_favourite_added;
+		Toast.makeText(StopDetailsActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+	}
+	
+	
+	/**
+	 * Show the map view, passing this stop
+	 */
+	private void showMap() {
+		// Map view
+		Bundle bundle = new Bundle();
+		StopsList mStopList = new StopsList();
+		mStopList.add(mStop);
+		bundle.putParcelable("stopslist", mStopList);
+		final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+		intent.putExtras(bundle);
+		startActivityForResult(intent, 1);		
+	}
+
+	
+	/**
+	 * Show the refresh spinner
+	 */
+	private void showRefreshSpinner() {
+		// Inflate our custom layout.
+		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mRefreshView = (ImageView) inflater.inflate(layout.refresh_actionview, null);
+	
+		// Apply the animation to our View
+		mRefreshView.startAnimation(mRotateClockwise);
+	
+		// Apply the View to our MenuItem
+		if (mRefreshItem != null)
+			mRefreshItem.setActionView(mRefreshView);
+	}
+
 	
     /**
      * Update refresh status icon/views
@@ -349,88 +456,33 @@ public class StopDetailsActivity extends ListActivity {
 
 		findViewById(R.id.departures_loading).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
 	}
-
 	
-    /**
-     * Update refresh status icon/views
-     */
-	private void showRefreshSpinner(boolean isRefreshing) {
-		findViewById(R.id.title_btn_refresh).setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
-		findViewById(R.id.title_refresh_progress).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
-	}
-	
-	
-	/**
-	 * Create the options for a given menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		
-		menu.add(0, MENU_ITEM_REFRESH, 0, "Refresh");
-		MenuItem menuItem1 = menu.findItem(MENU_ITEM_REFRESH);
-		menuItem1.setIcon(R.drawable.ic_menu_refresh);
-
-		menu.add(0, MENU_ITEM_FAVOURITE, 0, ""); // Title set in onMenuOpened()
-		MenuItem menuItem2 = menu.findItem(MENU_ITEM_FAVOURITE);
-		menuItem2.setIcon(R.drawable.ic_menu_star);
-		
-		menu.add(0, MENU_ITEM_MAP, 0, "Map");
-		MenuItem menuItem3 = menu.findItem(MENU_ITEM_MAP);
-		menuItem3.setIcon(R.drawable.ic_menu_mapmode);
-		
-		return true;
-	}
-
-	
-	/**
-	 * Overide the onMenuOpened method to allow us to dynamically set the menu item
-	 * title on open.
-	 */
-	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		boolean isFavourite = mFavouriteList.isFavourite(new Favourite(mStop, mRoute));
-		menu.getItem(MENU_ITEM_FAVOURITE).setTitle(isFavourite ? "Unfavourite" : "Favourite");
-		return super.onMenuOpened(featureId, menu);
-	}
-
 
 	/**
-	 * Menu actions
-	 * @param menuItem
+	 * Animation Listener for refresh button
 	 */
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem menuItem) {
-		
-		switch (menuItem.getItemId()) { 
-		
-			case MENU_ITEM_REFRESH:
-				mShowDialog = true;
-				new GetNextTramTimes().execute();
-				return true;
-				
-			case MENU_ITEM_FAVOURITE:
-				mStarButton = (CompoundButton)findViewById(R.id.stopStar);
-				Favourite favourite = new Favourite(mStop, mRoute);
-				boolean isFavourite = mFavouriteList.isFavourite(favourite);
-				mFavouriteList.toggleFavourite(favourite);
-				mStarButton.setChecked(!isFavourite);
-				return true;
-				
-			case MENU_ITEM_MAP:
-				// Map view
-				Bundle bundle = new Bundle();
-				StopsList mStopList = new StopsList();
-				mStopList.add(mStop);
-				bundle.putParcelable("stopslist", mStopList);
-				final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-				intent.putExtras(bundle);
-				startActivityForResult(intent, 1);
-				return true;
+	private AnimationListener rotateListener = new AnimationListener() {
+
+		@Override
+		public void onAnimationStart(Animation animation) {
 		}
-		
-		return false;
-	}
+
+		@Override
+		public void onAnimationRepeat(Animation animation) {
+		}
+
+		// A hacked way to start/stop the animation after it has complete
+		// it's current cycle.
+		@Override
+		public void onAnimationEnd(Animation animation) {
+			if (mIsRefreshing) { // Still going?
+				mRefreshView.startAnimation(mRotateClockwise);
+			} else { // Stopped refreshing. Stop.
+				mRefreshView.clearAnimation();
+				mRefreshItem.setActionView(null);
+			}
+		}
+	};
 
 	
 	/**
@@ -487,34 +539,29 @@ public class StopDetailsActivity extends ListActivity {
 				
 			}
 			
-			mRoutesSpinner.setOnItemSelectedListener(
-				new OnItemSelectedListener() {
-					public void onItemSelected(
-						AdapterView<?> parent, View view, int position, long id) {
-							if (id == 0) {
-								mRoute = null;
-							}
-							else {
-								// -1 for the offset of having 'All Routes' first item
-								mRoute = mRoutes.get(position-1);
-								if (LOGV) Log.v(TAG, "Route selected: " + mRoute);
-								
-							}
-							
-							// Refresh the results
-							mStarButton.setChecked(mFavouriteList.isFavourite(new Favourite(mStop, mRoute)));
-					    	mShowDialog = true;
-					    	new GetNextTramTimes().execute();
-	                    }
-	
-						public void onNothingSelected(AdapterView<?> parent) {
-	                    	mRoute = null;
-						}
+			mRoutesSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+					if (id == 0) {
+						mRoute = null;
+					} else {
+						// -1 for the offset of having 'All Routes' first item
+						mRoute = mRoutes.get(position - 1);
+						if (LOGV)
+							Log.v(TAG, "Route selected: " + mRoute);
+					}
+
+					// Refresh the results
+					mStarButton.setChecked(mFavouriteList
+							.isFavourite(new Favourite(mStop, mRoute)));
+					mShowDialog = true;
+					new GetNextTramTimes().execute();
 				}
-			);
+
+				public void onNothingSelected(AdapterView<?> parent) {
+					mRoute = null;
+				}
+			});
 		}
-		
-		
 	}
 	
 
@@ -546,11 +593,10 @@ public class StopDetailsActivity extends ListActivity {
 
 		@Override
 		protected void onPreExecute() {
-			// Show the spinner in the title bar
+			mIsRefreshing = true;
+			showRefreshSpinner();
 			if (mShowDialog)
 				showLoadingView(true);
-			
-			showRefreshSpinner(true);
 		}
 
 		@Override
@@ -584,17 +630,18 @@ public class StopDetailsActivity extends ListActivity {
         	if (mErrorRetry == MAX_ERRORS) {
 
         		// Toast: Error fetching departure information
-        		if (mFirstDepartureReqest) 
-        			UIUtils.popToast(getApplicationContext(), getResources().getText(R.string.dialog_error_fetching) +": \n(" + mErrorMessage + ")");
-        		
-        		mErrorMessage = null;
+        		if (mFirstDepartureReqest) {
+					final CharSequence message = getString(R.string.dialog_error_fetching, mErrorMessage);
+					Toast.makeText(StopDetailsActivity.this, message, Toast.LENGTH_LONG).show();
+        		}     		
+        		mErrorMessage = null; // Reset
         		mErrorRetry = 0;
         	}
         	else {
         		boolean noResults = true;
        		
 				if (nextTrams.size() > 0) {
-					mLoadingError = false;
+					//mLoadingError = false;
 					
 					// Sort trams by minutesAway
 					Collections.sort(nextTrams);
@@ -633,22 +680,20 @@ public class StopDetailsActivity extends ListActivity {
         	}
         	        	
         	// Hide the loading spinners
+        	mIsRefreshing = false;
         	showLoadingView(false);
-        	showRefreshSpinner(false);
-    		mShowDialog = false;
 		}
 	}
 	
 	
 	/**
 	 * Show a dialog message for a given 'Special Event'
-	 * @param message
 	 */
 	private void showSpecialEvent(String message) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setTitle("Special Event");
+        dialogBuilder.setTitle(R.string.title_special_event);
         dialogBuilder.setMessage(message);
-        dialogBuilder.setPositiveButton("OK", null);
+        dialogBuilder.setPositiveButton(android.R.string.ok, null);
         dialogBuilder.setIcon(R.drawable.ic_dialog_alert);
         dialogBuilder.show();
 	}
@@ -656,8 +701,6 @@ public class StopDetailsActivity extends ListActivity {
 
 	/**
 	 * Create a NextTramsListAdapter for showing our next trams
-	 * @author andy
-	 *
 	 */
 	private class NextTramsListAdapter extends BaseAdapter {
 	

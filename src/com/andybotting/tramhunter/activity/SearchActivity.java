@@ -70,12 +70,12 @@ package com.andybotting.tramhunter.activity;
 
 import java.util.List;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Stop;
-import com.andybotting.tramhunter.ui.UIUtils;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -91,7 +91,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class SearchActivity extends ListActivity {
+public class SearchActivity extends SherlockListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 	
@@ -108,14 +108,14 @@ public class SearchActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_list);
-        mListView = (ListView)this.findViewById(android.R.id.list);
         
-		// Home button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {       
-		    	UIUtils.goHome(SearchActivity.this);
-		    }
-		});	
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+        
+        mListView = (ListView)this.findViewById(android.R.id.list);
+
 
 		mDB = new TramHunterDB();
 
@@ -134,7 +134,8 @@ public class SearchActivity extends ListActivity {
         else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY); 
             final CharSequence title = getString(R.string.title_search_query, query);
-            ((TextView) findViewById(R.id.title_text)).setText(title);
+            actionBar.setTitle(title);
+            
 			mStops = mDB.getStopsForSearch(query);
 			
 			mListView.setOnItemClickListener(mListView_OnItemClickListener);		

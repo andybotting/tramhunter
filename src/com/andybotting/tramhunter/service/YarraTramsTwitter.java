@@ -82,10 +82,10 @@ public class YarraTramsTwitter {
      * assuming a JSON format.
      * @return Stop
      */
-    public List<Tweet> parseTweets(JSONArray tweetArray) throws TramTrackerServiceException {
+    public ArrayList<Tweet> parseTweets(JSONArray tweetArray) throws TramTrackerServiceException {
     	
     	try {
-    		List<Tweet> tweets = new ArrayList<Tweet>();
+    		ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 	        
 	        int tweetCount = tweetArray.length();
 	        
@@ -125,10 +125,10 @@ public class YarraTramsTwitter {
     /**
      * Get the list of tweets
      */
-	public List<Tweet> getTweets() throws TramTrackerServiceException {
+	public ArrayList<Tweet> getTweets() throws TramTrackerServiceException {
 
 		try {
-			List<Tweet> tweets = null;
+			ArrayList<Tweet> tweets = null;
 			InputStream jsonData = getJSONData(YARRA_TRAMS_TWITTER_URL);
 			JSONArray tweetArray = parseJSONArray(jsonData);
 			tweets = parseTweets(tweetArray);

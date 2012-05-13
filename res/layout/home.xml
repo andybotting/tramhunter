@@ -39,27 +39,10 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <LinearLayout style="@style/TitleBar">
-    
-        <ImageView style="@style/TitleBarLogo"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/title_logo" />
-
-        <View style="@style/TitleBarSpring" />
-
-        <ImageView style="@style/TitleBarSeparator" />
-    
-        <ImageButton android:id="@+id/title_btn_search" 
-        	style="@style/TitleBarAction"
-            android:contentDescription="@string/description_search"
-            android:src="@drawable/ic_title_search" />
-
-    </LinearLayout>
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dip"
         android:layout_weight="1"
         android:padding="6dip">
         
@@ -72,7 +55,7 @@
             <Button android:id="@+id/home_btn_starred"
                 style="@style/HomeButton"
                 android:text="@string/btn_starred"
-                android:drawableTop="@drawable/home_btn_starred"/>            
+                android:drawableTop="@drawable/home_btn_starred"/>      
                 
             <Button android:id="@+id/home_btn_browse"
                 style="@style/HomeButton"
@@ -117,8 +100,29 @@
         </LinearLayout>
         
 	</LinearLayout>
-			
+
+	<!-- Swiper -->
+	<LinearLayout android:id="@+id/info_swiper"
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="@dimen/info_window_height"
+	    android:visibility="gone">
+	
+	    <android.support.v4.view.ViewPager
+	        android:id="@+id/pager"
+	        android:layout_width="fill_parent"
+	        android:layout_height="0dp"
+	        android:layout_weight="1"/>
+	    
+<!-- 	    <com.viewpagerindicator.CirclePageIndicator -->
+<!-- 	        android:id="@+id/indicator" -->
+<!-- 	        android:padding="5dip" -->
+<!-- 	        android:layout_height="wrap_content" -->
+<!-- 	        android:layout_width="fill_parent"/> -->
+	</LinearLayout>		
+	
 		
+	<!-- Loading -->
     <LinearLayout
         android:id="@+id/info_window_loading"
         android:layout_width="fill_parent"

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/menu_search"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="always|withText"
+        android:title="@string/menu_item_search"/>
+    
+    <item android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:showAsAction="never"
+        android:title="@string/menu_item_settings"/>
+    
+    <item android:id="@+id/menu_about"
+        android:icon="@drawable/ic_action_about"
+        android:showAsAction="never"
+        android:title="@string/menu_item_about"/>
+
+</menu>

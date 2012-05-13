@@ -37,7 +37,7 @@ package com.andybotting.tramhunter;
 import java.util.UUID;
 import com.andybotting.tramhunter.activity.HomeActivity;
 
-import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -49,7 +49,7 @@ import android.os.Bundle;
  * 
  * DO NOT MOVE/RENAME THIS FILE! EVER!!! It will break the app upgrades (i.e. Icon will not work and ALL USERS will need to completely reinstall).
  */
-public class TramHunter extends Activity {
+public class TramHunter extends FragmentActivity {
 	
 	public static final String KEY_PERFORM_DEFAULT_ACTIVITY_LAUNCH = "PDAL"; 
     

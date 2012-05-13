@@ -40,11 +40,31 @@
 		  android:versionCode="991">
 		  <!-- Keep the version code in sync with TramHunterDB -->
 	  
+	
+	<!-- Application Permissions -->
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.VIBRATE"/>	  
+
+	<!-- Require Android 2.1 for ActionBarSherlock -->
+	<uses-sdk android:minSdkVersion="7"
+		android:targetSdkVersion="15" />
+    
+	<supports-screens smallScreens="true" 
+		normalScreens="true" 
+		largeScreens="true" 
+		android:anyDensity="true" />		  
+
 	<!-- Application -->
     <application android:name="TramHunterApplication" 
     	android:label="@string/app_name" 
     	android:icon="@drawable/icon" 
     	android:theme="@style/Theme.TramHunterStyle">
+	<!-- android:theme="@style/Theme.Sherlock.Light">-->
 
 		<!-- TramHunter Activity -->
 		<activity android:name=".TramHunter"
@@ -130,23 +150,5 @@
 
 		<uses-library android:name="com.google.android.maps" />
 	</application>
-	
-	<!-- Application Permissions -->
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
-	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.VIBRATE"/>
-	
-	<uses-sdk android:minSdkVersion="3" 
-		android:targetSdkVersion="14" />
-    
-	<supports-screens smallScreens="true" 
-		normalScreens="true" 
-		largeScreens="true" 
-		android:anyDensity="true" />
-	
 
 </manifest> 

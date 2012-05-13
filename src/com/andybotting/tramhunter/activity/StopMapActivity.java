@@ -45,6 +45,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
@@ -58,7 +61,7 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class StopMapActivity extends MapActivity {    
+public class StopMapActivity extends SherlockMapActivity {    
 	
 	private List<Overlay> mMapOverlays;
 
@@ -72,21 +75,23 @@ public class StopMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stop_map);
+        
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);        
 
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
-		if(extras != null) {
+		if(extras != null)
 			mStops = extras.getParcelable("stopslist");
-		} 
-		
-		Log.e("Testing", "Stops: " + mStops);
 
 		String title = "Stops Map";
 		if(mStops.size() == 1)
 			title = mStops.get(0).getStopName();
 
-		((TextView) findViewById(R.id.title_text)).setText(title);
-		
+		actionBar.setTitle(title);
+
 		
        	mMapView = (MapView) findViewById(R.id.mapView);
        	mMapView.setBuiltInZoomControls(true);
@@ -100,37 +105,25 @@ public class StopMapActivity extends MapActivity {
         mMapView.setClickable(true);
         mMapView.setEnabled(true);
         
-		// Home title button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goHome(StopMapActivity.this);
-		    }
-		});	
-
-		// My Location button
-		findViewById(R.id.title_btn_myloc).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {     
-		    	GeoPoint myLoc = mMyLocationOverlay.getMyLocation();
-		    	if (myLoc != null) {
-		    		mMapView.getController().animateTo(myLoc);
-		    	}
-		    	else {
-		    		UIUtils.popToast(getApplicationContext(), "Unable to find your location");
-		    	}
-		    }
-		});	
-        
         displayStops(mStops);
     }
     
-	
-    public void onHomeClick(View v) {
-        UIUtils.goHome(this);
-    }
-	
-    public void onSearchClick(View v) {
-        UIUtils.goSearch(this);
-    }
+    
+	/**
+	 * Options item select
+	 */
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+
+        case android.R.id.home:
+            finish();
+            return true;
+            
+        default:
+            return super.onOptionsItemSelected(item);
+		}
+	}
     
     
 	private void viewStop(Stop stop){
@@ -144,6 +137,7 @@ public class StopMapActivity extends MapActivity {
 		startActivityForResult(intent, 1);
 	}
 
+	
 	public class MyItemizedOverlay extends BalloonItemizedOverlay<OverlayItem> {
 
 	    private ArrayList<OverlayItem> m_overlays = new ArrayList<OverlayItem>();
@@ -176,6 +170,7 @@ public class StopMapActivity extends MapActivity {
 
 	}
 
+	
     private void displayStops(StopsList mStops) {
 
     	double minLat = 0;

@@ -46,20 +46,25 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.Tweet;
 import com.andybotting.tramhunter.service.YarraTramsTwitter;
-import com.andybotting.tramhunter.ui.InfoWindow;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
-import android.app.Activity;
+import com.andybotting.tramhunter.ui.TweetFragmentAdapter;
+
 import android.app.AlertDialog;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -68,27 +73,18 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+
+import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
+import android.widget.Toast;
 
-import android.widget.TextView;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends SherlockFragmentActivity {
 
     private static final String TAG = "Home";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
-	
-	// Menu items
-	private static final int MENU_ABOUT = 0;
-	private static final int MENU_SEARCH = 1;
-	private static final int MENU_SETTINGS = 2;
 	
 	private PreferenceHelper mPreferenceHelper;
 	private FavouriteStopUtil mFavouriteStopUtil;
@@ -98,9 +94,14 @@ public class HomeActivity extends Activity {
 	private static final int INFO_CHANGE_SECS = 5;
 	private static final int TWITTER_UPDATE_MINS = 10;
 	
+
+	private TweetFragmentAdapter mAdapter;
+	private ViewPager mPager;
+	
 	private List<Tweet> mTweets;
     private View mInfoLoadingView;
     private View mInfoWindowView;
+    
     List<View> mInfoWindows = new ArrayList<View>();
     private int mInfoWindowId = 0;
     private boolean mInfoWindowFirstUpdate = true;
@@ -108,16 +109,6 @@ public class HomeActivity extends Activity {
     private volatile Thread mRefreshThread;
     private String mErrorMessage;    
 	private int mErrorRetry = 0;
-	
-    // Handler for Info Window update
-    Handler UpdateHandler = new Handler() {
-    	public void handleMessage(Message msg) {
-    		if (!mInfoWindowFirstUpdate)
-    			changeInfoWindow();
-    		else
-    			mInfoWindowFirstUpdate = false;
-    	}
-	};
 	
 
 	@Override
@@ -175,7 +166,7 @@ public class HomeActivity extends Activity {
 					intent.putExtras(bundle);
 				}
 				else {
-					UIUtils.popToast(this, "Unable to determine closest favourite stop!");
+					Toast.makeText(this, R.string.toast_unable_closest_stop, Toast.LENGTH_SHORT).show();
 				}
 			}
 			else if(activityName.equals("NearStopsActivity")) {
@@ -186,28 +177,44 @@ public class HomeActivity extends Activity {
 				startActivityForResult(intent, 1);
 		}
 		
+		showMainHome();
+   	
+	}
+	
+	private void showMainHome() {
 		setContentView(R.layout.home);
 		
-		long lastUpdate = mPreferenceHelper.getLastTwitterUpdateTimestamp();
-        long timeDiff = UIUtils.dateDiff(lastUpdate);
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setTitle(R.string.app_name);
+
+		mInfoLoadingView = findViewById(R.id.info_window_loading);
+		mInfoWindowView = findViewById(R.id.info_swiper);
+
 		
-		// Kick off an update
-        if (timeDiff > TWITTER_UPDATE_MINS * 60000) {
-        	new GetTweets().execute();
-        }
-        else {
-			getInfoWindows();
-			changeInfoWindow();
-			startRefreshThread();
-        }
+		new GetTweets().execute();
+		
+//		long lastUpdate = mPreferenceHelper.getLastTwitterUpdateTimestamp();
+//        long timeDiff = UIUtils.dateDiff(lastUpdate);
+//		
+//		// Kick off an update
+//        if (timeDiff > TWITTER_UPDATE_MINS * 60000) {
+//        	new GetTweets().execute();
+//        }
+//        else {
+//			getInfoWindows();
+//			changeInfoWindow();
+//			startRefreshThread();
+//        }
 		
 		
 		// Search button
-		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goSearch(HomeActivity.this);
-		    }
-		});	
+//		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
+//		    public void onClick(View v) {
+//		    	UIUtils.goSearch(HomeActivity.this);
+//		    }
+//		});	
 		
 		// Favourite Stops
 		findViewById(R.id.home_btn_starred).setOnClickListener(new View.OnClickListener() {
@@ -250,22 +257,8 @@ public class HomeActivity extends Activity {
 		    	startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
 		    }
 		});
-		
-		mInfoLoadingView = findViewById(R.id.info_window_loading);
-		
-//		// Show or hide the welcome quote
-//		View welcomeMessage = findViewById(R.id.welcomeMessage);
-//        if (welcomeMessage != null) {
-//			if(mPreferenceHelper.isWelcomeQuoteEnabled()) {
-//				findViewById(R.id.welcomeMessage).setVisibility(View.VISIBLE);
-//				setRandomWelcomeMessage();
-//			}
-//			else {
-//				findViewById(R.id.welcomeMessage).setVisibility(View.GONE);
-//			}
-//        }
-   
-	}	
+	}
+	
 	
 	@Override
 	protected void onResume() {
@@ -288,6 +281,10 @@ public class HomeActivity extends Activity {
 //		}
 //    }
 	
+	
+	/**
+	 * Show the about dialog
+	 */
 	public void showAbout() {
 		// Get the package name
 		String heading = getResources().getText(R.string.app_name) + "\n";
@@ -316,35 +313,37 @@ public class HomeActivity extends Activity {
 		dialogBuilder.show();
 	}
 	
-	// Add menu items
+	
+	/**
+	 * Options menu
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		
-		menu.add(0, MENU_ABOUT, 0, R.string.menu_item_about)
-			.setIcon(android.R.drawable.ic_menu_help);
-
-		menu.add(0, MENU_SETTINGS, 0, R.string.menu_item_settings)
-			.setIcon(android.R.drawable.ic_menu_preferences);
-		
-        menu.add(0, MENU_SEARCH, 0, R.string.menu_item_search)
-        	.setIcon(android.R.drawable.ic_search_category_default)
-        	.setAlphabeticShortcut(SearchManager.MENU_KEY);
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.home, menu);
 
 		return true;
 	}
 	
-	// Menu actions
+	
+	/**
+	 * Options menu item select handler
+	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_ABOUT:
+
+		case R.id.menu_about:
 			showAbout();
 			return true;
-        case MENU_SEARCH:
+			
+        case R.id.menu_search:
             onSearchRequested();
             return true;
-		case MENU_SETTINGS:
+            
+		case R.id.menu_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
 		}
@@ -352,140 +351,6 @@ public class HomeActivity extends Activity {
 
 	}
 	
-	
-	/**
-	 * 
-	 */
-    public synchronized void startRefreshThread() {
-		// Start update status timer, if not already running
-		if(mRefreshThread == null) {
-			if (LOGV) Log.v(TAG, "Starting refresh thread");
-            mRefreshThread = new Thread(new InfoWindowTimer());
-            mRefreshThread.setDaemon(true);
-    		mRefreshThread.start();
-    		mInfoWindowFirstUpdate = true;
-    	}
-    }
-
-    /**
-     * 
-     */
-    public synchronized void stopRefreshThread(){
-    	if(mRefreshThread != null){
-    		if (LOGV) Log.v(TAG, "Stopping refresh thread");
-    		Thread killThread = mRefreshThread;
-    		mRefreshThread = null;
-    		killThread.interrupt();
-    		mInfoWindowFirstUpdate = true;
-    	}
-    }
-
-
-    /**
-     *     
-     * @author andy
-     *
-     */
-    private class InfoWindowTimer implements Runnable {
-        public void run() {
-        	while(!Thread.currentThread().isInterrupted()){
-        		Message m = new Message();
-        		UpdateHandler.sendMessage(m);
-        		try {
-        			// 5 seconds
-        			Thread.sleep(INFO_CHANGE_SECS * 1000);
-        		} 
-        		catch (InterruptedException e) {
-        			Thread.currentThread().interrupt();
-        		}
-        	}
-        }
-	}
- 
-    
-    /**
-     * 
-     * @return
-     */
-    public View makeErrorInfoWindow() {
-		View infoView = getLayoutInflater().inflate(R.layout.info_window, null);
-		((TextView) infoView.findViewById(R.id.info_window_title)).setText("Tube Status");
-		((TextView) infoView.findViewById(R.id.info_window_subtitle)).setText("Error fetching twitter feed.");
-//		((ImageButton) infoView.findViewById(R.id.info_window_icon)).setImageResource(R.drawable.info_window_weekend);
-		return infoView;
-    }
-    
-    
-    /**
-     * 
-     * @return
-     */
-    public View makeUpdateInfoWindow() {
-		View infoView = getLayoutInflater().inflate(R.layout.info_window, null);
-		((TextView) infoView.findViewById(R.id.info_window_title)).setText("Tube Status");
-		((TextView) infoView.findViewById(R.id.info_window_subtitle)).setText("Hit refresh to update Tube Line status.");
-//		((ImageButton) infoView.findViewById(R.id.info_window_icon)).setImageResource(R.drawable.info_window_weekend);
-		return infoView;
-    }
-    
-    
-    /**
-     * 
-     */
-    public void getInfoWindows() {
-   	   	
-    	InfoWindow infoWindow = new InfoWindow(this);
-    	
-    	if (LOGV) Log.v(TAG, "infoWindow=" + infoWindow);
-    	
-    	mInfoWindows = infoWindow.getInfoWindows(mTweets);
-    	
-    	if (LOGV) Log.v(TAG, "mInfoWindows=" + mInfoWindows);
-    }
-    
-    
-    /**
-     * Make a status window
-     */
-    public void setInfoWindow(View infoView) {
-		
-        if (mInfoLoadingView == null) // Landscape orientation
-        	return;
-        
-        ViewGroup homeRoot = (ViewGroup) findViewById(R.id.home_root);
-        
-        mInfoWindowView = findViewById(R.id.info_window);
-        if (mInfoWindowView != null) {
-            homeRoot.removeView(mInfoWindowView);
-            mInfoWindowView = null;
-        }
-        
-        mInfoWindowView = infoView;
-
-        homeRoot.addView(infoView, new LayoutParams(
-        		LayoutParams.FILL_PARENT,
-                (int) getResources().getDimension(R.dimen.info_window_height)));
-        
-   		mInfoLoadingView.setVisibility(View.GONE);        
-   		mInfoWindowView.setVisibility(View.VISIBLE);
-    }    
-    
-    
-    /**
-     * 
-     */
-    public void changeInfoWindow() {
-    	if (LOGV) Log.v(TAG, "Changing info windows. Size=" + mInfoWindows.size());
-    	
-    	if (mInfoWindows.size() > 0) {
-    		if (mInfoWindowId == mInfoWindows.size()-1)
-    			mInfoWindowId = 0;
-    		else
-    			mInfoWindowId++;
-    		setInfoWindow(mInfoWindows.get(mInfoWindowId));
-    	}
-    }
-    
     
     /**
      * Change UI widgets when updating status data
@@ -497,60 +362,67 @@ public class HomeActivity extends Activity {
         	mInfoLoadingView.setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
         }
         else {
-        	if (LOGV) Log.v(TAG, "mInfoWindowView is null");
+        	if (LOGV) Log.d(TAG, "mInfoWindowView is null");
         }
-        	
     }
     
 	
     /**
      * Async task for updating tube status data
      */
-    private class GetTweets extends AsyncTask<Void, Void, Void> {
+    private class GetTweets extends AsyncTask<Void, Void, ArrayList<Tweet>> {
 
         protected void onPreExecute() {
-        	stopRefreshThread();
         	updateRefreshStatus(true);
         }
 
-        protected Void doInBackground(Void... unused) {
+        @Override
+        protected ArrayList<Tweet> doInBackground(Void...unused) {
         	
-        	mTweets = new ArrayList<Tweet>();
+        	ArrayList<Tweet> tweets = new ArrayList<Tweet>();
         	YarraTramsTwitter twitter = new YarraTramsTwitter();
         	
         	try {
-                if (LOGV) Log.v(TAG, "Updating Tube Status");
-                mTweets = twitter.getTweets();
+                if (LOGV) Log.v(TAG, "Fetching Tweets...");
+                tweets = twitter.getTweets();
 			} catch (Exception e) {
 			    mErrorMessage = e.getMessage();
 			}
-        	return null;
+        	return tweets;
         }
 
-        protected void onPostExecute(Void unused) {
-        	// Display a toast with the error
-        	if (mErrorMessage != null) {
-        		if (mErrorRetry == MAX_FETCH_ERRORS) {
-        			if (LOGV) Log.v(TAG, "Maximum errors reached!");
-        			setInfoWindow(makeErrorInfoWindow());
-        			updateRefreshStatus(false);
-        			mErrorMessage = null;
-        			mErrorRetry = 0;
-        		}
-        		else {
-        			if (LOGV) Log.v(TAG, "Error number: " + mErrorRetry);
-        			new GetTweets().execute();
-        		}
-        		// Increment error
-        		mErrorMessage = null;
-        		mErrorRetry++;
-        	}
-        	else {
-        		getInfoWindows();
-        		changeInfoWindow();
-        		startRefreshThread();
-        		updateRefreshStatus(false);
-        	}
+        protected void onPostExecute(ArrayList<Tweet> tweets) {
+        
+  	      mAdapter = new TweetFragmentAdapter(getSupportFragmentManager(), tweets);
+
+	      mPager = (ViewPager)findViewById(R.id.pager);
+	      mPager.setAdapter(mAdapter);
+	      
+	      updateRefreshStatus(false);
+        	
+//        	// Display a toast with the error
+//        	if (mErrorMessage != null) {
+//        		if (mErrorRetry == MAX_FETCH_ERRORS) {
+//        			if (LOGV) Log.v(TAG, "Maximum errors reached!");
+//        			//setInfoWindow(makeErrorInfoWindow());
+//        			updateRefreshStatus(false);
+//        			mErrorMessage = null;
+//        			mErrorRetry = 0;
+//        		}
+//        		else {
+//        			if (LOGV) Log.v(TAG, "Error number: " + mErrorRetry);
+//        			new GetTweets().execute();
+//        		}
+//        		// Increment error
+//        		mErrorMessage = null;
+//        		mErrorRetry++;
+//        	}
+//        	else {
+//        		getInfoWindows();
+//        		changeInfoWindow();
+//        		startRefreshThread();
+//        		updateRefreshStatus(false);
+//        	}
         }
     }	
 	

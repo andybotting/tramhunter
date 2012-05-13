@@ -35,21 +35,24 @@
 package com.andybotting.tramhunter.activity;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import com.andybotting.tramhunter.ui.TouchListView;
 import com.andybotting.tramhunter.R;
@@ -57,9 +60,9 @@ import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.FavouriteList;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
-import com.andybotting.tramhunter.ui.UIUtils;
 
-public class FavouriteActivity extends ListActivity {
+
+public class FavouriteActivity extends SherlockListActivity {
 	
 	private final static int CONTEXT_MENU_SET_NAME = 0;
 	private final static int CONTEXT_MENU_VIEW_STOP = 1;
@@ -75,27 +78,17 @@ public class FavouriteActivity extends ListActivity {
 		
 		setContentView(R.layout.favourite_list);
 		
+		// Set up the Action Bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setTitle(R.string.title_favourite_stops);
+		
 		mListView = (TouchListView) getListView();
 		mListView.setDropListener(onDrop);
-		
-		// Home title button
-		findViewById(R.id.title_btn_home).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goHome(FavouriteActivity.this);
-		    }
-		});	
-
-		// Search title button
-		findViewById(R.id.title_btn_search).setOnClickListener(new View.OnClickListener() {
-		    public void onClick(View v) {
-		    	UIUtils.goSearch(FavouriteActivity.this);
-		    }
-		});	
 
 		mFavourites = new FavouriteList();
 
-		String title = "Favourite Stops";
-		((TextView) findViewById(R.id.title_text)).setText(title);
 		displayFavStops(true);
 	}
 
@@ -232,6 +225,22 @@ public class FavouriteActivity extends ListActivity {
 		
 	}
 	
+    
+	/**
+	 * Menu actions
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+
+        case android.R.id.home:
+            finish();
+            return true;
+		}
+
+		return false;
+	}
+    
 	
 	/**
 	 * List item click listener
@@ -249,13 +258,7 @@ public class FavouriteActivity extends ListActivity {
      */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-			AdapterView.AdapterContextMenuInfo info;
-			try {
-			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-			} catch (ClassCastException e) {
-			    return;
-			}
-
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
 			Favourite favourite = mFavourites.getFavourite(info.position);
 			
 			menu.setHeaderIcon(R.drawable.icon);
@@ -271,9 +274,9 @@ public class FavouriteActivity extends ListActivity {
      * Action a context menu item
      */
     @Override
-    public boolean onContextItemSelected (MenuItem item){
-    	try {
-    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+    public boolean onContextItemSelected (android.view.MenuItem item){
+
+    		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
     		Favourite favourite = mFavourites.getFavourite(info.position);
         	
         	switch (item.getItemId()) {
@@ -292,7 +295,6 @@ public class FavouriteActivity extends ListActivity {
     				displayStops();
     				return true;	
         	}
-    	} catch (ClassCastException e) {}
     	    	
 		return super.onContextItemSelected(item);
     }
