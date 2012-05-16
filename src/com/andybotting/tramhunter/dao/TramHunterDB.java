@@ -72,7 +72,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// E.g. 
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 900;
+	private static final int DATABASE_VERSION = 991;
 	
 	
 	private SQLiteDatabase mDB = null;
@@ -474,10 +474,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			null, 
 			null, null, null);
 		
-		Route route = new Route();
+		Route route = null;
 		
 		if (c.moveToFirst()) {	
-		
+			route = new Route();
+			
 			int col_number = c.getColumnIndexOrThrow(Routes.NUMBER);
 			route.setId(routeId);
 			route.setNumber(c.getString(col_number));
@@ -502,12 +503,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 					dest.setDestination(d.getString(d_col_destination));
 					dest.setUp(d.getInt(d_col_direction));
 					
-					if (dest.getUp()) {
+					if (dest.getUp())
 						route.setDestinationDown(dest);
-					}
-					else {
+					else
 						route.setDestinationUp(dest);
-					}
 				} 
 				while(d.moveToNext());
 			}
@@ -654,9 +653,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 				null, 
 				null);
 	
-		Destination dest = new Destination();
+		Destination dest = null;
 		
-		if (c.moveToFirst()) {		
+		if (c.moveToFirst()) {	
+			dest = new Destination();
+			
 			int col_id = c.getColumnIndexOrThrow(RoutesColumns.ID);
 			int col_number = c.getColumnIndexOrThrow(RoutesColumns.NUMBER);
 			int col_destination = c.getColumnIndexOrThrow(DestinationsColumns.DESTINATION);
@@ -864,9 +865,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 							null, 
 							null, null, null);	
 	
-		Stop stop = new Stop();
+		Stop stop = null;
 		
 		if (c.moveToFirst()) {		
+			stop = new Stop();
+			
 			int col_id = c.getColumnIndexOrThrow(StopsColumns.ID);
 			int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
 			int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
