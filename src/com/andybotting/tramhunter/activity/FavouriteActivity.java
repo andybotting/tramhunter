@@ -373,7 +373,7 @@ public class FavouriteActivity extends SherlockListActivity {
 				stopName = stop.getPrimaryName();
 				stopDetails = "Stop " + stop.getFlagStopNumber();
 				// If the stop has a secondary name, add it
-				if (stop.getSecondaryName().length() > 0)
+				if (stop.getSecondaryName() != null)
 					stopDetails += ": " + stop.getSecondaryName();
 				
 				stopDetails += " - " + stop.getCityDirection();

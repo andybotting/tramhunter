@@ -45,8 +45,8 @@ import com.google.android.maps.GeoPoint;
 
 public class Stop { 
 	
-	private long id;
-	private int tramTrackerID;
+	private long id = -1;
+	private int tramTrackerID = -1;
 	private String flagStopNumber;
 	private String primaryName;
 	private String secondaryName;
@@ -56,7 +56,6 @@ public class Stop {
 	private double latitude;
 	private double longitude;
 	private String suburb;
-//	private boolean starred = false;
 	private List<Route> routes;
 	
 	private static final String NAME_PATTERN = "(.+) & (.+)";
@@ -116,7 +115,7 @@ public class Stop {
 	public String getStopName() {
 	   String stopName = primaryName;
 	   
-	   if (secondaryName.length() > 0) {
+	   if (secondaryName != null) {
 		   stopName += " & " + secondaryName;
 	   }
 	   
