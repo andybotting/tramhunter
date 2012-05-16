@@ -144,7 +144,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	 */
 	public List<NextTram> getNextPredictedRoutesCollection (Stop stop, Route route) throws TramTrackerServiceException {
 		
-		SoapObject result = null;
+		SoapObject soapResult = null;
 		final List<NextTram> nextTrams = new ArrayList<NextTram>();
 		
 		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedRoutesCollection");
@@ -157,24 +157,26 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		else
 			request.addProperty("routeNo", route.getNumber());
 		
+		Object result = makeTramTrackerRequest(request);
 					
 		try {
-			result = (SoapObject) makeTramTrackerRequest(request);
+			soapResult = (SoapObject)result;
 		}
 		catch (ClassCastException e) {
-			throw new TramTrackerServiceException(e);
+			// SOAP result might just be an error string
+			throw new TramTrackerServiceException(result.toString());
 		}
 
-		if (result != null) {
+		if (soapResult != null) {
 				
 			try {
-				SoapObject result1 = (SoapObject)result.getProperty("diffgram");
-				SoapObject result2 = (SoapObject)result1.getProperty("DocumentElement");
+				SoapObject soapResult1 = (SoapObject)soapResult.getProperty("diffgram");
+				SoapObject soapResult2 = (SoapObject)soapResult1.getProperty("DocumentElement");
 	
 				
-				for (int i = 0; i < result2.getPropertyCount(); i++) {
+				for (int i = 0; i < soapResult2.getPropertyCount(); i++) {
 					
-						SoapObject nextPredicted = (SoapObject)result2.getProperty(i);
+						SoapObject nextPredicted = (SoapObject)soapResult2.getProperty(i);
 						
 						NextTram tram = new NextTram();
 						
@@ -306,7 +308,11 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 			androidHttpTransport.debug = true;
 			
 			androidHttpTransport.call(soapAction, envelope);
-			return envelope.getResponse();
+			
+			Object response = envelope.getResponse();
+			//if (LOGV) Log.d(TAG, "SOAP Response: " + response.toString());
+			
+			return response;
 			
 		} 
 		catch (Exception e) {
