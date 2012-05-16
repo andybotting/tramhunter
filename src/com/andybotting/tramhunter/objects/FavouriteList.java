@@ -67,51 +67,53 @@ public class FavouriteList {
 	
 	/**
 	 * Get the favourite items
-	 * @return 
 	 */
 	public ArrayList<Favourite> getFavouriteItems() {
-		
+
 		ArrayList<Favourite> favourites = new ArrayList<Favourite>();
 		JSONArray favouriteJSONArray = null;
 		TramHunterDB db = new TramHunterDB();
-		
+
 		// Fetch JSON favourite stops string from preferences
 		String favouriteString = mPreferenceHelper.getStarredStopsString();
 		if (LOGV) Log.i(TAG, "Parsing favourite string: " + favouriteString);
 
 		// Check to see if we even have any favourites
 		if (favouriteString.length() > 1) {
-			
+
 			// Convert any old favourites - if not a JSON Array
 			if (!favouriteString.contains("["))
 				favouriteString = convertOldFavourites(favouriteString);
 
 			try {
 				favouriteJSONArray = new JSONArray(favouriteString);
-				
-		        for (int i = 0; i < favouriteJSONArray.length(); i++) {
-				
-					JSONObject favouriteJSONObject = favouriteJSONArray.getJSONObject(i);
-					
-		            int tramTrackerID = favouriteJSONObject.optInt("stop");
-		            int routeID = favouriteJSONObject.optInt("route", -1);
-		            String name = favouriteJSONObject.optString("name", null);
-		    		
-		            Stop stop = db.getStop(tramTrackerID);
-		            Route route = null;
-		            
-		            if (routeID != -1)
-		            	route = db.getRoute(routeID);
 
-		            favourites.add(new Favourite(stop, route, name));
-		        }
-		            
+				for (int i = 0; i < favouriteJSONArray.length(); i++) {
+
+					JSONObject favouriteJSONObject = favouriteJSONArray.getJSONObject(i);
+
+					int tramTrackerID = favouriteJSONObject.optInt("stop");
+					int routeID = favouriteJSONObject.optInt("route", -1);
+					String name = favouriteJSONObject.optString("name", null);
+
+					Stop stop = db.getStop(tramTrackerID);
+					// Stop can be null if we have updated stops and an ID has
+					// been removed
+					if (stop != null) {
+						Route route = null;
+
+						if (routeID != -1)
+							route = db.getRoute(routeID);
+
+						favourites.add(new Favourite(stop, route, name));
+					}
+				}
+
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		        catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-			}
-		        
+
 		}
 		db.close();
 		return favourites;
