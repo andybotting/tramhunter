@@ -34,15 +34,13 @@
 -->
 
 <resources>
-    
-	<style name="Theme.TramHunterStyle" parent="Theme.Sherlock.Light.DarkActionBar">
-	    <item name="actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
-	    <item name="android:actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
-	</style>
 
-	<style name="Widget.TramHunter.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse">
-    
-	</style>	
+    <style name="Theme.TramHunterStyle" parent="Theme.Sherlock.Light.DarkActionBar">
+        <item name="actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
+        <item name="android:actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
+    </style>
+
+    <style name="Widget.TramHunter.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse"></style>
 
     <style name="HomeButton">
         <item name="android:layout_gravity">center_vertical</item>
@@ -55,15 +53,13 @@
         <item name="android:textColor">@color/foreground1</item>
         <item name="android:background">@null</item>
     </style>
-  
-    
-     <style name="SmallSpinnerInverse" parent="@android:style/Widget.ProgressBar.Small.Inverse">
+
+    <style name="SmallSpinnerInverse" parent="@android:style/Widget.ProgressBar.Small.Inverse">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:indeterminate">true</item> 
+        <item name="android:indeterminate">true</item>
         <item name="android:layout_margin">6dip</item>
-    </style>   
-
+    </style>
 
     <style name="TextHeader">
         <item name="android:textSize">18sp</item>
@@ -82,7 +78,7 @@
         <item name="android:lineSpacingMultiplier">1.1</item>
         <item name="android:textColor">@android:color/secondary_text_light</item>
     </style>
-    
+
     <style name="TitleNotBold">
         <item name="android:textSize">@dimen/text_size_medium</item>
         <item name="android:textColor">@android:color/primary_text_light</item>
@@ -106,14 +102,13 @@
         <item name="android:paddingTop">6dip</item>
         <item name="android:paddingBottom">6dip</item>
     </style>
- 
- 
+
     <style name="ListHeader">
         <item name="android:paddingLeft">10dip</item>
         <item name="android:paddingRight">10dip</item>
         <item name="android:paddingTop">8dip</item>
         <item name="android:paddingBottom">8dip</item>
-    </style>    
+    </style>
 
     <style name="TightListItem">
         <item name="android:paddingRight">4dip</item>
@@ -125,7 +120,7 @@
         <item name="android:paddingTop">6dip</item>
         <item name="android:paddingBottom">6dip</item>
     </style>
-    
+
     <style name="ListSubItem">
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">10dip</item>
@@ -133,25 +128,22 @@
         <item name="android:paddingBottom">6dip</item>
         <item name="android:textColor">@color/gray</item>
     </style>
-    
+
     <style name="ListTitle">
         <item name="android:textSize">@dimen/text_size_medium</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
     </style>
 
     <style name="ListSubtitle">
         <item name="android:textSize">@dimen/text_size_small</item>
-		<item name="android:textColor">@color/gray</item>
+        <item name="android:textColor">@color/gray</item>
     </style>
-    
+
     <style name="DialogTextMedium">
         <item name="android:textSize">@dimen/text_size_medium</item>
-        <item name="android:textColor">@android:color/white</item>
     </style>
-    
+
     <style name="DialogTextSmall">
         <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:textColor">@android:color/white</item>
     </style>
-    
+
 </resources>
