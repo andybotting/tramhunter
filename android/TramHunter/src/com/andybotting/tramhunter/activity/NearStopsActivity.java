@@ -419,10 +419,10 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			String stopDetails = stop.getStopDetailsLine();
 			String stopDistance = stop.formatDistanceTo(mLocation);
 
-			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
-			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
-			((TextView) pv.findViewById(R.id.stopDistanceTextView)).setText(stopDistance);
-			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(stop.getRoutesString());
+			((TextView) pv.findViewById(R.id.stop_name)).setText(stopName);
+			((TextView) pv.findViewById(R.id.stop_details)).setText(stopDetails);
+			((TextView) pv.findViewById(R.id.stop_distance)).setText(stopDistance);
+			((TextView) pv.findViewById(R.id.stop_routes)).setText(stop.getRoutesString());
 
 			return pv;
 		}

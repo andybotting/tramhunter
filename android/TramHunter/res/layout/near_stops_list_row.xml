@@ -39,47 +39,37 @@
 	android:layout_height="fill_parent"
 	style="@style/ListItem" >
 
-	<ImageView android:id="@+id/starImageView"
-		android:src="@drawable/star_on"	
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true"
- 		android:visibility="invisible" />		
-
-	<TextView android:id="@+id/stopNameTextView"
+	<TextView android:id="@+id/stop_name"
 		style="@style/ListTitle"	
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true"
-		android:layout_alignParentTop="true"		
-		android:layout_toLeftOf="@+id/starImageView" />
+		android:layout_alignParentTop="true" />
 
-	<TextView android:id="@+id/stopDistanceTextView"
+	<TextView android:id="@+id/stop_distance"
 		style="@style/ListSubtitle"
 		android:textColor="@color/aqua"
 		android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-    	android:layout_alignParentRight="true"
-		android:layout_below="@+id/starImageView" />	
+    	android:layout_alignParentRight="true" />	
 	
-	<TextView android:id="@+id/stopDetailsTextView"
+	<TextView android:id="@+id/stop_details"
 		style="@style/ListSubtitle"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true"		
-		android:layout_below="@+id/stopNameTextView"
-		android:layout_toLeftOf="@+id/stopDistanceTextView"
+		android:layout_below="@+id/stop_name"
+		android:layout_toLeftOf="@+id/stop_distance"
 		android:textSize="@dimen/text_size_tiny" />
 	
 	<TextView
-	   	android:id="@+id/stopRoutesTextView"
+	   	android:id="@+id/stop_routes"
 	   	style="@style/ListSubtitle"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true"		
-		android:layout_below="@+id/stopDetailsTextView"
-		android:layout_toLeftOf="@+id/stopDistanceTextView"
+		android:layout_below="@+id/stop_details"
+		android:layout_toLeftOf="@+id/stop_distance"
 		android:textSize="@dimen/text_size_tiny" />
 
 </RelativeLayout>
