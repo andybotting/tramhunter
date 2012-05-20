@@ -37,13 +37,9 @@ package com.andybotting.tramhunter.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockMapActivity;
@@ -52,213 +48,197 @@ import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.ui.BalloonItemizedOverlay;
-import com.andybotting.tramhunter.ui.UIUtils;
+
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class StopMapActivity extends SherlockMapActivity {    
-	
+public class StopMapActivity extends SherlockMapActivity {
+
 	private List<Overlay> mMapOverlays;
 
-	private MapController mMapController;	
-    private MapView mMapView;
-    private MyLocationOverlay mMyLocationOverlay;
+	private MapController mMapController;
+	private MapView mMapView;
+	private MyLocationOverlay mMyLocationOverlay;
 	private StopsList mStops;
-	
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.stop_map);
-        
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.stop_map);
+
 		// Set up the Action Bar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
-		actionBar.setDisplayHomeAsUpEnabled(true);        
+		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		// Get bundle data
 		Bundle extras = getIntent().getExtras();
-		if(extras != null)
+		if (extras != null)
 			mStops = extras.getParcelable("stopslist");
 
 		String title = "Stops Map";
-		if(mStops.size() == 1)
+		if (mStops.size() == 1)
 			title = mStops.get(0).getStopName();
 
 		actionBar.setTitle(title);
 
-		
-       	mMapView = (MapView) findViewById(R.id.mapView);
-       	mMapView.setBuiltInZoomControls(true);
-       	
-        mMapController = mMapView.getController();
-        mMapOverlays = mMapView.getOverlays();
-        
-        mMyLocationOverlay = new MyLocationOverlay(this, mMapView);
-        mMapOverlays.add(mMyLocationOverlay);
+		mMapView = (MapView) findViewById(R.id.mapView);
+		mMapView.setBuiltInZoomControls(true);
 
-        mMapView.setClickable(true);
-        mMapView.setEnabled(true);
-        
-        displayStops(mStops);
-    }
-    
-    
+		mMapController = mMapView.getController();
+		mMapOverlays = mMapView.getOverlays();
+
+		mMyLocationOverlay = new MyLocationOverlay(this, mMapView);
+		mMapOverlays.add(mMyLocationOverlay);
+
+		mMapView.setClickable(true);
+		mMapView.setEnabled(true);
+
+		displayStops(mStops);
+	}
+
 	/**
 	 * Options item select
 	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) {
+		switch (item.getItemId())
+			{
 
-        case android.R.id.home:
-            finish();
-            return true;
-            
-        default:
-            return super.onOptionsItemSelected(item);
-		}
+			case android.R.id.home:
+				finish();
+				return true;
+
+			default:
+				return super.onOptionsItemSelected(item);
+			}
 	}
-    
-    
-	private void viewStop(Stop stop){
+
+	private void viewStop(Stop stop) {
 		int tramTrackerId = stop.getTramTrackerID();
-		
+
 		Bundle bundle = new Bundle();
 		bundle.putInt("tramTrackerId", tramTrackerId);
 		Intent intent = new Intent(StopMapActivity.this, StopDetailsActivity.class);
 		intent.putExtras(bundle);
-		
+
 		startActivityForResult(intent, 1);
 	}
 
-	
 	public class MyItemizedOverlay extends BalloonItemizedOverlay<OverlayItem> {
 
-	    private ArrayList<OverlayItem> m_overlays = new ArrayList<OverlayItem>();
+		private ArrayList<OverlayItem> m_overlays = new ArrayList<OverlayItem>();
 
-	    public MyItemizedOverlay(Drawable defaultMarker, MapView mapView) {
-	        super(boundCenter(defaultMarker), mapView);
-	    }
+		public MyItemizedOverlay(Drawable defaultMarker, MapView mapView) {
+			super(boundCenter(defaultMarker), mapView);
+		}
 
-	    public void addOverlay(OverlayItem overlay) {
-	        m_overlays.add(overlay);
-	        populate();
-	    }
+		public void addOverlay(OverlayItem overlay) {
+			m_overlays.add(overlay);
+			populate();
+		}
 
-	    @Override
-	    protected OverlayItem createItem(int i) {
-	        return m_overlays.get(i);
-	    }
+		@Override
+		protected OverlayItem createItem(int i) {
+			return m_overlays.get(i);
+		}
 
-	    @Override
-	    public int size() {
-	        return m_overlays.size();
-	    }
+		@Override
+		public int size() {
+			return m_overlays.size();
+		}
 
-	    @Override
-	    protected boolean onBalloonTap(int index) {
-	    	Stop stop = mStops.get(index);
-	        viewStop(stop);
-	        return true;
-	    }
+		@Override
+		protected boolean onBalloonTap(int index) {
+			Stop stop = mStops.get(index);
+			viewStop(stop);
+			return true;
+		}
 
 	}
 
-	
-    private void displayStops(StopsList mStops) {
+	private void displayStops(StopsList mStops) {
 
-    	double minLat = 0;
-    	double maxLat = 0;
-    	double minLng = 0;
-    	double maxLng = 0;
-    	
-    	Drawable redMarker = this.getResources().getDrawable(R.drawable.map_marker_red);
-    	
-    	int w = redMarker.getIntrinsicWidth();
-    	int h = redMarker.getIntrinsicHeight();
-    	redMarker.setBounds(-w/2, -h, w/2, 0);
+		double minLat = 0;
+		double maxLat = 0;
+		double minLng = 0;
+		double maxLng = 0;
 
-    	
-    	MyItemizedOverlay itemizedOverlay = new MyItemizedOverlay(redMarker, mMapView);
-    	mMapOverlays.add(itemizedOverlay);
-    	
-    	for (Stop stop: mStops) {
+		Drawable redMarker = this.getResources().getDrawable(R.drawable.map_marker_red);
 
-    		GeoPoint point = stop.getGeoPoint();
-    		
-    		String title = stop.getPrimaryName();
-    		
-    		String snippet = "Stop " + stop.getFlagStopNumber();
-    		// If the stop has a secondary name, add it
-    		if (stop.getSecondaryName().length() > 0) {
-    			snippet += ": " + stop.getSecondaryName();
-    		}
-    		snippet += " - " + stop.getCityDirection();
-    		snippet += " (" + stop.getTramTrackerID() + ")";
-    		
-        	OverlayItem overlayitem = new OverlayItem(point, title, snippet);
-        	
-        	itemizedOverlay.addOverlay(overlayitem);
-        	
-        	Double lat = stop.getLatitude();
-        	Double lng = stop.getLongitude();
-        	
-        	// Initialise our max/min values, if not set
-        	if ((maxLat == minLat) && (minLat == 0)) {
-        		minLat = lat;
-        		maxLat = lat;
-        		minLng = lng;
-        		maxLng = lng;
-        	}
-        	
-            if (lat < minLat) 
-            	minLat = lat;
-            
-            if (lat > maxLat) 
-            	maxLat = lat;
-            
-            if (lng < minLng) 
-            	minLng = lng;
-            
-            if (lng > maxLng) 
-            	maxLng = lng;
-        }
+		int w = redMarker.getIntrinsicWidth();
+		int h = redMarker.getIntrinsicHeight();
+		redMarker.setBounds(-w / 2, -h, w / 2, 0);
 
-        // Would be ideal to set map bounds here, but settle for center for now
-        double centerLat = (maxLat + minLat) / 2;
-        double centerLng = (maxLng + minLng) / 2;
+		MyItemizedOverlay itemizedOverlay = new MyItemizedOverlay(redMarker, mMapView);
+		mMapOverlays.add(itemizedOverlay);
 
-        int lat1E6 = (int) (centerLat * 1E6);
-        int lng1E6 = (int) (centerLng * 1E6);
-        
-        GeoPoint point = new GeoPoint(lat1E6, lng1E6);
-        
-        mMapController.setZoom(15);
-        mMapController.setCenter(point);
-    }
- 
-    
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mMyLocationOverlay.enableMyLocation();
-    }
+		for (Stop stop : mStops) {
 
-    @Override
-    protected void onStop() {
-        mMyLocationOverlay.disableMyLocation();
-        super.onStop();
-    }
-    
-    
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
-    }
+			GeoPoint point = stop.getGeoPoint();
+
+			String title = stop.getPrimaryName();
+			String details = stop.getStopDetailsLine();
+
+			OverlayItem overlayitem = new OverlayItem(point, title, details);
+
+			itemizedOverlay.addOverlay(overlayitem);
+
+			Double lat = stop.getLatitude();
+			Double lng = stop.getLongitude();
+
+			// Initialise our max/min values, if not set
+			if ((maxLat == minLat) && (minLat == 0)) {
+				minLat = lat;
+				maxLat = lat;
+				minLng = lng;
+				maxLng = lng;
+			}
+
+			if (lat < minLat)
+				minLat = lat;
+
+			if (lat > maxLat)
+				maxLat = lat;
+
+			if (lng < minLng)
+				minLng = lng;
+
+			if (lng > maxLng)
+				maxLng = lng;
+		}
+
+		// Would be ideal to set map bounds here, but settle for center for now
+		double centerLat = (maxLat + minLat) / 2;
+		double centerLng = (maxLng + minLng) / 2;
+
+		int lat1E6 = (int) (centerLat * 1E6);
+		int lng1E6 = (int) (centerLng * 1E6);
+
+		GeoPoint point = new GeoPoint(lat1E6, lng1E6);
+
+		mMapController.setZoom(15);
+		mMapController.setCenter(point);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mMyLocationOverlay.enableMyLocation();
+	}
+
+	@Override
+	protected void onStop() {
+		mMyLocationOverlay.disableMyLocation();
+		super.onStop();
+	}
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
+	}
 }

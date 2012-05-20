@@ -55,6 +55,7 @@ public class PreferenceHelper {
 	private static final String KEY_LAST_TWITTER_DATA = "last_twitter_data";
 	private static final String KEY_STATS_TIMESTAMP = "stats_timestamp";
 	
+	
 	private final SharedPreferences mPreferences;
 	private final Context mContext;
 
@@ -80,9 +81,9 @@ public class PreferenceHelper {
 		return mPreferences.getBoolean(SettingsActivity.KEY_TRAM_IMAGE, SettingsActivity.KEY_TRAM_IMAGE_DEFAULT_VALUE);
 	}	
 	
-//	public boolean isJSONAPIEnabled()	{
-//		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
-//	}
+	public boolean isJSONAPIEnabled()	{
+		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
+	}
 	
 	public boolean isSendStatsEnabled()	{
 		return mPreferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
@@ -92,7 +93,10 @@ public class PreferenceHelper {
      * Return a string representing the GUID
      */
 	public String getGUID() {
-		return mPreferences.getString(KEY_GUID, "");
+		String guid = mPreferences.getString(KEY_GUID, null);
+		// Make sure that a blank guid is returned as null
+		if (guid == "") guid = null;
+		return guid;
 	}
 	
     /**
@@ -162,31 +166,23 @@ public class PreferenceHelper {
 		return mPreferences.getLong(KEY_LAST_TWITTER_UPDATE, 0);
 	}
 	
-    /**
-     * Set a long representing the last stats send date
-     */	
-	public void setLastTwitterUpdateTimestamp() {
-		Date now = new Date();
-		SharedPreferences.Editor editor = mPreferences.edit();	
-		editor.putLong(KEY_LAST_TWITTER_UPDATE, now.getTime());
-		editor.commit();
-	}	
-	
-	
+
 	/**
-     * Return a string representing the starred station/lines
+     * Return a string representing the last fetched twitter data
      */
 	public String getLastTwitterData() {
-		return mPreferences.getString(KEY_LAST_TWITTER_DATA, "");
+		return mPreferences.getString(KEY_LAST_TWITTER_DATA, null);
 	}	
 	
 	
     /**
-     * Set a string representing the starred station/lines
+     * Set a string representing the last fetched twitter data
      */	
 	public void setLastTwitterData(String twitterData) {
+		Date now = new Date();
 		SharedPreferences.Editor editor = mPreferences.edit();
 		editor.putString(KEY_LAST_TWITTER_DATA, twitterData);
+		editor.putLong(KEY_LAST_TWITTER_UPDATE, now.getTime());
 		editor.commit();
 	}
 	

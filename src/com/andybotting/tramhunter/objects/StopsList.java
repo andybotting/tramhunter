@@ -51,13 +51,12 @@ public class StopsList extends ArrayList<Stop> implements Parcelable{
 		readFromParcel(in);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+	public static final Parcelable.Creator<StopsList> CREATOR = new Parcelable.Creator<StopsList>() {
 		public StopsList createFromParcel(Parcel in) {
 			return new StopsList(in);
 		}
 
-		public Object[] newArray(int arg0) {
+		public StopsList[] newArray(int arg0) {
 			return null;
 		}
 

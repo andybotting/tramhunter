@@ -10,6 +10,7 @@ public class Tweet {
 	private String name;
 	private String message;
 	private String imageUrl;
+	private String imagePath;
 	private Date date;
 	
 	
@@ -24,7 +25,7 @@ public class Tweet {
 	 * @return the username
 	 */
 	public String getUsername() {
-		return "@" + username;
+		return username;
 	}
 	
 	/**
@@ -67,6 +68,20 @@ public class Tweet {
 	 */
 	public String getImageUrl() {
 		return imageUrl;
+	}	
+
+	/**
+	 * @return the imagePath
+	 */
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	/**
+	 * @param imagePath the imagePath to set
+	 */
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 	
 	/**
@@ -85,6 +100,15 @@ public class Tweet {
 		}
 	}
 	
+	
+	/**
+	 * @param date the date to set
+	 */
+	public void setDate(long time) {
+		this.date = new Date(time);
+	}
+	
+	
 	/**
 	 * @param date the date to set
 	 */
@@ -92,13 +116,14 @@ public class Tweet {
 		this.date = date;
 	}
 	
+
 	/**
 	 * @return the date
 	 */
-	public Date getDate() {
-		return date;
-	}
-	
+	public long getDateLong() {
+		return date.getTime();
+	}	
+
 	
 	/**
 	 * @param dateStr
@@ -110,7 +135,7 @@ public class Tweet {
 		Date today = new Date();
 	
 		// how much time since (ms)
-		Long duration = today.getTime() - getDate().getTime();
+		Long duration = today.getTime() - date.getTime();
 	
 		int second = 1000;
 		int minute = second * 60;

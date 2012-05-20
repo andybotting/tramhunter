@@ -34,12 +34,8 @@
 
 package com.andybotting.tramhunter.objects;
 
-import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.andybotting.tramhunter.dao.TramHunterDB;
 
 import android.util.Log;
 
@@ -62,8 +58,6 @@ public class Favourite {
 		this.route = route;
 		this.stop = stop;
 		this.name = name;
-		
-		if (LOGV) Log.i(TAG, "New Favourite with Name: " + this);
 	}
 	
 	/**
@@ -157,17 +151,10 @@ public class Favourite {
 	 * @return String
 	 */
 	public String getRouteName() {
-		if (route == null) {
-			// Fetch the routes from the DB
-			TramHunterDB db = new TramHunterDB();
-			List<Route> routes = db.getRoutesForStop(stop.getTramTrackerID());
-			db.close();
-			stop.setRoutes(routes);
-			return stop.getRoutesListString();
-		}
-		else {
-			return "Route " + route.getNumber();
-		}
+		if (route != null)
+			return route.toString();
+		
+		return stop.getRoutesString();		
 	}
 	
 	
@@ -227,7 +214,6 @@ public class Favourite {
 				object.put("name", name);
 		} 
 		catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -239,7 +225,6 @@ public class Favourite {
 	 * JSON string
 	 */
 	public String toString() {
-		if (LOGV) Log.i(TAG, "New Favourite: " + getFavouriteJSON().toString());
 		return getFavouriteJSON().toString();
 	}
 	

@@ -51,8 +51,7 @@ public class TramNotification extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
-	notificationManager = (NotificationManager) context
-		.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		// creating a new notification
 		final int icon = R.drawable.icon;

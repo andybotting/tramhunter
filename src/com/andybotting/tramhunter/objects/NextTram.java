@@ -58,6 +58,7 @@ public class NextTram implements Comparable<NextTram> {
 	private Date predictedArrivalDateTime;
 	private Date requestDateTime;
 	private List<Stop> favouritesOnRoute;
+
 	
 	public Stop getOriginStop() {
 		return originStop;

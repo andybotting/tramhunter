@@ -43,56 +43,56 @@ import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-public class NetworkMapActivity extends SherlockFragmentActivity {  
-  
-    @Override  
-    protected void onCreate(Bundle savedInstanceState) {  
-    	super.onCreate(savedInstanceState);  
+public class NetworkMapActivity extends SherlockFragmentActivity {
 
-    	setContentView(R.layout.network_map);
-    	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		setContentView(R.layout.network_map);
+
 		// Set up the Action Bar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setTitle(R.string.title_network_map);
 
-    	WebView webView = (WebView) findViewById(R.id.web_view);
-    	
-    	// Hide but not remove the functionality of the scrollbar. 
-    	// The layout margin adjustment is a nasty work-around.
-    	webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-    	
-    	webView.setVerticalScrollBarEnabled(false);
-    	webView.setHorizontalScrollBarEnabled(false);
-        	
-    	WebSettings settings = webView.getSettings();
-    	settings.setBuiltInZoomControls(true);
-    	settings.setLoadWithOverviewMode(true);
-    	settings.setUseWideViewPort(true);
+		WebView webView = (WebView) findViewById(R.id.web_view);
 
-        try {
-            webView.loadUrl("file:///android_asset/networkmap/networkmap.html");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }    	
-        
+		// Hide but not remove the functionality of the scrollbar.
+		// The layout margin adjustment is a nasty work-around.
+		webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+
+		webView.setVerticalScrollBarEnabled(false);
+		webView.setHorizontalScrollBarEnabled(false);
+
+		WebSettings settings = webView.getSettings();
+		settings.setBuiltInZoomControls(true);
+		settings.setLoadWithOverviewMode(true);
+		settings.setUseWideViewPort(true);
+
+		try {
+			webView.loadUrl("file:///android_asset/networkmap/networkmap.html");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
-    
+
 	/**
 	 * Menu actions
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
+		switch (item.getItemId())
+			{
 
-        case android.R.id.home:
-            finish();
-            return true;
-		}
+			case android.R.id.home:
+				finish();
+				return true;
+			}
 
 		return false;
 	}
-    
-    
+
 }

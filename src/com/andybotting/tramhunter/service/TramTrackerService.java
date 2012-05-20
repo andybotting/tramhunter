@@ -49,6 +49,6 @@ public interface TramTrackerService {
 
 	List<NextTram> getNextPredictedRoutesCollection(Stop stop, Route route) throws TramTrackerServiceException;
 	
-	String getGUID();
+	String getGUID() throws TramTrackerServiceException;
 
 }

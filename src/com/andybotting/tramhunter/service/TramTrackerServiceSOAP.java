@@ -34,14 +34,27 @@
 
 package com.andybotting.tramhunter.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
@@ -53,7 +66,6 @@ import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.util.PreferenceHelper;
-
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
 	
@@ -68,8 +80,6 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 	
 	private PreferenceHelper mPreferenceHelper;
-	
-	String guid = "";
 
 	public TramTrackerServiceSOAP() {
 		this.mPreferenceHelper = new PreferenceHelper();
@@ -230,43 +240,11 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		return nextTrams;
 
 	}	
-	
-	private void getNewClientGuid() throws TramTrackerServiceException {
 
-		try {
-			SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	 
-			Object result = makeTramTrackerRequest(request);
 	
-			guid = result.toString();
-			mPreferenceHelper.setGUID(guid);
-		}
-		catch (Exception e) {
-			throw new TramTrackerServiceException("Error getting GUID");
-		}
-	}
-	
-	
-	/**
-	 * Get the GUID
-	 */
-	public String getGUID() {
-		return guid;
-	}
-	
-	
-	/**
-	 * toString method
-	 */
-	public String toString() {
-		return "GUID: " + guid;
-	}
-
 	
 	/**
 	 * Make a Tram Tracker request
-	 * @param request
-	 * @return
-	 * @throws TramTrackerServiceException
 	 */
 	private Object makeTramTrackerRequest(SoapObject request) throws TramTrackerServiceException {	
 		
@@ -283,25 +261,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 			envelope.dotNet = true;
 			
 			// Get our GUID from the database
-			guid = mPreferenceHelper.getGUID();
-			
-			// If we don't have a GUID yet, get from from TramTracker
-			if (guid == "") {
-				if (LOGV) Log.d(TAG, "GUID is null, methodName is " + methodName);
-				
-				if (methodName != "GetNewClientGuid") {
-					getNewClientGuid();
-		
-					// Sleep for a sec so that our GUID works with the next TT Request
-					try {
-						Thread.sleep(1000);
-					} 
-					catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-				
+			String guid = getGUID();
 			envelope.setGuid(guid);
 					
 			HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
@@ -319,6 +279,66 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 			throw new TramTrackerServiceException(e);
 		} 
 		
+	}
+	
+	
+	/**
+	 * Fetch a new GUID
+	 */
+	public String getNewClientGuid() throws TramTrackerServiceException {
+
+		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	 
+		
+		String methodName = request.getName();
+		String soapAction = NAMESPACE + methodName;
+
+		try {
+			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);	
+			envelope.setOutputSoapObject(request);
+		
+			envelope.setClientType(CLIENTTYPE);
+			envelope.setClientVersion(CLIENTVERSION);
+			envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
+			envelope.dotNet = true;
+					
+			HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+			androidHttpTransport.debug = true;
+			
+			androidHttpTransport.call(soapAction, envelope);
+			
+			Object response = envelope.getResponse();
+			
+			String guid = response.toString();
+			
+			// Save our GUID
+			mPreferenceHelper.setGUID(guid);
+			
+			return guid;
+			
+		} 
+		catch (Exception e) {
+			throw new TramTrackerServiceException("Error fetching GUID from TramTracker: " + e);
+		} 
+		
 	}	
+
+	
+	/** 
+	 * Get the GUID
+	 */
+	public String getGUID() throws TramTrackerServiceException {
+		
+		// Get our GUID from the database
+		String guid = mPreferenceHelper.getGUID();
+		
+		// If we don't have a GUID yet, get from from TramTracker
+		if (guid == null) {
+			if (LOGV) Log.d(TAG, "GUID is null, fetching new one");
+			guid = getNewClientGuid();
+		}
+		
+		return guid;
+	}
+	
 
 }

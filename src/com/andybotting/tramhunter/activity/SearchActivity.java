@@ -94,130 +94,120 @@ import android.widget.AdapterView.OnItemClickListener;
 public class SearchActivity extends SherlockListActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
-	
+
 	private ListView mListView;
 	private StopsListAdapter mListAdapter;
 	private List<Stop> mStops;
-	private TramHunterDB mDB;
-	
-	
+
 	/**
 	 * On Create
 	 */
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.search_list);
-        
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.search_list);
+
 		// Set up the Action Bar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-        
-        mListView = (ListView)this.findViewById(android.R.id.list);
 
-
-		mDB = new TramHunterDB();
+		mListView = (ListView) this.findViewById(android.R.id.list);
 
 		// Test our intent action in case it's a search
 		Intent intent = getIntent();
-		
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            // from click on search results
-            int tramTrackerId = Integer.parseInt(intent.getDataString());
-            Intent next = new Intent();
-            next.setClass(this, StopDetailsActivity.class);
-            next.putExtra("tramTrackerId", tramTrackerId);
-            startActivity(next);
-            finish();
-        } 
-        else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY); 
-            final CharSequence title = getString(R.string.title_search_query, query);
-            actionBar.setTitle(title);
-            
-			mStops = mDB.getStopsForSearch(query);
-			
-			mListView.setOnItemClickListener(mListView_OnItemClickListener);		
+
+		if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			// from click on search results
+			int tramTrackerId = Integer.parseInt(intent.getDataString());
+			Intent next = new Intent();
+			next.setClass(this, StopDetailsActivity.class);
+			next.putExtra("tramTrackerId", tramTrackerId);
+			startActivity(next);
+			finish();
+		} else if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			final CharSequence title = getString(R.string.title_search_query, query);
+			actionBar.setTitle(title);
+
+			TramHunterDB db = new TramHunterDB();
+			mStops = db.getStopsForSearch(query);
+			db.close();
+
+			mListView.setOnItemClickListener(mListView_OnItemClickListener);
 			mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
 			mListAdapter = new StopsListAdapter();
 			setListAdapter(mListAdapter);
-        }
-        
-    }
+		}
 
-	
+	}
+
 	/**
 	 * Start the activity to view a stop
-	 * @param stop
 	 */
-	private void viewStop(Stop stop){
+	private void viewStop(Stop stop) {
 		int tramTrackerId = stop.getTramTrackerID();
-		
+
 		Bundle bundle = new Bundle();
 		bundle.putInt("tramTrackerId", tramTrackerId);
 		Intent intent = new Intent(this, StopDetailsActivity.class);
 		intent.putExtras(bundle);
-		
+
 		startActivityForResult(intent, 1);
 	}
-	
-	
+
 	/**
 	 * List item click action
 	 */
 	private OnItemClickListener mListView_OnItemClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
-			viewStop((Stop)mStops.get(position));
+			viewStop((Stop) mStops.get(position));
 		}
-    };
+	};
 
-    
-    /**
-     * Create the context menu
-     */
+	/**
+	 * Create the context menu
+	 */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 			AdapterView.AdapterContextMenuInfo info;
 			try {
-			    info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+				info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 			} catch (ClassCastException e) {
-			    return;
+				return;
 			}
 
-			Stop thisStop = (Stop)mStops.get(info.position);
+			Stop thisStop = (Stop) mStops.get(info.position);
 			menu.setHeaderIcon(R.drawable.icon);
 			menu.setHeaderTitle(thisStop.getStopName());
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
 		}
-    };
-    
-    
-    /**
-     * Context menu actions
-     */
-    @Override
-    public boolean onContextItemSelected (MenuItem item){
-    	try {
-    		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        	Stop thisStop = (Stop)mStops.get(info.position);
-        	
-        	switch (item.getItemId()) {
-    			case CONTEXT_MENU_VIEW_STOP:
-    				viewStop(thisStop);
-    				return true;
-        	}
-    	} catch (ClassCastException e) {}
-    	    	
+	};
+
+	/**
+	 * Context menu actions
+	 */
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		try {
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+			Stop thisStop = (Stop) mStops.get(info.position);
+
+			switch (item.getItemId())
+				{
+				case CONTEXT_MENU_VIEW_STOP:
+					viewStop(thisStop);
+					return true;
+				}
+		} catch (ClassCastException e) {
+		}
+
 		return super.onContextItemSelected(item);
-    }
-    
-    
-    /**
-     * Stops list adapter
-     * @author andy
-     *
-     */
+	}
+
+	/**
+	 * Stops list adapter
+	 */
 	private class StopsListAdapter extends BaseAdapter {
 
 		public int getCount() {
@@ -234,33 +224,25 @@ public class SearchActivity extends SherlockListActivity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View pv;
-            if(convertView == null) {
-    			LayoutInflater inflater = getLayoutInflater();
-    			pv = inflater.inflate(R.layout.stops_list_row, parent, false);
-            }
-            else {
-                pv = convertView;
-            }
-			
-			Stop thisStop = (Stop) mStops.get(position);
-			
-			String stopName = thisStop.getPrimaryName();
-			String stopDetails = "Stop " + thisStop.getFlagStopNumber();
-			// If the stop has a secondary name, add it
-			if (thisStop.getSecondaryName().length() > 0) {
-				stopDetails += ": " + thisStop.getSecondaryName();
+			if (convertView == null) {
+				LayoutInflater inflater = getLayoutInflater();
+				pv = inflater.inflate(R.layout.stops_list_row, parent, false);
+			} else {
+				pv = convertView;
 			}
-			
-			stopDetails += " - " + thisStop.getCityDirection();
-			stopDetails += " (" + thisStop.getTramTrackerID() + ")";
+
+			Stop thisStop = (Stop) mStops.get(position);
+
+			String stopName = thisStop.getPrimaryName();
+			String stopDetails = thisStop.getStopDetailsLine();
 
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(thisStop.getRoutesString());
-			
+
 			return pv;
 		}
-			
+
 	}
 
 }

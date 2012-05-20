@@ -54,7 +54,6 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
 
-
 import android.widget.ExpandableListView.OnChildClickListener;
 
 public class RoutesListActivity extends SherlockExpandableListActivity {
@@ -62,13 +61,13 @@ public class RoutesListActivity extends SherlockExpandableListActivity {
 	private List<Route> routes;
 	private List<Destination> destinations;
 	private ExpandableListAdapter mAdapter;
-	
+
 	@Override
 	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);	
-		
+		super.onCreate(icicle);
+
 		setContentView(R.layout.routes_list);
-		
+
 		// Set up the Action Bar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
@@ -78,11 +77,11 @@ public class RoutesListActivity extends SherlockExpandableListActivity {
 		getExpandableListView().setOnChildClickListener(new OnChildClickListener() {
 			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 				long destinationId = -1;
-				
+
 				Route route = routes.get(groupPosition);
 				destinations = route.getDestinations();
 				destinationId = destinations.get(childPosition).getId();
-				
+
 				Bundle bundle = new Bundle();
 				bundle.putLong("destinationId", destinationId);
 				Intent stopsListIntent = new Intent(RoutesListActivity.this, StopsListActivity.class);
@@ -91,73 +90,73 @@ public class RoutesListActivity extends SherlockExpandableListActivity {
 				return true;
 			}
 		});
-	 
+
 		displayRoutes();
 	}
 
-	
 	/**
 	 * Menu actions
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
+		switch (item.getItemId())
+			{
 
-        case android.R.id.home:
-            finish();
-            return true;
-		}
+			case android.R.id.home:
+				finish();
+				return true;
+			}
 
 		return false;
 	}
-	
-		
+
+	/**
+	 * Display all routes in an exapandable list
+	 */
 	public void displayRoutes() {
-				
+
 		TramHunterDB db = new TramHunterDB();
 		routes = db.getRoutes();
 		db.close();
-				
-        List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
-        List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
-        
-        for (int i = 0; i < routes.size(); i++) {
-        	Route route = routes.get(i);
-        	Map<String, String> curGroupMap = new HashMap<String, String>();
-            curGroupMap.put("route", "Route " + route.getNumber());
-            curGroupMap.put("to", route.getDestinationString());
-            groupData.add(curGroupMap);
-            
-            List<Map<String, String>> children = new ArrayList<Map<String, String>>();
-            List<Destination> destinations = route.getDestinations();
-            
-            for (Destination d : destinations) {
-            	Map<String, String> curChildMap = new HashMap<String, String>();
-            	curChildMap.put("destination", d.getDestination());
-            	children.add(curChildMap);
-            }
 
-            childData.add(children);
-            
-        }
-		
-		
-        // Set up our adapter
-        mAdapter = new SimpleExpandableListAdapter(
-                this,
-                groupData,
-                R.layout.routes_list_row,
-                new String[] { "route", "to" },
-                new int[] { R.id.route_name, R.id.route_dest },
-                childData,
-                android.R.layout.simple_expandable_list_item_1,
-                new String[] { "destination" },
-                new int[] { android.R.id.text1, android.R.id.text2 }
-                );
-        
-        setListAdapter(mAdapter);
+		List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
+		List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
+
+		for (int i = 0; i < routes.size(); i++) {
+			Route route = routes.get(i);
+			Map<String, String> curGroupMap = new HashMap<String, String>();
+			curGroupMap.put("route", "Route " + route.getNumber());
+			curGroupMap.put("to", route.getDestinationString());
+			groupData.add(curGroupMap);
+
+			List<Map<String, String>> children = new ArrayList<Map<String, String>>();
+			List<Destination> destinations = route.getDestinations();
+
+			for (Destination d : destinations) {
+				Map<String, String> curChildMap = new HashMap<String, String>();
+				curChildMap.put("destination", d.getDestination());
+				children.add(curChildMap);
+			}
+
+			childData.add(children);
+
+		}
+
+		// Set up our adapter
+		mAdapter = new SimpleExpandableListAdapter(
+					this,
+					groupData, 
+					R.layout.routes_list_row,
+					new String[] { "route", "to" },
+					new int[] { R.id.route_name, R.id.route_dest },
+					childData,
+					android.R.layout.simple_expandable_list_item_1, 
+					new String[] { "destination" },
+					new int[] { android.R.id.text1, android.R.id.text2 }
+				);
+
+		setListAdapter(mAdapter);
 
 	}
 
-	  
 }
