@@ -416,15 +416,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			Stop stop = (Stop) mStops.get(position);
 
 			String stopName = stop.getPrimaryName();
-			String stopDetails = "Stop " + stop.getFlagStopNumber();
-			// If the stop has a secondary name, add it
-			if (stop.getSecondaryName().length() > 0) {
-				stopDetails += ": " + stop.getSecondaryName();
-			}
-
-			stopDetails += " - " + stop.getCityDirection();
-			stopDetails += " (" + stop.getTramTrackerID() + ")";
-
+			String stopDetails = stop.getStopDetailsLine();
 			String stopDistance = stop.formatDistanceTo(mLocation);
 
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
