@@ -35,115 +35,121 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_root"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:padding="6dip">
-        
+        android:orientation="vertical"
+        android:padding="6dip" >
+
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:orientation="horizontal" >
 
-            <Button android:id="@+id/home_btn_starred"
+            <Button
+                android:id="@+id/home_btn_starred"
                 style="@style/HomeButton"
-                android:text="@string/btn_starred"
-                android:drawableTop="@drawable/home_btn_starred"/>      
-                
-            <Button android:id="@+id/home_btn_browse"
+                android:drawableTop="@drawable/home_btn_starred"
+                android:text="@string/btn_starred" />
+
+            <Button
+                android:id="@+id/home_btn_browse"
                 style="@style/HomeButton"
-                android:text="@string/btn_browse"
-                android:drawableTop="@drawable/home_btn_browse"/>
-                
+                android:drawableTop="@drawable/home_btn_browse"
+                android:text="@string/btn_browse" />
         </LinearLayout>
-    
+
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">                
-            
-            <Button android:id="@+id/home_btn_nearby"
-                style="@style/HomeButton"
-                android:text="@string/btn_nearby"
-                android:drawableTop="@drawable/home_btn_nearby"/>
+            android:layout_weight="1"
+            android:orientation="horizontal" >
 
-            <Button android:id="@+id/home_btn_search"
+            <Button
+                android:id="@+id/home_btn_nearby"
                 style="@style/HomeButton"
-                android:text="@string/btn_search"
-                android:drawableTop="@drawable/home_btn_search"/>
+                android:drawableTop="@drawable/home_btn_nearby"
+                android:text="@string/btn_nearby" />
+
+            <Button
+                android:id="@+id/home_btn_search"
+                style="@style/HomeButton"
+                android:drawableTop="@drawable/home_btn_search"
+                android:text="@string/btn_search" />
         </LinearLayout>
-    
+
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:orientation="horizontal" >
 
-            <Button android:id="@+id/home_btn_map"
+            <Button
+                android:id="@+id/home_btn_map"
                 style="@style/HomeButton"
-                android:text="@string/btn_map"
-                android:drawableTop="@drawable/home_btn_map"/>
-                
-            <Button android:id="@+id/home_btn_settings"
+                android:drawableTop="@drawable/home_btn_map"
+                android:text="@string/btn_map" />
+
+            <Button
+                android:id="@+id/home_btn_settings"
                 style="@style/HomeButton"
-                android:text="@string/btn_settings"
-                android:drawableTop="@drawable/home_btn_settings"/>
-                
+                android:drawableTop="@drawable/home_btn_settings"
+                android:text="@string/btn_settings" />
         </LinearLayout>
-        
-	</LinearLayout>
+    </LinearLayout>
 
-	<!-- Swiper -->
-	<LinearLayout android:id="@+id/info_swiper"
-	    android:orientation="vertical"
-	    android:layout_width="fill_parent"
-	    android:layout_height="@dimen/info_window_height"
-	    android:visibility="gone">
-	
-	    <android.support.v4.view.ViewPager
-	        android:id="@+id/pager"
-	        android:layout_width="fill_parent"
-	        android:layout_height="0dp"
-	        android:layout_weight="1"/>
-	    
-<!-- 	    <com.viewpagerindicator.CirclePageIndicator -->
-<!-- 	        android:id="@+id/indicator" -->
-<!-- 	        android:padding="5dip" -->
-<!-- 	        android:layout_height="wrap_content" -->
-<!-- 	        android:layout_width="fill_parent"/> -->
-	</LinearLayout>		
-	
-		
-	<!-- Loading -->
+    <!-- Swiper -->
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/info_window_height"
+        android:visibility="gone" />
+
+    <!-- Loading -->
     <LinearLayout
         android:id="@+id/info_window_loading"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/info_window_height"
-        android:orientation="horizontal"
         android:background="#eee"
-        android:gravity="center">
-        
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
         <ProgressBar
             style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingRight="6dip"
-            android:indeterminate="true"/>
-        
+            android:indeterminate="true"
+            android:paddingRight="6dip" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size_small"
-            android:text="@string/label_loading"/>
-            
+            android:text="@string/label_loading"
+            android:textSize="@dimen/text_size_small" />
+    </LinearLayout>
+
+    <!-- Error -->
+    <LinearLayout
+        android:id="@+id/info_window_error"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/info_window_height"
+        android:background="#eee"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_error_loading"
+            android:textSize="@dimen/text_size_small" />
     </LinearLayout>
 
 </LinearLayout>
