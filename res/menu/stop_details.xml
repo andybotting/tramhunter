@@ -5,16 +5,16 @@
         android:icon="@drawable/ic_action_refresh"
         android:title="@string/menu_item_refresh"        
         android:orderInCategory="0"
-        android:showAsAction="always|withText" />    
+        android:showAsAction="always" />    
     
     <item android:id="@+id/menu_favourite"
-        android:icon="@drawable/ic_action_star"
-        android:showAsAction="never"
+        android:icon="@drawable/ic_action_unstar"
+        android:showAsAction="always"
         android:title="@string/menu_item_favourite"/>
     
     <item android:id="@+id/menu_map"
         android:icon="@drawable/ic_action_map"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_item_map"/>
 
 </menu>
