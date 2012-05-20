@@ -122,7 +122,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public SQLiteDatabase getDatabase() {
 		SQLiteDatabase db;  
 		
-		if (LOGV) Log.v(TAG, "Getting DB");
+		if (LOGV) Log.d(TAG, "Getting DB");
 		db = getExternalStorageDB();
 		if (db == null) {
 			if (LOGV) Log.w(TAG, "DB from SD Card failed, using internal");
@@ -138,7 +138,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * @return SQLiteDatabase
 	 */
 	private SQLiteDatabase getInternalStorageDB() {
-		if (LOGV) Log.i(TAG, "Getting DB from device internal storage");
+		if (LOGV) Log.d(TAG, "Getting DB from device internal storage");
 
 		SQLiteDatabase db = null;
 		String dbFile = DATABASE_INTERNAL_PATH + DATABASE_NAME;
@@ -168,10 +168,19 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * @return SQLiteDatabase
 	 */
 	private SQLiteDatabase getExternalStorageDB() {
-		if (LOGV) Log.i(TAG, "Getting DB from external storage (SD Card)");
+		if (LOGV) Log.d(TAG, "Getting DB from external storage (SD Card)");
 
 		SQLiteDatabase db = null;
 
+        // TODO: This should be used in modern Android (2.2+)
+		//try {
+		//	// Android API v8+
+		//	appDbDir = new File(mContext.getExternalFilesDir(null));
+		//} catch (NoSuchMethodError e) {
+		//	// Older API
+		//	appDbDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + AUTHORITY + "/files");
+		//}
+		
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return null;
 
@@ -182,7 +191,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
         	appDbDir.mkdirs();
         }
 
-        // Our dbFile at /mnt/sdcard/Android/data/com.andybotting.tubechaser/files/tubechaser.db
         File dbFileObj = new File(appDbDir, DATABASE_NAME);
         String dbFile = dbFileObj.getAbsolutePath();
         
@@ -216,7 +224,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		boolean dbExist = checkDB(dbFile);
  
 		if (dbExist) {
-			if (LOGV) Log.v(TAG, "Found existing DB at " + dbFile);
+			if (LOGV) Log.d(TAG, "Found existing DB at " + dbFile);
 
 			mDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
 			int thisDBVersion = mDB.getVersion();
@@ -232,7 +240,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			}	
 		}
 		else {
-			if (LOGV) Log.v(TAG, "Creating a new DB at " + dbFile);
+			if (LOGV) Log.d(TAG, "Creating a new DB at " + dbFile);
 			// By calling this method and empty database will be created into the default system path
 			// of your application so we are gonna be able to overwrite that database with our database.
 			mDB = getReadableDatabase(dbFile);
@@ -252,7 +260,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	private boolean checkDB(String dbFile){
  		SQLiteDatabase checkDB = null;
- 		if (LOGV) Log.v(TAG, "Checking for an existing DB at " + dbFile);
+ 		if (LOGV) Log.d(TAG, "Checking for an existing DB at " + dbFile);
  		
 		try {
 			checkDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
@@ -275,7 +283,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	private void copyDB(String dbFile) throws IOException {
 		
-		if (LOGV) Log.v(TAG, "Copying packaged DB to " + dbFile);
+		if (LOGV) Log.d(TAG, "Copying packaged DB to " + dbFile);
 		
 		// Open your local db as the input stream
 		InputStream is = mContext.getAssets().open(DATABASE_NAME);
@@ -295,7 +303,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		os.close();
 		is.close();
 		
-		if (LOGV) Log.v(TAG, "DB copying completed");
+		if (LOGV) Log.d(TAG, "DB copying completed");
 	}
 
 	
@@ -330,7 +338,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		if (LOGV) Log.v(TAG, "DB onCreate() called");
 		// Do nothing here
 	}
  
@@ -340,7 +347,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if (LOGV) Log.v(TAG, "DB onUpgrade() called");
 		// Do nothing here
 	}
 	
@@ -379,7 +385,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			}
 
 			onOpen(db);
-			if (LOGV) Log.v(TAG, "Opened " + DATABASE_NAME + " in read-only mode");
+			if (LOGV) Log.d(TAG, "Opened " + DATABASE_NAME + " in read-only mode");
 			mDB = db;
 			return mDB;
 		} finally {
