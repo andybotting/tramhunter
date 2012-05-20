@@ -34,27 +34,14 @@
 
 package com.andybotting.tramhunter.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
@@ -68,9 +55,9 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
-	
-    private static final String TAG = "TTServiceSOAP";
-    private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
+
+	private static final String TAG = "TTServiceSOAP";
+	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
 	private static final String NAMESPACE = "http://www.yarratrams.com.au/pidsservice/";
 	private static final String URL = "http://ws.tramtracker.com.au/pidsservice/pids.asmx";
@@ -78,40 +65,39 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String CLIENTTYPE = "TRAMHUNTER";
 	private static final String CLIENTVERSION = "0.6.0";
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
-	
+
 	private PreferenceHelper mPreferenceHelper;
 
 	public TramTrackerServiceSOAP() {
 		this.mPreferenceHelper = new PreferenceHelper();
 	}
-	
-	
+
 	/**
 	 * Parse the timestamp given my Tram Tracker
+	 * 
 	 * @param dateString
 	 * @return
 	 */
 	private Date parseTimestamp(String dateString) {
-		
-		//<PredictedArrivalDateTime>2010-05-30T19:00:48+10:00</PredictedArrivalDateTime>
-		//<RequestDateTime>2010-05-30T18:59:54.2212858+10:00</RequestDateTime>
-		
-		DateFormat df = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss");
+
+		// <PredictedArrivalDateTime>2010-05-30T19:00:48+10:00</PredictedArrivalDateTime>
+		// <RequestDateTime>2010-05-30T18:59:54.2212858+10:00</RequestDateTime>
+
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		df.setTimeZone(TimeZone.getTimeZone("Australia/Melbourne"));
 		Date date = new Date();
-				
+
 		try {
 			String fixedDate = dateString.substring(0, 18);
 			date = df.parse(fixedDate);
-			
+
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-		}	
-		
+		}
+
 		return date;
 	}
-	
-	
+
 	/**
 	 * Get Stop information
 	 */
@@ -122,223 +108,211 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 
 		try {
 			SoapObject result = (SoapObject) makeTramTrackerRequest(request);
-			
+
 			Stop stop = new Stop();
-			
+
 			if (result != null) {
-				
+
 				SoapObject stopResult2 = (SoapObject) result.getProperty("diffgram");
 				SoapObject stopResult3 = (SoapObject) stopResult2.getProperty("DocumentElement");
 				SoapObject stopResult4 = (SoapObject) stopResult3.getProperty("StopInformation");
-				
+
 				stop.setTramTrackerID(tramTrackerID);
 				stop.setFlagStopNumber(stopResult4.getProperty(0).toString());
 				stop.setStopName(stopResult4.getProperty(1).toString());
 				stop.setCityDirection(stopResult4.getProperty(2).toString());
-				//stop.setLatitude(Float.parseFloat(stopResult4.getProperty(3).toString()));
-				//stop.setLongitude(Float.parseFloat(stopResult4.getProperty(4).toString()));
+				// stop.setLatitude(Float.parseFloat(stopResult4.getProperty(3).toString()));
+				// stop.setLongitude(Float.parseFloat(stopResult4.getProperty(4).toString()));
 				stop.setSuburb(stopResult4.getProperty(5).toString());
 			}
-		
+
 			return stop;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new TramTrackerServiceException(e);
 		}
 
 	}
 
-	
 	/**
 	 * Get next tram departures
 	 */
-	public List<NextTram> getNextPredictedRoutesCollection (Stop stop, Route route) throws TramTrackerServiceException {
-		
+	public List<NextTram> getNextPredictedRoutesCollection(Stop stop, Route route) throws TramTrackerServiceException {
+
 		SoapObject soapResult = null;
 		final List<NextTram> nextTrams = new ArrayList<NextTram>();
-		
+
 		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedRoutesCollection");
 		request.addProperty("stopNo", stop.getTramTrackerID());
 		request.addProperty("lowFloor", "false");
-		
+
 		// Filter the results by route
 		if (route == null)
 			request.addProperty("routeNo", "0");
 		else
 			request.addProperty("routeNo", route.getNumber());
-		
+
 		Object result = makeTramTrackerRequest(request);
-					
+
 		try {
-			soapResult = (SoapObject)result;
-		}
-		catch (ClassCastException e) {
+			soapResult = (SoapObject) result;
+		} catch (ClassCastException e) {
 			// SOAP result might just be an error string
 			throw new TramTrackerServiceException(result.toString());
 		}
 
 		if (soapResult != null) {
-				
+
 			try {
-				SoapObject soapResult1 = (SoapObject)soapResult.getProperty("diffgram");
-				SoapObject soapResult2 = (SoapObject)soapResult1.getProperty("DocumentElement");
-	
-				
+				SoapObject soapResult1 = (SoapObject) soapResult.getProperty("diffgram");
+				SoapObject soapResult2 = (SoapObject) soapResult1.getProperty("DocumentElement");
+
 				for (int i = 0; i < soapResult2.getPropertyCount(); i++) {
-					
-						SoapObject nextPredicted = (SoapObject)soapResult2.getProperty(i);
-						
-						NextTram tram = new NextTram();
-						
-			            int internalRouteNo = Integer.parseInt(nextPredicted.getProperty(0).toString());
-			            String routeNo = nextPredicted.getProperty(1).toString();
-			            String headboardRouteNo = nextPredicted.getProperty(2).toString();
-			            int vehicleNo = Integer.parseInt(nextPredicted.getProperty(3).toString());
-			            String destination = nextPredicted.getProperty(4).toString();
-			            boolean hasDisruption = nextPredicted.getProperty(5).toString().equalsIgnoreCase("true") ? true : false;
-			            boolean isTTAvailable = nextPredicted.getProperty(6).toString().equalsIgnoreCase("true") ? true : false;
-			            boolean isLowFloorTram = nextPredicted.getProperty(7).toString().equalsIgnoreCase("true") ? true : false;
-			            boolean airConditioned = nextPredicted.getProperty(8).toString().equalsIgnoreCase("true") ? true : false;
-			            boolean displayAC = nextPredicted.getProperty(9).toString().equalsIgnoreCase("true") ? true : false;
-			            boolean hasSpecialEvent = nextPredicted.getProperty(10).toString().equalsIgnoreCase("true") ? true : false;
-			            String specialEventMessage = nextPredicted.getProperty(11).toString();
-			            String predictedArrivalDateTimeString = nextPredicted.getProperty(12).toString();
-			            String requestDateTimeString = nextPredicted.getProperty(13).toString();
-			            
-			            // Parse timestamps
-			            Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
-			            Date requestDateTime = parseTimestamp(requestDateTimeString);
-			            
-						tram.setInternalRouteNo(internalRouteNo);
-						tram.setRouteNo(routeNo);
-						tram.setHeadboardRouteNo(headboardRouteNo);
-						tram.setVehicleNo(vehicleNo);
-						tram.setDestination(destination);
-						tram.setHasDisruption(hasDisruption);
-						tram.setIsTTAvailable(isTTAvailable);
-						tram.setIsLowFloorTram(isLowFloorTram);
-						tram.setAirConditioned(airConditioned);
-						tram.setDisplayAC(displayAC);
-						tram.setHasSpecialEvent(hasSpecialEvent);
-						tram.setSpecialEventMessage(specialEventMessage);
-						tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
-						tram.setRequestDateTime(requestDateTime);
-						
-						nextTrams.add(tram);
+
+					SoapObject nextPredicted = (SoapObject) soapResult2.getProperty(i);
+
+					NextTram tram = new NextTram();
+
+					int internalRouteNo = Integer.parseInt(nextPredicted.getProperty(0).toString());
+					String routeNo = nextPredicted.getProperty(1).toString();
+					String headboardRouteNo = nextPredicted.getProperty(2).toString();
+					int vehicleNo = Integer.parseInt(nextPredicted.getProperty(3).toString());
+					String destination = nextPredicted.getProperty(4).toString();
+					boolean hasDisruption = nextPredicted.getProperty(5).toString().equalsIgnoreCase("true") ? true : false;
+					boolean isTTAvailable = nextPredicted.getProperty(6).toString().equalsIgnoreCase("true") ? true : false;
+					boolean isLowFloorTram = nextPredicted.getProperty(7).toString().equalsIgnoreCase("true") ? true : false;
+					boolean airConditioned = nextPredicted.getProperty(8).toString().equalsIgnoreCase("true") ? true : false;
+					boolean displayAC = nextPredicted.getProperty(9).toString().equalsIgnoreCase("true") ? true : false;
+					boolean hasSpecialEvent = nextPredicted.getProperty(10).toString().equalsIgnoreCase("true") ? true : false;
+					String specialEventMessage = nextPredicted.getProperty(11).toString();
+					String predictedArrivalDateTimeString = nextPredicted.getProperty(12).toString();
+					String requestDateTimeString = nextPredicted.getProperty(13).toString();
+
+					// Parse timestamps
+					Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+					Date requestDateTime = parseTimestamp(requestDateTimeString);
+
+					tram.setInternalRouteNo(internalRouteNo);
+					tram.setRouteNo(routeNo);
+					tram.setHeadboardRouteNo(headboardRouteNo);
+					tram.setVehicleNo(vehicleNo);
+					tram.setDestination(destination);
+					tram.setHasDisruption(hasDisruption);
+					tram.setIsTTAvailable(isTTAvailable);
+					tram.setIsLowFloorTram(isLowFloorTram);
+					tram.setAirConditioned(airConditioned);
+					tram.setDisplayAC(displayAC);
+					tram.setHasSpecialEvent(hasSpecialEvent);
+					tram.setSpecialEventMessage(specialEventMessage);
+					tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
+					tram.setRequestDateTime(requestDateTime);
+
+					nextTrams.add(tram);
 				}
-				
-			}	
-			catch (Exception e) {
+
+			} catch (Exception e) {
 				throw new TramTrackerServiceException("No results");
 			}
-			
-		}
-		else {
+
+		} else {
 			throw new TramTrackerServiceException("No results");
 		}
-			
+
 		return nextTrams;
 
-	}	
+	}
 
-	
-	
 	/**
 	 * Make a Tram Tracker request
 	 */
-	private Object makeTramTrackerRequest(SoapObject request) throws TramTrackerServiceException {	
-		
+	private Object makeTramTrackerRequest(SoapObject request) throws TramTrackerServiceException {
+
 		String methodName = request.getName();
 		String soapAction = NAMESPACE + methodName;
 
 		try {
-			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);	
+			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
 			envelope.setOutputSoapObject(request);
-		
+
 			envelope.setClientType(CLIENTTYPE);
 			envelope.setClientVersion(CLIENTVERSION);
 			envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
 			envelope.dotNet = true;
-			
+
 			// Get our GUID from the database
 			String guid = getGUID();
 			envelope.setGuid(guid);
-					
+
 			HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
 			androidHttpTransport.debug = true;
-			
+
 			androidHttpTransport.call(soapAction, envelope);
-			
+
 			Object response = envelope.getResponse();
-			//if (LOGV) Log.d(TAG, "SOAP Response: " + response.toString());
-			
+			// if (LOGV) Log.d(TAG, "SOAP Response: " + response.toString());
+
 			return response;
-			
-		} 
-		catch (Exception e) {
+
+		} catch (Exception e) {
 			throw new TramTrackerServiceException(e);
-		} 
-		
+		}
+
 	}
-	
-	
+
 	/**
 	 * Fetch a new GUID
 	 */
 	public String getNewClientGuid() throws TramTrackerServiceException {
 
-		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");	 
-		
+		SoapObject request = new SoapObject(NAMESPACE, "GetNewClientGuid");
+
 		String methodName = request.getName();
 		String soapAction = NAMESPACE + methodName;
 
 		try {
-			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);	
+			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
 			envelope.setOutputSoapObject(request);
-		
+
 			envelope.setClientType(CLIENTTYPE);
 			envelope.setClientVersion(CLIENTVERSION);
 			envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
 			envelope.dotNet = true;
-					
+
 			HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
 			androidHttpTransport.debug = true;
-			
+
 			androidHttpTransport.call(soapAction, envelope);
-			
+
 			Object response = envelope.getResponse();
-			
+
 			String guid = response.toString();
-			
+
 			// Save our GUID
 			mPreferenceHelper.setGUID(guid);
-			
-			return guid;
-			
-		} 
-		catch (Exception e) {
-			throw new TramTrackerServiceException("Error fetching GUID from TramTracker: " + e);
-		} 
-		
-	}	
 
-	
-	/** 
+			return guid;
+
+		} catch (Exception e) {
+			throw new TramTrackerServiceException("Error fetching GUID from TramTracker: " + e);
+		}
+
+	}
+
+	/**
 	 * Get the GUID
 	 */
 	public String getGUID() throws TramTrackerServiceException {
-		
+
 		// Get our GUID from the database
 		String guid = mPreferenceHelper.getGUID();
-		
+
 		// If we don't have a GUID yet, get from from TramTracker
 		if (guid == null) {
-			if (LOGV) Log.d(TAG, "GUID is null, fetching new one");
+			if (LOGV)
+				Log.d(TAG, "GUID is null, fetching new one");
 			guid = getNewClientGuid();
 		}
-		
+
 		return guid;
 	}
-	
 
 }
