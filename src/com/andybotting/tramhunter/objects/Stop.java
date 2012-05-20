@@ -71,16 +71,16 @@ public class Stop {
 		}
 	}
 	
-	public void setId(long _id) {
-		id = _id;
+	public void setId(long id) {
+		this.id = id;
 	}
 	
 	public long getId() {
 		return id;
 	}
 	
-	public void setTramTrackerID(int _tramTrackerID) {
-		tramTrackerID = _tramTrackerID;
+	public void setTramTrackerID(int tramTrackerID) {
+		this.tramTrackerID = tramTrackerID;
 	}
 	
 	
@@ -89,8 +89,8 @@ public class Stop {
 	} 
 	
 
-	public void setFlagStopNumber(String _flagStopNumber) {
-		flagStopNumber = _flagStopNumber;
+	public void setFlagStopNumber(String flagStopNumber) {
+		this.flagStopNumber = flagStopNumber;
 	}
 	
 	
@@ -108,7 +108,6 @@ public class Stop {
 			primaryName = matcher.group(1);
 			secondaryName = matcher.group(2);
 		}
-		
 	}
 
 	
@@ -123,57 +122,60 @@ public class Stop {
 	}	
 
 	
-	public void setPrimaryName(String _primaryName) {
-			primaryName = _primaryName;
+	public void setPrimaryName(String primaryName) {
+		this.primaryName = primaryName;
 	}
 		
 	public String getPrimaryName() {
-			return primaryName;
+		return primaryName;
 	}
 	
-	public void setSecondaryName(String _secondaryName) {
-			secondaryName = _secondaryName;
+	public void setSecondaryName(String secondaryName) {
+		if (secondaryName != null)
+			if (secondaryName.length() < 1)
+				secondaryName = null;
+		this.secondaryName = secondaryName;
 	}
 		
 	public String getSecondaryName() {
 		return secondaryName;
 	}
-	
+
 	public void setRoutesString(String routesString) {
 		this.routesString = routesString;
 	}
-	
+
 	public String getRoutesString() {
 		return routesString;
 	}
-	
-	public void setCityDirection(String _cityDirection) {
-		   cityDirection = _cityDirection;
+
+	public void setCityDirection(String cityDirection) {
+		this.cityDirection = cityDirection;
 	}
-		
+
 	public String getCityDirection() {
-		  return cityDirection;
-	}	
-		
+		return cityDirection;
+	}
+
 	public double getLatitude() {
 		return latitude;
-	}	
-	
-	public void setLatitude(Double _latitude) {
-		latitude = _latitude;		
 	}
-	
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
 	public double getLongitude() {
 		return longitude;
-	}	 
-	
-	public void setLongitude(Double _longitude) {
-		longitude = _longitude;
-		
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+
 	}
 	
-	public void setLocation(Location _location) {
-		 location = _location;
+	public void setLocation(Location location) {
+		 this.location = location;
 	}
 	
 	public Location getLocation() {
@@ -237,8 +239,8 @@ public class Stop {
 	}
 	
 	
-	public void setSuburb(String _suburb) {
-		suburb = _suburb;
+	public void setSuburb(String suburb) {
+		suburb = this.suburb;
 	}
 	
 	
@@ -247,8 +249,8 @@ public class Stop {
 	}   
 	
 	
-	public void setRoutes(List<Route> _routes) {
-		routes = _routes;
+	public void setRoutes(List<Route> routes) {
+		routes = this.routes;
 	}
 	
 	
@@ -256,39 +258,59 @@ public class Stop {
 	   return routes;
 	}   	
 	
-	
+	/**
+	 * Return a friendly formatted routes list for stop lists
+	 */
 	public String getRoutesListString() {
 		String routesString = "";
 
-		if (routes != null && routes.size() > 0){
-			
+		if (routes != null && routes.size() > 0) {
+
 			if (routes.size() < 2)
 				routesString = "Route ";
 			else
 				routesString = "Routes ";
-			
+
 			for (int i = 0; i < routes.size(); i++) {
 				Route r = routes.get(i);
 				routesString += r.getNumber();
-			
-				if (i < routes.size() -2)
+
+				if (i < routes.size() - 2)
 					routesString += ", ";
-				else if (i == routes.size() -2)
+				else if (i == routes.size() - 2)
 					routesString += " and ";
-			}	
+			}
 		}
 
 		return routesString;
 	}
-	                               
-	
+
+	/**
+	 * Generate a useful description string to show in lists to supplement the
+	 * stops primary name
+	 */
+	public String getStopDetailsLine() {
+
+		// Stop 4: Swanston St - towards City (3004)
+		// Stop 8 - Towards Fed. Square (3008)
+
+		String line = "Stop " + flagStopNumber;
+
+		// If the stop has a secondary name, add it
+		if (secondaryName != null)
+			line += ": " + secondaryName;
+
+		line += " - " + cityDirection + " (" + tramTrackerID + ")";
+
+		return line;
+	}
+
 	/**
 	 * @return String representing the stop
 	 */
 	public String toString() {
 		return ("Stop " + tramTrackerID + " (" + getPrimaryName() + ")");
 	}
-
 
 	
 }
