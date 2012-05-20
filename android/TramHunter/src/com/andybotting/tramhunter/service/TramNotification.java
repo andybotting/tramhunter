@@ -49,6 +49,7 @@ public class TramNotification extends BroadcastReceiver {
 
 	private NotificationManager notificationManager;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
 		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
