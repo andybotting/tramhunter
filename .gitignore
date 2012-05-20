@@ -15,13 +15,14 @@
 *R.java
 
 # specific dirs
-bin/*
-!bin/.keep
-gen/*
-!gen/.keep
+android/TramHunter/bin/*
+!android/TramHunter/bin/.keep
+android/TramHunter/gen/*
+!android/TramHunter/gen/.keep
 
 # python pyc
 *.pyc
+*.pyo
 
 # Mac DS Store
 .DS_Store
