@@ -1,22 +1,14 @@
 package com.andybotting.tramhunter.service;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -24,13 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.http.AndroidHttpClient;
-import android.os.Environment;
 import android.util.Log;
 
-import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.Tweet;
 import com.andybotting.tramhunter.ui.UIUtils;
@@ -41,12 +28,10 @@ public class TwitterFeed {
 	private static final String TAG = "YarraTramsTwitter";
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
     
-    private static final String TRAM_HUNTER_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=tram_hunter&count=2";
+    //private static final String TRAM_HUNTER_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=tram_hunter&count=2";
     private static final String YARRA_TRAMS_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=yarratrams&count=4";
 	
     private static final int TWITTER_UPDATE_MINS = 10;
-    
-    
     
     
 	/**
@@ -99,7 +84,8 @@ public class TwitterFeed {
         	// User object
         	JSONObject userObject = tweetObject.getJSONObject("user");
         	
-        	String profileImage = userObject.getString("profile_image_url");
+        	// We'll include our twitter images for now
+        	//String profileImage = userObject.getString("profile_image_url");
         	
             String username = userObject.getString("screen_name");
             String name = userObject.getString("name");
