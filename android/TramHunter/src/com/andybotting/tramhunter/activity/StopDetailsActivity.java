@@ -63,6 +63,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -659,7 +660,8 @@ public class StopDetailsActivity extends SherlockListActivity {
 	 * Show a dialog message for a given 'Special Event'
 	 */
 	private void showSpecialEvent(String message) {
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(
+				new ContextThemeWrapper(this, R.style.AlertDialog));
 		dialogBuilder.setTitle(R.string.title_special_event);
 		dialogBuilder.setMessage(message);
 		dialogBuilder.setPositiveButton(android.R.string.ok, null);
