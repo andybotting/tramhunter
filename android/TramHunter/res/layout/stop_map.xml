@@ -39,6 +39,8 @@
 	android:layout_height="fill_parent"
 	android:enabled="true"
 	android:clickable="true"
-	android:apiKey="0JD_--tKzziu8rZn4MD1xWIMhBClngwbk6a2-sg" />
+	android:apiKey="0srPkV4tljqUqqo3XSMeuXCcHOSbthBD8bdBh-g" />
 
-	<!--PROD   	android:apiKey="0srPkV4tljqUqqo3XSMeuXCcHOSbthBD8bdBh-g" /> -->
+<!-- Maps API keys -->
+<!-- DEBUG android:apiKey="0JD_-|REMOVE THIS BECAUSE STUPID KEY HAS DOUBLE DASHES IN IT|-tKzziu8rZn4MD1xWIMhBClngwbk6a2-sg" -->
+<!-- PROD android:apiKey="0srPkV4tljqUqqo3XSMeuXCcHOSbthBD8bdBh-g" -->
