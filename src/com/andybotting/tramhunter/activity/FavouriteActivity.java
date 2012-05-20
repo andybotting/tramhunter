@@ -61,29 +61,28 @@ import com.andybotting.tramhunter.objects.FavouriteList;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 
-
 public class FavouriteActivity extends SherlockListActivity {
-	
+
 	private final static int CONTEXT_MENU_SET_NAME = 0;
 	private final static int CONTEXT_MENU_VIEW_STOP = 1;
 	private final static int CONTEXT_MENU_UNFAVOURITE = 2;
 
 	private FavouritesListAdapter mListAdapter;
-	private FavouriteList mFavourites;	
+	private FavouriteList mFavourites;
 	private TouchListView mListView;
 
 	@Override
 	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);	  
-		
+		super.onCreate(icicle);
+
 		setContentView(R.layout.favourite_list);
-		
+
 		// Set up the Action Bar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setTitle(R.string.title_favourite_stops);
-		
+
 		mListView = (TouchListView) getListView();
 		mListView.setDropListener(onDrop);
 
@@ -97,8 +96,7 @@ public class FavouriteActivity extends SherlockListActivity {
 		super.onResume();
 		displayFavStops(false);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param alertIfNoFavourites
@@ -106,54 +104,53 @@ public class FavouriteActivity extends SherlockListActivity {
 	public void displayFavStops(boolean alertIfNoFavourites) {
 		if (alertIfNoFavourites && !mFavourites.hasFavourites())
 			alertNoFavourites();
-		
+
 		displayStops();
 	}
 
-	
-	
 	/**
 	 * 
 	 */
 	private void alertNoFavourites() {
-		final Intent routeListIntent = new Intent(this, RoutesListActivity.class);
-		
+		final Intent routeListIntent = new Intent(this,
+				RoutesListActivity.class);
+
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-		dialogBuilder.setMessage(R.string.no_favourite_stops)
-			.setCancelable(false)
-			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					startActivity(routeListIntent);
-					finish();
-				}
-			})
-			.setNegativeButton("No", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();				
-					finish();
-				}
-			});
-		
+		dialogBuilder
+				.setMessage(R.string.no_favourite_stops)
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								startActivity(routeListIntent);
+								finish();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+						finish();
+					}
+				});
+
 		AlertDialog alert = dialogBuilder.create();
 		alert.setTitle("No Favourite Stops");
 		alert.setIcon(R.drawable.icon);
 		alert.show();
 	}
-	
-	
+
 	/**
 	 * 
 	 */
 	public void displayStops() {
 		mFavourites = new FavouriteList();
 		mListAdapter = new FavouritesListAdapter();
-		
-		mListView.setOnItemClickListener(mListView_OnItemClickListener);		
+
+		mListView.setOnItemClickListener(mListView_OnItemClickListener);
 		mListView.setOnCreateContextMenuListener(mListView_OnCreateContextMenuListener);
 		setListAdapter(mListAdapter);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param stop
@@ -163,16 +160,15 @@ public class FavouriteActivity extends SherlockListActivity {
 		int tramTrackerId = stop.getTramTrackerID();
 		Bundle bundle = new Bundle();
 		bundle.putInt("tramTrackerId", tramTrackerId);
-		
+
 		if (route != null)
 			bundle.putInt("routeId", route.getId());
-		
+
 		Intent intent = new Intent(FavouriteActivity.this, StopDetailsActivity.class);
 		intent.putExtras(bundle);
 		startActivityForResult(intent, 1);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param favourite
@@ -189,43 +185,43 @@ public class FavouriteActivity extends SherlockListActivity {
 			input.setText(favourite.getName());
 		else
 			input.setText(favourite.getStop().getPrimaryName());
-		
+
 		final CharSequence message = getString(R.string.dialog_set_name_message, favourite.getName());
 		alert.setMessage(message);
-		
+
 		// Save the new stop name
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				String customName = input.getText().toString().trim();
-				 
+
 				if (customName.matches(favourite.getStop().getPrimaryName()))
 					favourite.setName(null);
 				else
 					favourite.setName(customName);
-				
+
 				mFavourites.writeFavourites();
 				displayStops();
 			}
 		});
 
-        alert.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            	favourite.setName(null);
+		alert.setNeutralButton("Reset", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				favourite.setName(null);
 				mFavourites.writeFavourites();
 				displayStops();
-            }
-        });
-		
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				dialog.cancel();
 			}
 		});
+
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						dialog.cancel();
+					}
+				});
 		alert.show();
-		
+
 	}
-	
-    
+
 	/**
 	 * Menu actions
 	 */
@@ -233,15 +229,14 @@ public class FavouriteActivity extends SherlockListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 
-        case android.R.id.home:
-            finish();
-            return true;
+		case android.R.id.home:
+			finish();
+			return true;
 		}
 
 		return false;
 	}
-    
-	
+
 	/**
 	 * List item click listener
 	 */
@@ -250,57 +245,57 @@ public class FavouriteActivity extends SherlockListActivity {
 			Favourite favourite = mFavourites.getFavourite(position);
 			viewStop(favourite.getStop(), favourite.getRoute());
 		}
-    };
+	};
 
-    
-    /**
-     * Context menu items
-     */
+	/**
+	 * Context menu items
+	 */
 	private OnCreateContextMenuListener mListView_OnCreateContextMenuListener = new OnCreateContextMenuListener() {
 		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-			AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 			Favourite favourite = mFavourites.getFavourite(info.position);
-			
+
 			menu.setHeaderIcon(R.drawable.icon);
 			menu.setHeaderTitle(favourite.getName());
+			// TODO: These should be set in strings.xml
 			menu.add(0, CONTEXT_MENU_SET_NAME, CONTEXT_MENU_SET_NAME, "Set Stop Name");
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, CONTEXT_MENU_VIEW_STOP, "View Stop");
 			menu.add(0, CONTEXT_MENU_UNFAVOURITE, CONTEXT_MENU_UNFAVOURITE, "Unfavourite Stop");
 		}
-    };
-    
-    
-    /**
-     * Action a context menu item
-     */
-    @Override
-    public boolean onContextItemSelected (android.view.MenuItem item){
+	};
 
-    		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-    		Favourite favourite = mFavourites.getFavourite(info.position);
-        	
-        	switch (item.getItemId()) {
-        	
-    			case CONTEXT_MENU_VIEW_STOP:
-    				viewStop(favourite.getStop(), favourite.getRoute());
-    				return true;
-    			case CONTEXT_MENU_SET_NAME:
-    				// Toggle favourite
-    				nameStop(favourite);
-    				return true;
-    			case CONTEXT_MENU_UNFAVOURITE:
-    				// Toggle favourite
-    				mFavourites.removeFavourite(favourite);
-    				mFavourites.writeFavourites();
-    				displayStops();
-    				return true;	
-        	}
-    	    	
+	/**
+	 * Action a context menu item
+	 */
+	@Override
+	public boolean onContextItemSelected(android.view.MenuItem item) {
+
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		Favourite favourite = mFavourites.getFavourite(info.position);
+
+		switch (item.getItemId()) {
+
+			case CONTEXT_MENU_VIEW_STOP:
+				viewStop(favourite.getStop(), favourite.getRoute());
+				return true;
+
+			case CONTEXT_MENU_SET_NAME:
+				// Toggle favourite
+				nameStop(favourite);
+				return true;
+
+			case CONTEXT_MENU_UNFAVOURITE:
+				// Toggle favourite
+				mFavourites.removeFavourite(favourite);
+				mFavourites.writeFavourites();
+				displayStops();
+				return true;
+		}
+
 		return super.onContextItemSelected(item);
-    }
-    
-    
-    /**
+	}
+
+	/**
      * 
      */
 	private TouchListView.DropListener onDrop = new TouchListView.DropListener() {
@@ -310,15 +305,14 @@ public class FavouriteActivity extends SherlockListActivity {
 			mListAdapter.remove(favourite);
 			mListAdapter.insert(favourite, to);
 			mListAdapter.notifyDataSetChanged();
-			//mPreferenceHelper.setStarredStopsString(mFavourites.toString());
+			// mPreferenceHelper.setStarredStopsString(mFavourites.toString());
 		}
 	};
 
-	
 	/**
 	 * 
 	 * @author andy
-	 *
+	 * 
 	 */
 	private class FavouritesListAdapter extends BaseAdapter {
 
@@ -337,56 +331,42 @@ public class FavouriteActivity extends SherlockListActivity {
 		public Favourite getItem(int position) {
 			return mFavourites.getFavourite(position);
 		}
-		
+
 		public long getItemId(int position) {
 			return position;
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View pv;
-            if(convertView == null) {
-    			LayoutInflater inflater = getLayoutInflater();
-    			pv = inflater.inflate(R.layout.favourite_list_row, parent, false);
-            }
-            else {
-                pv = convertView;
-            }
-			
+			if (convertView == null) {
+				LayoutInflater inflater = getLayoutInflater();
+				pv = inflater.inflate(R.layout.favourite_list_row, parent, false);
+			} else {
+				pv = convertView;
+			}
+
 			Favourite favourite = mFavourites.getFavourite(position);
 			Stop stop = favourite.getStop();
-			
+
 			String stopName;
 			String stopDetails;
-			
+
 			if (favourite.hasName()) {
 				stopName = favourite.getName();
 				stopDetails = stop.getPrimaryName();
-				stopDetails += ", Stop " + stop.getFlagStopNumber();
-				// If the stop has a secondary name, add it
-				if (stop.getSecondaryName().length() > 0)
-					stopDetails += ": " + stop.getSecondaryName();
-				
-				stopDetails += " - " + stop.getCityDirection();
-				stopDetails += " (" + stop.getTramTrackerID() + ")";				
-			}
-			else {
+				stopDetails += ", " + stop.getStopDetailsLine();
+			} else {
 				stopName = stop.getPrimaryName();
-				stopDetails = "Stop " + stop.getFlagStopNumber();
-				// If the stop has a secondary name, add it
-				if (stop.getSecondaryName() != null)
-					stopDetails += ": " + stop.getSecondaryName();
-				
-				stopDetails += " - " + stop.getCityDirection();
-				stopDetails += " (" + stop.getTramTrackerID() + ")";
+				stopDetails = stop.getStopDetailsLine();
 			}
 
 			((TextView) pv.findViewById(R.id.stopNameTextView)).setText(stopName);
 			((TextView) pv.findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
 			((TextView) pv.findViewById(R.id.stopRoutesTextView)).setText(favourite.getRouteName());
-			
+
 			return pv;
 		}
-			
+
 	}
-	
+
 }
