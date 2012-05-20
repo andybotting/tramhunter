@@ -70,7 +70,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -83,6 +85,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -262,19 +265,19 @@ public class HomeActivity extends SherlockFragmentActivity {
 	 */
 	public void showAbout() {
 		// Get the package name
-		String heading = getResources().getText(R.string.app_name) + "\n";
+		String heading = getResources().getText(R.string.app_name).toString();
 
 		try {
 			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-			heading += "v" + pi.versionName + "\n\n";
+			heading += " v" + pi.versionName + "";
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
 
-		// Build alert dialog
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		// Build alert dialog, using a ContextThemeWrapper for proper theming
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
+		View aboutView = View.inflate(new ContextThemeWrapper(this, R.style.AlertDialog), R.layout.dialog_about, null);
 		dialogBuilder.setTitle(heading);
-		View aboutView = getLayoutInflater().inflate(R.layout.dialog_about, null);
 		dialogBuilder.setView(aboutView);
 		dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
