@@ -1,5 +1,5 @@
 Tram Hunter
------------
+===========
 
 Tram Hunter is an Android client for Yarra Trams tramTRACKER® Web Service for real-time information about Melbourne's tram network.
 
@@ -9,14 +9,30 @@ http://ws.tramtracker.com.au/pidsservice/Terms.aspx
 This application is provided with no warranty, and is licensed under GPL v3.
 
 
+Features
+========
+
+Tram Hunter aims to be as quick and clean as possible for getting to the data you want.
+
+The main features of Tram Hunter are:
+
+  - Browse or search for stops
+  - Favorite stops for quick reference
+  - Find nearby stops by Android location services
+  - Tram icons representing the approaching tram model
+  - See tram stops on a map
+  - Network map
+  - Yarra Trams twitter feed for latest tram network issues
+
+
 Installation
-------------
+============
 
 Tram Hunter is available from [Google Play], but you can find development build from [downloads] section of the GitHub project.
 
 
 Source
-------
+======
 
 The latest code can be found from the [GitHub project site].
 
@@ -26,22 +42,23 @@ Tram Hunter requires the excellent *ActionBarSherlock* library for supporting th
 
 
 Issues
-------
+======
 
 Please report any bugs or feature requests in the [Issue Tracker]
 
 
 Contact
--------
+=======
 
   - follow [@tram_hunter] on Twitter
   - join the Tram Hunter [Google Groups mailing list]
 
 
 Change Log
------------
+==========
 
 Latest Changes in v1.0
+----------------------
 
   - New 'Action Bar' style and support for ICS
   - Require at least Android 2.1
@@ -54,6 +71,7 @@ Latest Changes in v1.0
   - Better error messages from Tram Tracker web service
 
 Latest Changes in v0.9
+----------------------
 
   - Allow renaming of favourite stops
   - Added route selector for stops with >1 route
