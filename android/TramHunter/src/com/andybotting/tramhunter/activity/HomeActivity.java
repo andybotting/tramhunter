@@ -73,6 +73,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -466,6 +467,19 @@ public class HomeActivity extends SherlockFragmentActivity {
 			// BitmapFactory.decodeFile(tweet.getImagePath());
 			// image.setImageBitmap(bitmap);
 			image.setImageResource(R.drawable.yarratrams_twitter);
+			
+			// Handle onClick to Twitter
+			View tweetLayout = v.findViewById(R.id.tweet_layout);
+			tweetLayout.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String url = "http://twitter.com/" + tweet.getUsername();
+						Intent i = new Intent(Intent.ACTION_VIEW);
+						i.setData(Uri.parse(url));
+						startActivity(i);
+					}
+				}
+			);
 
 			return v;
 		}

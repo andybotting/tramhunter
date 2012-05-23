@@ -29,8 +29,7 @@ public class TwitterFeed {
     private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
     
     //private static final String TRAM_HUNTER_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=tram_hunter&count=2";
-    private static final String YARRA_TRAMS_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=yarratrams&count=4";
-	
+    private static final String YARRA_TRAMS_TWITTER_URL = "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=yarratrams&count=10";
     private static final int TWITTER_UPDATE_MINS = 10;
     
     
