@@ -46,6 +46,8 @@ Issues
 
 Please report any bugs or feature requests in the [Issue Tracker]
 
+If you experience any Force Close or other issues, the best thing you can do is to send a copy of your log just after the crash. Install [Log Collector] from Google Play and email it to *tramhunter@andybotting.com*.
+
 
 Contact
 =======
@@ -87,4 +89,5 @@ Latest Changes in v0.9
 [@tram_hunter]: http://twitter.com/tram_hunter
 [Google Groups mailing list]: http://groups.google.com/group/tramhunter
 [downloads]: https://github.com/andybotting/tramhunter/downloads
+[Log Collector]: https://play.google.com/store/apps/details?id=com.xtralogic.android.logcollector
 
