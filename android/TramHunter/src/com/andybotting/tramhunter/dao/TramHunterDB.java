@@ -72,7 +72,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// E.g. 
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 991;
+	private static final int DATABASE_VERSION = 1000;
 	
 	
 	private SQLiteDatabase mDB = null;
