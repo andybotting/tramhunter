@@ -36,28 +36,24 @@ package com.andybotting.tramhunter;
 
 import android.app.Application;
 import android.content.Context;
+import com.andybotting.tramhunter.R;
 
 /**
- * This class is primarily used to provide an application context for 
- * getting access to application resources, like DB and assets
- * @author andy
+ * This class is primarily used to provide an application context for getting
+ * access to application resources, like DB and assets
  */
 public class TramHunterApplication extends Application {
 
-	public static final String NAME = "TramHunter";
-	public static final int VERSION = 893;
-	
-    private static TramHunterApplication instance;
-    
+	private static TramHunterApplication instance;
 
-    public TramHunterApplication() {
-        instance = this;
-    }
+	public TramHunterApplication() {
+		instance = this;
+	}
 
-    public static Context getContext() {
-    	if (instance == null)
-    		instance = new TramHunterApplication();
-        return instance;
-    }
+	public static Context getContext() {
+		if (instance == null)
+			instance = new TramHunterApplication();
+		return instance;
+	}
 
 }
