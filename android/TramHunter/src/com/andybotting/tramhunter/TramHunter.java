@@ -35,7 +35,6 @@
 package com.andybotting.tramhunter;
 
 import java.util.UUID;
-import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.activity.HomeActivity;
 
 import android.support.v4.app.FragmentActivity;

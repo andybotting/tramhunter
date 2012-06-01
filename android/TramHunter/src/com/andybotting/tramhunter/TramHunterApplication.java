@@ -36,7 +36,6 @@ package com.andybotting.tramhunter;
 
 import android.app.Application;
 import android.content.Context;
-import com.andybotting.tramhunter.R;
 
 /**
  * This class is primarily used to provide an application context for getting
