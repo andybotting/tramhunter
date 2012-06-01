@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
@@ -37,11 +39,23 @@ public class TwitterFeed {
 	 * Fetch JSON data over HTTP
 	 */
 	public InputStream getJSONData(String url) throws URISyntaxException, IllegalStateException, IOException {
+		Log.d(TAG, "Fetching URL: " + url);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		URI uri = new URI(url);
 		HttpGet method = new HttpGet(uri);
 		HttpResponse response = httpClient.execute(method);
-		return response.getEntity().getContent();
+
+		// Handle GZIP'd response from Twitter
+		// (which is about half the time for some reason)
+		InputStream is = response.getEntity().getContent();
+		Header contentEncoding = response.getFirstHeader("Content-Encoding");
+		if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+			Log.d(TAG, "Twitter feed is GZIP'd");
+			is = new GZIPInputStream(is);
+		}
+
+		return is;
+
 	}
 
 	
@@ -58,8 +72,8 @@ public class TwitterFeed {
 		}
 		is.close();
 		String jsonData = sb.toString();
-        if (LOGV) Log.v(TAG, "JSON Response: " + jsonData);
-        return new JSONArray(jsonData);
+		Log.v(TAG, "JSON Response: " + jsonData);
+		return new JSONArray(jsonData);
     }	
     
     
