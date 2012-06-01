@@ -269,10 +269,10 @@ public class StopDetailsActivity extends SherlockListActivity {
 		displayStop(mStop);
 
 		// Get our TramTracker service, either SOAP (def) or JSON
-		if (mPreferenceHelper.isJSONAPIEnabled())
-			ttService = new TramTrackerServiceJSON();
-		else
-			ttService = new TramTrackerServiceSOAP();
+//		if (mPreferenceHelper.isJSONAPIEnabled())
+//			ttService = new TramTrackerServiceJSON();
+//		else
+		ttService = new TramTrackerServiceSOAP();
 
 		// Our thread for updating the stops every 60 secs
 		mRefreshThread = new Thread(new CountDown());

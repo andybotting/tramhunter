@@ -79,13 +79,14 @@ public class PreferenceHelper {
 	
 	public boolean isTramImageEnabled() {
 		return mPreferences.getBoolean(SettingsActivity.KEY_TRAM_IMAGE, SettingsActivity.KEY_TRAM_IMAGE_DEFAULT_VALUE);
-	}	
-	
-	public boolean isJSONAPIEnabled()	{
-		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
 	}
-	
-	public boolean isSendStatsEnabled()	{
+
+	//public boolean isJSONAPIEnabled() {
+	//	return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API,
+	//	SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
+	//}
+
+	public boolean isSendStatsEnabled() {
 		return mPreferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
 	}
 	
