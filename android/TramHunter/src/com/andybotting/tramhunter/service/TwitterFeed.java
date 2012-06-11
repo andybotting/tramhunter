@@ -43,6 +43,7 @@ public class TwitterFeed {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		URI uri = new URI(url);
 		HttpGet method = new HttpGet(uri);
+		method.addHeader("Accept-Encoding", "gzip");
 		HttpResponse response = httpClient.execute(method);
 
 		// Handle GZIP'd response from Twitter
