@@ -99,7 +99,6 @@ import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramNotification;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
-import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.GenericUtil;
