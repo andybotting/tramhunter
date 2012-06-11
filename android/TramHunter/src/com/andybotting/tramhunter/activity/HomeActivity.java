@@ -80,7 +80,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -377,7 +376,7 @@ public class HomeActivity extends SherlockFragmentActivity {
 			}
 			return tweets;
 		}
-
+				
 		protected void onPostExecute(ArrayList<Tweet> tweets) {
 			if (tweets == null) {
 				Log.w(TAG, "Error fetching Tweets");
@@ -463,8 +462,7 @@ public class HomeActivity extends SherlockFragmentActivity {
 			time.setText(tweet.twitterHumanFriendlyDate());
 
 			// We're going to use our down twitter images for now.
-			// final Bitmap bitmap =
-			// BitmapFactory.decodeFile(tweet.getImagePath());
+			// final Bitmap bitmap = BitmapFactory.decodeFile(tweet.getImagePath());
 			// image.setImageBitmap(bitmap);
 			image.setImageResource(R.drawable.yarratrams_twitter);
 			

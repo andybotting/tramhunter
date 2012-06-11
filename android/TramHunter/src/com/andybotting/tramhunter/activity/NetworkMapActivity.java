@@ -35,7 +35,7 @@
 package com.andybotting.tramhunter.activity;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 
@@ -43,7 +43,7 @@ import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-public class NetworkMapActivity extends SherlockFragmentActivity {
+public class NetworkMapActivity extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
