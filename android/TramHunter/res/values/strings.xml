@@ -107,9 +107,10 @@
     <string name="dialog_notify_me">Notify me when tram is</string>
     <string name="dialog_set_notification">Set!</string>
     <string name="dialog_notification_hint">Enter minutes due</string>
-    <string name="notification_title">Your tram is getting closer</string>
+    <string name="notification_title">Your tram is approaching</string>
+    <string name="notification_message">Your tram is approaching</string>
     <string name="dialog_error_msg">Please enter a valid number</string>
-    <string name="dialog_notification_trigger_msg">You will be notified when your tram is <xliff:g id="name">%1$s</xliff:g> minute(s) due!</string>
+    <string name="dialog_notification_trigger_msg">You will be alerted <xliff:g id="name">%1$s</xliff:g> minute(s) before your tram is due</string>
 
     <!-- Toast -->
     <string name="toast_favourite_added">Added to favourite stops.</string>

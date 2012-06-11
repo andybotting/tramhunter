@@ -47,7 +47,10 @@ import com.andybotting.tramhunter.activity.HomeActivity;
 
 public class TramNotification extends BroadcastReceiver {
 
+	public final static int TRAM_APPROACHING_NOTIFICATION = 1;
+	
 	private NotificationManager notificationManager;
+	
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -64,14 +67,14 @@ public class TramNotification extends BroadcastReceiver {
 
 		// define the notification message and intent
 		final CharSequence contentTitle = context.getString(R.string.notification_title);
-		final CharSequence contentText = "Run Forrest, run!";
+		final CharSequence contentText = context.getString(R.string.notification_message);
 
 		final Intent notificationIntent = new Intent(context, HomeActivity.class);
 		final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
 		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
-		notificationManager.notify(1, notification);
+		notificationManager.notify(TRAM_APPROACHING_NOTIFICATION, notification);
 	}
 
 }
