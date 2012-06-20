@@ -113,7 +113,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 			mDefaultLaunchActivity.setSummary("Open " + getFreindlyDefaultActivityName(sharedPreferences) + " on launch");
 		} else if (key.equals(KEY_WELCOME_MESSAGE)) {
 			mDisplayWelcomeMessage.setSummary(sharedPreferences.getBoolean(key, KEY_WELCOME_MESSAGE_DEFAULT_VALUE) ? 
-					"Showing welcome messages" : "Hiding welcome messages");
+					"Showing twitter feed" : "Hiding twitter feed");
 		} else if (key.equals(KEY_TRAM_IMAGE)) {
 			mDisplayTramImage.setSummary(sharedPreferences.getBoolean(key, KEY_TRAM_IMAGE_DEFAULT_VALUE) ? 
 					"Showing tram images" : "Hiding tram images");
