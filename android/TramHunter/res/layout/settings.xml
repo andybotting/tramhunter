@@ -38,7 +38,7 @@
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="displayWelcomeMessage"
-        android:title="Welcome Message" />
+        android:title="Twitter feed" />
 
     <CheckBoxPreference
         android:defaultValue="true"
