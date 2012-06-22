@@ -41,7 +41,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -139,19 +138,13 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		startLocationListening(true);
 		Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-		if (LOGV)
-			Log.i(TAG,
-					"Enabled Location Services:" + " Network=" + mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) + " GPS="
-							+ mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
-
 		if (location != null) {
 			new StopDistanceCalculator(location).execute();
 		} else {
-
-			if ((!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) && (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+			if ( !hasGPSLocationEnabled() && !hasNetworkLocationEnabled() ) {
 				buildAlertNoLocationServices();
 			}
-
+			// else no results?
 		}
 	}
 
@@ -184,6 +177,20 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	}
 
 	/**
+	 * Return boolean for GPS location
+	 */
+	private boolean hasGPSLocationEnabled() {
+		return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+	}
+
+	/**
+	 * Return boolean for network location
+	 */
+	private boolean hasNetworkLocationEnabled() {
+		return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+	}
+
+	/**
 	 * Build an alert dialog
 	 */
 	private void buildAlertNoLocationServices() {
@@ -191,6 +198,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		builder.setMessage("You do not have GPS or Wireless network location services enabled.\n\nWould you like to enable them now?").setTitle("No Location Services")
 				.setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
+						dialog.dismiss();
 						launchGPSOptions();
 					}
 				}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -200,7 +208,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 					}
 				});
 
-		final AlertDialog alert = builder.create();
+		AlertDialog alert = builder.create();
 		alert.show();
 	}
 
@@ -208,12 +216,9 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	 * Open up the location settings
 	 */
 	private void launchGPSOptions() {
-		final ComponentName toLaunch = new ComponentName("com.android.settings", "com.android.settings.SecuritySettings");
 		final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-		intent.addCategory(Intent.CATEGORY_LAUNCHER);
-		intent.setComponent(toLaunch);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivityForResult(intent, 0);
+		//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivityForResult(intent, -1);
 	}
 
 	/**
