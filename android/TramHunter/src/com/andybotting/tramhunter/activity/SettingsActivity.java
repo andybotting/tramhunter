@@ -122,7 +122,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 //					"Using experimental JSON API" : "Using stable SOAP API");
 		} else if (key.equals(KEY_SEND_STATS)) {
 			mSendStats.setSummary(sharedPreferences.getBoolean(key, KEY_SEND_STATS_DEFAULT_VALUE) ? 
-					"Sending anonymous usage statistics" : "Not send anonymous usage statistics");
+					"Sending anonymous usage statistics" : "Not sending anonymous usage statistics");
 		}
 	}
 
