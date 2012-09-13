@@ -59,6 +59,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
@@ -89,7 +90,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 	// Maximum stops to list
 	private final int MAXSTOPS = 20;
-	private final String mTitle = "Nearest Stops";// ±
+	private final String mTitle = "Nearest Stops";// ��
 
 	// Only show loading dialog at first load
 	private boolean mShowBusy = true;
@@ -250,22 +251,33 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	 */
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId())
-			{
-
+		switch (item.getItemId()) {
 			case R.id.menu_map:
-				Bundle bundle = new Bundle();
-				bundle.putParcelable("stopslist", mNearStopsList);
-				Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
-				intent.putExtras(bundle);
-				startActivityForResult(intent, -1);
-
+				showMap();
 			case android.R.id.home:
 				finish();
-
-			}
+		}
 
 		return false;
+	}
+	
+	/**
+	 * Show the map view, passing this stop
+	 */
+	private void showMap() {
+
+		// Detect Google Maps
+		try {
+			Class.forName("com.google.android.maps.MapActivity");
+			// Map view
+			Bundle bundle = new Bundle();
+			bundle.putParcelable("stopslist", mNearStopsList);
+			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
+			intent.putExtras(bundle);
+			startActivityForResult(intent, -1);
+		} catch (Exception e) {
+			Toast.makeText(this, "Google Maps are not available", Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/**
@@ -453,7 +465,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			}
 			
 			if (location.hasAccuracy()) {
-				getSupportActionBar().setTitle(mTitle + " (±" + (int) location.getAccuracy() + "m)");
+				getSupportActionBar().setTitle(mTitle + " (��" + (int) location.getAccuracy() + "m)");
 			} else {
 				getSupportActionBar().setTitle(mTitle);
 			}
@@ -498,8 +510,17 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
 			mIsListeningForNetworkLocation = subscribeToNetworkLocation;
 
-			if (subscribeToNetworkLocation)
-				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
+			try {
+				if (subscribeToNetworkLocation)
+					mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
+			}
+			catch( IllegalArgumentException e ) {
+			    // It is not available, abort whatever you wanted to do
+			    return;
+			}
+			// You can safely continue here, as we've verified that it works
+			
+			
 		}
 	}
 

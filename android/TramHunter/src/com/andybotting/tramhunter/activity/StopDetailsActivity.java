@@ -69,6 +69,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -171,6 +172,22 @@ public class StopDetailsActivity extends SherlockListActivity {
 		mListView = getListView();
 		mListView.setVisibility(View.GONE);
 
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				
+				NextTram nextTram = (NextTram) mListAdapter.getItem(position);
+				int vehicleNumber = nextTram.getVehicleNo();
+				
+				Bundle bundle = new Bundle();
+				bundle.putInt("vehicleNumber", vehicleNumber);
+				Intent intent = new Intent(StopDetailsActivity.this, TramRunActivity.class);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, 1);				
+			}
+			
+		});
+		
 		// long click on list item implementation
 		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
@@ -389,14 +406,21 @@ public class StopDetailsActivity extends SherlockListActivity {
 	 * Show the map view, passing this stop
 	 */
 	private void showMap() {
-		// Map view
-		Bundle bundle = new Bundle();
-		StopsList mStopList = new StopsList();
-		mStopList.add(mStop);
-		bundle.putParcelable("stopslist", mStopList);
-		final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-		intent.putExtras(bundle);
-		startActivityForResult(intent, 1);
+
+		// Detect Google Maps
+		try {
+			Class.forName("com.google.android.maps.MapActivity");
+			// Map view
+			Bundle bundle = new Bundle();
+			StopsList mStopList = new StopsList();
+			mStopList.add(mStop);
+			bundle.putParcelable("stopslist", mStopList);
+			final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+			intent.putExtras(bundle);
+			startActivityForResult(intent, 1);
+		} catch (Exception e) {
+			Toast.makeText(this, "Google Maps are not available", Toast.LENGTH_LONG).show();
+		};
 	}
 
 	/**
@@ -678,7 +702,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 		}
 
 		public Object getItem(int position) {
-			return position;
+			return mNextTrams.get(position);
 		}
 
 		public long getItemId(int position) {
