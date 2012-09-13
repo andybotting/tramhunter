@@ -130,7 +130,7 @@ public class TramRunActivity extends SherlockListActivity {
 
 		// Set the title
 		//final String title = mStop.getStopName();
-		String title = "Testing title";
+		String title = "Stops for Tram #" + mVehicleNumber;
 		actionBar.setTitle(title);
 
 		// Display stop data
@@ -327,25 +327,17 @@ public class TramRunActivity extends SherlockListActivity {
 				// Stop our refresh thread because we had errors
 				mRefreshThread.interrupt();
 			} else {
-				boolean noResults = true;
-
 				if (tramRun.getTramRunTimeCount() > 0) {
 					// Start the refresh thread if stopped
 					if (mRefreshThread.isInterrupted()) {
 						mRefreshThread.start();
 					}
 
-					noResults = false;
 					setListAdapter(mListAdapter);
 
 					// Reset the first departure request
 					mFirstDepartureReqest = false;
 				}
-
-//				if (noResults) {
-//					mListView.getEmptyView().setVisibility(noResults ? View.VISIBLE : View.GONE);
-//					mListView.setVisibility(noResults ? View.VISIBLE : View.GONE);
-//				}
 
 			}
 

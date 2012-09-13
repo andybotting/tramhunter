@@ -254,6 +254,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		switch (item.getItemId()) {
 			case R.id.menu_map:
 				showMap();
+				break;
 			case android.R.id.home:
 				finish();
 		}
