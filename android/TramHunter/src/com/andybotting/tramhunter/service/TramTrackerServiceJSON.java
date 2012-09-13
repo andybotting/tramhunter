@@ -66,6 +66,7 @@ import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.TramRun;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
@@ -423,6 +424,14 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			throw new TramTrackerServiceException(e);
 		}
 
+	}
+
+	/**
+	 * TODO: Update this
+	 */
+	public TramRun getNextPredictedArrivalTimeAtStopsForTramNo(int tram) throws TramTrackerServiceException {
+		TramRun tramRun = new TramRun();
+		return tramRun;
 	}
 
 	/**

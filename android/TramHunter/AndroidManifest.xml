@@ -118,6 +118,12 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name" />
 
+        <!-- Tram Run Activity -->
+        <activity
+            android:name=".activity.TramRunActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name" />
+
         <!-- Stop Map Activity -->
         <activity
             android:name=".activity.StopMapActivity"
@@ -170,7 +176,7 @@
         </receiver>
 
         <!-- Use Google Maps -->
-        <uses-library android:name="com.google.android.maps" />
+        <uses-library android:name="com.google.android.maps" android:required="false" />
 
     </application>
 

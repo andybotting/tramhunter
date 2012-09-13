@@ -49,15 +49,20 @@ import org.ksoap2.transport.HttpTransportSE;
 
 import android.util.Log;
 
+import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.TramRun;
+import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramTrackerServiceSOAP implements TramTrackerService {
 
 	private static final String TAG = "TTServiceSOAP";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
+
+	private TramHunterDB mDB;
 
 	private static final String NAMESPACE = "http://www.yarratrams.com.au/pidsservice/";
 	private static final String URL = "http://ws.tramtracker.com.au/pidsservice/pids.asmx";
@@ -259,6 +264,123 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	}
 
 	/**
+	 * Get next tram departures
+	 */
+	public TramRun getNextPredictedArrivalTimeAtStopsForTramNo(int tram) throws TramTrackerServiceException {
+
+		//	<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		//		<soap:Body>
+		//		    <GetNextPredictedArrivalTimeAtStopsForTramNoResponse xmlns="http://www.yarratrams.com.au/pidsservice/">
+		//		    	<GetNextPredictedArrivalTimeAtStopsForTramNoResult>
+		//		    	    <diffgr:diffgram xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		//		    	        <NewDataSet xmlns="">
+		//		    	            <TramNoRunDetailsTable diffgr:id="TramNoRunDetailsTable1" msdata:rowOrder="0">
+		//		    	                <VehicleNo>2064</VehicleNo>
+		//		    	                <AtLayover>false</AtLayover>
+		//		    	                <Available>true</Available>
+		//		    	                <RouteNo>59</RouteNo>
+		//		    	                <HeadBoardRouteNo>59</HeadBoardRouteNo>
+		//		    	                <Up>true</Up>
+		//		    	                <HasSpecialEvent>false</HasSpecialEvent>
+		//		    	                <HasDisruption>false</HasDisruption>
+		//		    	            </TramNoRunDetailsTable>
+		//		    	            <NextPredictedStopsDetailsTable diffgr:id="NextPredictedStopsDetailsTable1" msdata:rowOrder="0">
+		//		    	                <StopNo>1318</StopNo>
+		//		    	                <PredictedArrivalDateTime>2012-08-12T17:48:00+10:00</PredictedArrivalDateTime>
+		//		    	            </NextPredictedStopsDetailsTable>
+		//		    	            <NextPredictedStopsDetailsTable diffgr:id="NextPredictedStopsDetailsTable2" msdata:rowOrder="1">
+		//		    	                <StopNo>1317</StopNo>
+		//		    	                <PredictedArrivalDateTime>2012-08-12T17:49:00+10:00</PredictedArrivalDateTime>
+		//		    	            </NextPredictedStopsDetailsTable>
+		//		    	            <NextPredictedStopsDetailsTable diffgr:id="NextPredictedStopsDetailsTable3" msdata:rowOrder="2">
+		//		    	                <StopNo>1316</StopNo>
+		//		    	                <PredictedArrivalDateTime>2012-08-12T17:50:00+10:00</PredictedArrivalDateTime>
+		//		    	            </NextPredictedStopsDetailsTable>
+		//		    	            <NextPredictedStopsDetailsTable diffgr:id="NextPredictedStopsDetailsTable4" msdata:rowOrder="3">
+		//		    	                <StopNo>1315</StopNo>
+		//		    	                <PredictedArrivalDateTime>2012-08-12T17:50:00+10:00</PredictedArrivalDateTime>
+		//		    	            </NextPredictedStopsDetailsTable>
+		//		    	        </NewDataSet>
+		//		    	    </diffgr:diffgram>
+		//		    	</GetNextPredictedArrivalTimeAtStopsForTramNoResult>
+		//		    	<validationResult/>
+		//			</GetNextPredictedArrivalTimeAtStopsForTramNoResponse>
+		//		</soap:Body>
+		//	</soap:Envelope>
+
+		SoapObject soapResult = null;
+		mDB = new TramHunterDB();
+
+		TramRun tramRun = new TramRun();
+
+		SoapObject request = new SoapObject(NAMESPACE, "GetNextPredictedArrivalTimeAtStopsForTramNo");
+		request.addProperty("tramNo", tram);
+
+		Object result = makeTramTrackerRequest(request);
+
+		try {
+			soapResult = (SoapObject) result;
+		} catch (ClassCastException e) {
+			// SOAP result might just be an error string
+			throw new TramTrackerServiceException(result.toString());
+		}
+
+		if (soapResult != null) {
+
+			try {
+				SoapObject diffgram = (SoapObject) soapResult.getProperty("diffgram");
+				SoapObject dataSet = (SoapObject) diffgram.getProperty("NewDataSet");
+
+				SoapObject runDetails = (SoapObject) dataSet.getProperty("TramNoRunDetailsTable");
+
+				int vehicleNumber = Integer.parseInt(runDetails.getProperty("VehicleNo").toString());
+				boolean isAtLayover = runDetails.getProperty("AtLayover").toString().equalsIgnoreCase("true") ? true : false;
+				boolean isAvailable = runDetails.getProperty("Available").toString().equalsIgnoreCase("true") ? true : false;
+
+				boolean hasSpecialEvent = runDetails.getProperty("HasSpecialEvent").toString().equalsIgnoreCase("true") ? true : false;
+				boolean hasDisruption = runDetails.getProperty("AtLayover").toString().equalsIgnoreCase("true") ? true : false;
+
+				tramRun.setVehicleNo(vehicleNumber);
+				tramRun.setIsAtLayover(isAtLayover);
+				tramRun.setIsAvailable(isAvailable);
+				tramRun.setHasSpecialEvent(hasSpecialEvent);
+				tramRun.setHasDisruption(hasDisruption);
+
+				// Start at 1 becuase the dataset starts with the details table.
+				for (int i = 1; i < dataSet.getPropertyCount(); i++) {
+
+					SoapObject timeObject = (SoapObject) dataSet.getProperty(i);
+
+					TramRunTime tramRunTime = new TramRunTime();
+
+					// Get stop string and fetch stop from DB
+					int stopNumber = Integer.parseInt(timeObject.getProperty("StopNo").toString());
+					Stop stop = mDB.getStop(stopNumber);
+					tramRunTime.setStop(stop);
+
+					// Get predicted time and parse it to a java datetime
+					String predictedArrivalDateTimeString = timeObject.getProperty("PredictedArrivalDateTime").toString();
+					Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+					tramRunTime.setPredictedArrivalDateTime(predictedArrivalDateTime);
+
+					tramRun.addTramRunTime(tramRunTime);
+				}
+
+			} catch (Exception e) {
+				throw new TramTrackerServiceException("No results");
+			} finally {
+				mDB.close();
+			}
+
+		} else {
+			throw new TramTrackerServiceException("No results");
+		}
+
+		return tramRun;
+
+	}
+
+	/**
 	 * Fetch a new GUID
 	 */
 	public String getNewClientGuid() throws TramTrackerServiceException {
@@ -271,7 +393,6 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 		try {
 			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
 			envelope.setOutputSoapObject(request);
-
 			envelope.setClientType(CLIENTTYPE);
 			envelope.setClientVersion(CLIENTVERSION);
 			envelope.setClientWebServiceVersion(CLIENTWEBSERVICESVERSION);
@@ -279,22 +400,15 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 
 			HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
 			androidHttpTransport.debug = true;
-
 			androidHttpTransport.call(soapAction, envelope);
-
 			Object response = envelope.getResponse();
-
 			String guid = response.toString();
-
 			// Save our GUID
 			mPreferenceHelper.setGUID(guid);
-
 			return guid;
-
 		} catch (Exception e) {
 			throw new TramTrackerServiceException("Error fetching GUID from TramTracker: " + e);
 		}
-
 	}
 
 	/**
@@ -307,8 +421,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 
 		// If we don't have a GUID yet, get from from TramTracker
 		if (guid == null) {
-			if (LOGV)
-				Log.d(TAG, "GUID is null, fetching new one");
+			if (LOGV) Log.d(TAG, "GUID is null, fetching new one");
 			guid = getNewClientGuid();
 		}
 

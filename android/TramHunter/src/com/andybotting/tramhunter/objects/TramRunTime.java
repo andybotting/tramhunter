@@ -32,26 +32,36 @@
  * limitations under the License.
  */
 
-package com.andybotting.tramhunter.service;
+package com.andybotting.tramhunter.objects;
 
-import java.util.List;
+import java.util.Date;
 
-import com.andybotting.tramhunter.objects.NextTram;
-import com.andybotting.tramhunter.objects.Route;
-import com.andybotting.tramhunter.objects.Stop;
-import com.andybotting.tramhunter.objects.TramRun;
+public class TramRunTime {
 
-/**
- * Service for retrieving Tram Tracking information.
- */
-public interface TramTrackerService {
+	private Stop stop;
+	private Date predictedArrivalDateTime;
 
-	Stop getStopInformation(int tramTrackerID) throws TramTrackerServiceException;
+	public Stop getStop() {
+		return stop;
+	}
 
-	List<NextTram> getNextPredictedRoutesCollection(Stop stop, Route route) throws TramTrackerServiceException;
+	public void setStop(Stop stop) {
+		this.stop = stop;
+	}
 
-	TramRun getNextPredictedArrivalTimeAtStopsForTramNo(int tram) throws TramTrackerServiceException;
+	// predictedArrivalDateTime
+	public void setPredictedArrivalDateTime(Date predictedArrivalDateTime) {
+		this.predictedArrivalDateTime = predictedArrivalDateTime;
+	}
 
-	String getGUID() throws TramTrackerServiceException;
+	public Date getPredictedArrivalDateTime() {
+		return predictedArrivalDateTime;
+	}
+
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(stop + ": " + getPredictedArrivalDateTime());
+		return buffer.toString();
+	}
 
 }
