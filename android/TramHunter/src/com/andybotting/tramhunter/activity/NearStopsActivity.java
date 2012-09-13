@@ -90,7 +90,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 	// Maximum stops to list
 	private final int MAXSTOPS = 20;
-	private final String mTitle = "Nearest Stops";// ��
+	private final String mTitle = "Nearest Stops"; //±
 
 	// Only show loading dialog at first load
 	private boolean mShowBusy = true;
@@ -466,7 +466,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			}
 			
 			if (location.hasAccuracy()) {
-				getSupportActionBar().setTitle(mTitle + " (��" + (int) location.getAccuracy() + "m)");
+				getSupportActionBar().setTitle(mTitle + " (±" + (int) location.getAccuracy() + "m)");
 			} else {
 				getSupportActionBar().setTitle(mTitle);
 			}
