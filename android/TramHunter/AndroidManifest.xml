@@ -36,9 +36,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andybotting.tramhunter"
     android:installLocation="auto"
-    android:versionCode="1000"
-    android:versionName="1.0" >
-    <!-- Keep the version code in sync with TramHunterDB -->
+    android:versionCode="1099"
+    android:versionName="1.1rc1" >
+    <!-- Keep the version code in sync with TramHunterDB and CLIENTVERSION in SOAP provider -->
 
     <!-- Application Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -52,7 +52,7 @@
     <!-- Require Android 2.1 for ActionBarSherlock -->
     <uses-sdk
         android:minSdkVersion="7"
-        android:targetSdkVersion="15" />
+        android:targetSdkVersion="16" />
 
     <supports-screens
         largeScreens="true"
@@ -176,7 +176,9 @@
         </receiver>
 
         <!-- Use Google Maps -->
-        <uses-library android:name="com.google.android.maps" android:required="false" />
+        <uses-library
+            android:name="com.google.android.maps"
+            android:required="false" />
 
     </application>
 
