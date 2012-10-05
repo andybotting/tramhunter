@@ -43,6 +43,7 @@ import java.util.TreeMap;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -67,7 +68,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.location.LastLocationFinder;
+
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 
@@ -77,25 +81,21 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
-
-	// private final static int MENU_MAP = 0;
+	
+	private final String ACTIVITY_TITLE = "Nearest Stops"; // ±
 
 	private ListView mListView;
 	private List<Stop> mAllStops;
 	private StopsList mNearStopsList;
 	private LocationManager mLocationManager;
-	private Location mLastKnownLocation;
+	protected LocationListener mLocationListener;
 
 	private TramHunterDB mDB;
 
-	// Maximum stops to list
-	private final int MAXSTOPS = 20;
-	private final String mTitle = "Nearest Stops"; //±
-
-	// Only show loading dialog at first load
 	private boolean mShowBusy = true;
-	private boolean mIsListeningForNetworkLocation;
-	private boolean mIsCalculatingStopDistances;
+
+	protected Criteria mCriteria;
+	protected LastLocationFinder lastLocationFinder;
 
 	/**
 	 * On Create
@@ -109,10 +109,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setTitle(mTitle);
-
-		mIsListeningForNetworkLocation = true;
-		mIsCalculatingStopDistances = false;
+		actionBar.setTitle(ACTIVITY_TITLE);
 
 		mListView = (ListView) this.findViewById(android.R.id.list);
 		mListView.setOnItemClickListener(listView_OnItemClickListener);
@@ -126,27 +123,46 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		// Make our Near Stops List for the map
 		mNearStopsList = new StopsList();
 
+	    // Instantiate a LastLocationFinder class.
+	    // This will be used to find the last known location when the application starts.
+	    lastLocationFinder = new LastLocationFinder(this);
+	    lastLocationFinder.setChangedLocationListener(oneShotLastLocationUpdateListener);
+	    
 		// Get the location
 		mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-		displayNearStops();
+		mCriteria = new Criteria();
+		mCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+		
+		if (!hasLocationEnabled())
+			buildAlertNoLocationServices();
+	
+		// onResume will be called and getLocationAndUpdateStops() and
+		// startLocationListening() will be called.
 	}
-
+  
 	/**
-	 * Display nearby stops
+	 * One-off location listener that receives updates from the
+	 * {@link LastLocationFinder}. This is triggered where the last known
+	 * location is outside the bounds of our maximum distance and latency.
 	 */
-	private void displayNearStops() {
-		startLocationListening(true);
-		Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-		if (location != null) {
-			new StopDistanceCalculator(location).execute();
-		} else {
-			if ( !hasGPSLocationEnabled() && !hasNetworkLocationEnabled() ) {
-				buildAlertNoLocationServices();
-			}
-			// else no results?
+	protected LocationListener oneShotLastLocationUpdateListener = new LocationListener() {
+		public void onLocationChanged(Location l) {
+			updateStops(l);
 		}
+		public void onProviderDisabled(String provider) {}
+		public void onStatusChanged(String provider, int status, Bundle extras) {}
+		public void onProviderEnabled(String provider) {}
+	};
+	
+	/**
+	 * Check Android settings that we have enabled location providers
+	 */
+	protected boolean hasLocationEnabled() {
+		String bestAvailableProvider = mLocationManager.getBestProvider(mCriteria, true);
+		if (bestAvailableProvider == null)
+			return false;
+		return true;
 	}
 
 	/**
@@ -155,7 +171,12 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	@Override
 	protected void onResume() {
 		super.onResume();
-		displayNearStops();
+		// Get the last known location (and optionally request location updates)
+		// and update the stops list.
+		if (hasLocationEnabled()) {
+			getLocationAndUpdateStops();
+			startLocationListening();
+		}
 	}
 
 	/**
@@ -163,8 +184,9 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	 */
 	@Override
 	protected void onPause() {
-		super.onPause();
+		// Stop listening for location updates when the Activity is inactive.
 		stopLocationListening();
+		super.onPause();
 	}
 
 	/**
@@ -173,22 +195,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		stopLocationListening();
 		mDB.close();
-	}
-
-	/**
-	 * Return boolean for GPS location
-	 */
-	private boolean hasGPSLocationEnabled() {
-		return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-	}
-
-	/**
-	 * Return boolean for network location
-	 */
-	private boolean hasNetworkLocationEnabled() {
-		return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 	}
 
 	/**
@@ -200,7 +207,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 				.setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
 						dialog.dismiss();
-						launchGPSOptions();
+						launchLocationSettings();
 					}
 				}).setNegativeButton("No", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
@@ -216,9 +223,8 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	/**
 	 * Open up the location settings
 	 */
-	private void launchGPSOptions() {
+	private void launchLocationSettings() {
 		final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-		//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivityForResult(intent, -1);
 	}
 
@@ -299,102 +305,212 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, 0, "View Stop");
 		}
 	};
-
-	//
-	// /**
-	// * On select of context menu item
-	// */
-	// @Override
-	// public boolean onContextItemSelected (MenuItem item){
-	// try {
-	// AdapterView.AdapterContextMenuInfo info =
-	// (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-	// StopsListAdapter stopsListAdapter = (StopsListAdapter)getListAdapter();
-	// Stop thisStop = stopsListAdapter.getStops().get(info.position);
-	//
-	// switch (item.getItemId()) {
-	// case CONTEXT_MENU_VIEW_STOP:
-	// viewStop(thisStop);
-	// return true;
-	// }
-	// } catch (ClassCastException e) {}
-	//
-	// return super.onContextItemSelected(item);
-	// }
-
+	
+	
 	/**
-	 * Stop distance calculator
-	 * 
-	 * @author andy
-	 * 
+	 * Find the last known location and update the stops list
 	 */
-	private class StopDistanceCalculator extends AsyncTask<Stop, Void, ArrayList<Stop>> {
+	protected void getLocationAndUpdateStops() {
+		
+		// This isn't directly affecting the UI, so put it on a worker thread.
+		AsyncTask<Stop, Void, ArrayList<Stop>> findLastLocationTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
+			
+			Location location; 
+			
+			// Can use UI thread here
+			protected void onPreExecute() {
+				if (mShowBusy) {
+					// Show the dialog window
+					mListView.setVisibility(View.GONE);
+					findViewById(android.R.id.empty).setVisibility(View.GONE);
+					findViewById(R.id.loading).setVisibility(View.VISIBLE);
+					mShowBusy = false;
+				}
+			}			
 
-		private final Location mLocation;
+			@Override
+			protected ArrayList<Stop> doInBackground(final Stop... params) {
+				
+				// Find the last known location, specifying a required accuracy
+				// of within the min distance between updates and a required
+				// latency of the minimum time required between updates.
+				location = lastLocationFinder.getLastBestLocation(TramHunterConstants.MAX_DISTANCE, System.currentTimeMillis() - TramHunterConstants.MAX_TIME);
+				
+				ArrayList<Stop> sortedStops = new ArrayList<Stop>();
+				SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
 
-		public StopDistanceCalculator(Location location) {
-			mLocation = location;
-		}
-
-		// Can use UI thread here
-		protected void onPreExecute() {
-			mIsCalculatingStopDistances = true;
-			if (mShowBusy) {
-				// Show the dialog window
-				mListView.setVisibility(View.GONE);
-				findViewById(android.R.id.empty).setVisibility(View.GONE);
-				findViewById(R.id.loading).setVisibility(View.VISIBLE);
-				mShowBusy = false;
-			}
-		}
-
-		// Automatically done on worker thread (separate from UI thread)
-		protected ArrayList<Stop> doInBackground(final Stop... params) {
-			ArrayList<Stop> sortedStops = new ArrayList<Stop>();
-			SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
-
-			for (Stop stop : mAllStops) {
-				double distance = mLocation.distanceTo(stop.getLocation());
-				sortedStopList.put(distance, stop);
-			}
-
-			// Build a sorted list, of MAXSTOPS stops
-			for (Entry<Double, Stop> item : sortedStopList.entrySet()) {
-				Stop stop = item.getValue();
-
-				// Don't show terminus stops > 8000
-				if (stop.getTramTrackerID() < 8000) {
-					sortedStops.add(stop);
-					mNearStopsList.add(stop);
+				for (Stop stop : mAllStops) {
+					double distance = location.distanceTo(stop.getLocation());
+					sortedStopList.put(distance, stop);
 				}
 
-				if (sortedStops.size() >= MAXSTOPS)
-					break;
-			}
+				// Build a sorted list, of MAXSTOPS stops
+				for (Entry<Double, Stop> item : sortedStopList.entrySet()) {
+					Stop stop = item.getValue();
 
-			return sortedStops;
+					// Don't show terminus stops > 8000
+					if (stop.getTramTrackerID() < 8000) {
+						sortedStops.add(stop);
+						mNearStopsList.add(stop);
+					}
+
+					if (sortedStops.size() >= TramHunterConstants.MAX_NEARBY_STOPS)
+						break;
+				}
+
+				return sortedStops;
+			}
+			
+			// Can use UI thread here
+			protected void onPostExecute(final ArrayList<Stop> sortedStops) {
+				StopsListAdapter stopsListAdapter;
+				// Refresh the entire list
+				stopsListAdapter = new StopsListAdapter(sortedStops, location);
+				setListAdapter(stopsListAdapter);
+
+				// If we've just been showing the loading screen
+				if (mListView.getVisibility() == View.GONE) {
+					mListView.setVisibility(View.VISIBLE);
+					findViewById(R.id.loading).setVisibility(View.GONE);
+				}
+			}
+		};
+		
+		findLastLocationTask.execute();
+	}	
+
+	
+	
+	/**
+	 * Given a location, update the stops list
+	 */
+	protected void updateStops(Location l) {
+		
+		final Location location = l;
+		
+		// This isn't directly affecting the UI, so put it on a worker thread.
+		AsyncTask<Stop, Void, ArrayList<Stop>> updateStopsTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
+			
+			// Can use UI thread here
+			protected void onPreExecute() {
+				if (mShowBusy) {
+					// Show the dialog window
+					mListView.setVisibility(View.GONE);
+					findViewById(android.R.id.empty).setVisibility(View.GONE);
+					findViewById(R.id.loading).setVisibility(View.VISIBLE);
+					mShowBusy = false;
+				}
+			}			
+
+			@Override
+			protected ArrayList<Stop> doInBackground(final Stop... params) {
+				
+				ArrayList<Stop> sortedStops = new ArrayList<Stop>();
+				SortedMap<Double, Stop> sortedStopList = new TreeMap<Double, Stop>();
+
+				for (Stop stop : mAllStops) {
+					double distance = location.distanceTo(stop.getLocation());
+					sortedStopList.put(distance, stop);
+				}
+
+				// Build a sorted list
+				for (Entry<Double, Stop> item : sortedStopList.entrySet()) {
+					Stop stop = item.getValue();
+
+					// Don't show terminus stops > 8000
+					if (stop.getTramTrackerID() < 8000) {
+						sortedStops.add(stop);
+						mNearStopsList.add(stop);
+					}
+
+					if (sortedStops.size() >= TramHunterConstants.MAX_NEARBY_STOPS)
+						break;
+				}
+
+				return sortedStops;
+			}
+			
+			// Can use UI thread here
+			protected void onPostExecute(final ArrayList<Stop> sortedStops) {
+				StopsListAdapter stopsListAdapter;
+				// Refresh the entire list
+				stopsListAdapter = new StopsListAdapter(sortedStops, location);
+				setListAdapter(stopsListAdapter);
+
+				// If we've just been showing the loading screen
+				if (mListView.getVisibility() == View.GONE) {
+					mListView.setVisibility(View.VISIBLE);
+					findViewById(R.id.loading).setVisibility(View.GONE);
+				}
+			}
+		};
+		
+		updateStopsTask.execute();
+	}	
+	
+	/**
+	 * On location changed
+	 */
+	public void onLocationChanged(Location location) {
+		
+		if (location.distanceTo(location) > TramHunterConstants.DEFAULT_RADIUS) {
+			updateStops(location);
 		}
+		
+		if (location.hasAccuracy()) {
+			getSupportActionBar().setTitle(ACTIVITY_TITLE + " (±" + (int) location.getAccuracy() + "m)");
+		} else {
+			getSupportActionBar().setTitle(ACTIVITY_TITLE);
+		}	    
+	}
+	
+	/**
+     * Stop listening for location events
+     */
+	private void stopLocationListening() {
+		if (LOGV) Log.i(TAG, "Stopping location listening");
+		if (mLocationManager != null)
+			mLocationManager.removeUpdates(this);
+	}
+	
+	/**
+	 * Start listening for location events
+	 */
+	private void startLocationListening() {
+		if (mLocationManager != null) {
 
-		// Can use UI thread here
-		protected void onPostExecute(final ArrayList<Stop> sortedStops) {
-			StopsListAdapter stopsListAdapter;
-			// Refresh the entire list
-			stopsListAdapter = new StopsListAdapter(sortedStops, mLocation);
-			setListAdapter(stopsListAdapter);
+			String bestAvailableProvider = mLocationManager.getBestProvider(mCriteria, true);
+			if (LOGV) Log.i(TAG, "Start location listening with provider: " + bestAvailableProvider);
 
-			// If we've just been showing the loading screen
-			if (mListView.getVisibility() == View.GONE) {
-				mListView.setVisibility(View.VISIBLE);
-				findViewById(R.id.loading).setVisibility(View.GONE);
+			if (bestAvailableProvider == null) {
+				buildAlertNoLocationServices();
+			} else {
+				mLocationManager.requestLocationUpdates(bestAvailableProvider, 0, 0, this);
 			}
-
-			mIsCalculatingStopDistances = false;
 		}
 	}
 
 	/**
-	 * 
-	 * @author andy
+     * onProviderDisabled unused
+     */
+	@Override
+	public void onProviderDisabled(String provider) {}
+
+	/**
+	 * onProviderEnabled unused
+	 */
+	@Override
+	public void onProviderEnabled(String provider) {}
+
+	/**
+	 * onStatusChanged unused
+	 */
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
+	
+	
+	/**
+	 * Adapter for Stops list
 	 */
 	private class StopsListAdapter extends BaseAdapter {
 
@@ -444,106 +560,6 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 			return pv;
 		}
-
-	}
-
-	/**
-	 * On location changed
-	 */
-	public void onLocationChanged(Location location) {
-
-		if (location != null) {
-			// If this is a GPS location then ignore and unsubscribe from
-			// network location updates.
-			if (location.getProvider().equals("gps") && mIsListeningForNetworkLocation) {
-				stopLocationListening();
-				startLocationListening(false);
-			}
-
-			if (shouldCalculateNewDistance(location)) {
-				new StopDistanceCalculator(location).execute();
-				mLastKnownLocation = location;
-			}
-			
-			if (location.hasAccuracy()) {
-				getSupportActionBar().setTitle(mTitle + " (±" + (int) location.getAccuracy() + "m)");
-			} else {
-				getSupportActionBar().setTitle(mTitle);
-			}
-
-		}
-	}
-
-	/**
-	 * 
-	 * @param location
-	 * @return
-	 */
-	private boolean shouldCalculateNewDistance(Location location) {
-		boolean result = false;
-
-		if (mLastKnownLocation != null && mLastKnownLocation.distanceTo(location) > 1) {
-			result = true;
-		} else if (mLastKnownLocation == null) {
-			result = true;
-		}
-
-		return result && (!mIsCalculatingStopDistances);
-	}
-
-	/**
-     * 
-     */
-	private void stopLocationListening() {
-		if (LOGV) Log.i(TAG, "Stopping location listening");
-		if (mLocationManager != null) {
-			mLocationManager.removeUpdates(this);
-		}
-	}
-
-	/**
-	 * 
-	 * @param subscribeToNetworkLocation
-	 */
-	private void startLocationListening(boolean subscribeToNetworkLocation) {
-		if (LOGV) Log.i(TAG, "Starting location listening");
-		if (mLocationManager != null) {
-			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
-			mIsListeningForNetworkLocation = subscribeToNetworkLocation;
-
-			try {
-				if (subscribeToNetworkLocation)
-					mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 20, this);
-			}
-			catch( IllegalArgumentException e ) {
-			    // It is not available, abort whatever you wanted to do
-			    return;
-			}
-			// You can safely continue here, as we've verified that it works
-			
-			
-		}
-	}
-
-	/**
-     * 
-     */
-	@Override
-	public void onProviderDisabled(String provider) {
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public void onProviderEnabled(String provider) {
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
 
 }
