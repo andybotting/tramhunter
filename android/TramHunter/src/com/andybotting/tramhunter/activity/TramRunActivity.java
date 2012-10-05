@@ -34,9 +34,7 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -65,6 +63,7 @@ import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
+import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramRunActivity extends SherlockListActivity {
 
@@ -77,7 +76,9 @@ public class TramRunActivity extends SherlockListActivity {
 
 	private ListAdapter mListAdapter;
 	private ListView mListView;
-
+	
+	private PreferenceHelper mPreferenceHelper;
+	
 	private TramTrackerService ttService;
 
 	private String mErrorMessage = null;
@@ -118,6 +119,9 @@ public class TramRunActivity extends SherlockListActivity {
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
+		// Preferences
+		mPreferenceHelper = new PreferenceHelper();
+		
 		// Set up our list
 		mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
@@ -126,6 +130,12 @@ public class TramRunActivity extends SherlockListActivity {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVehicleNumber = extras.getInt("vehicleNumber");
+			
+			// Throw an error if we don't actually have a vehicle ID
+			if (mVehicleNumber <= 0) {
+				Toast.makeText(this, "Stop details are not available for this service.", Toast.LENGTH_LONG).show();
+				finish();
+			}
 		}
 
 		// Set the title
@@ -358,7 +368,6 @@ public class TramRunActivity extends SherlockListActivity {
 			if (mTramRun == null)
 				return 0;
 			return mTramRun.getTramRunTimeCount();
-
 		}
 
 		public Object getItem(int position) {
@@ -380,15 +389,15 @@ public class TramRunActivity extends SherlockListActivity {
 
 			TramRunTime runTime = (TramRunTime) mTramRun.getTramRunTime(position);
 			((TextView) pv.findViewById(R.id.stopName)).setText(runTime.getStop().getPrimaryName());
-			
-			long diff = runTime.getPredictedArrivalDateTime().getTime() - now.getTime(); 
-			int minutes = (int)diff/60000;
 
-			SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm");
-			dateFormat.setTimeZone(TimeZone.getTimeZone("Australia/Melbourne"));
-			String mins =  dateFormat.format(runTime.getPredictedArrivalDateTime().getTime());
+			// We factor in the clock offset here to fix the times. See the SOAP
+			// provider for info about why we do this.
+			long diff = runTime.getPredictedArrivalDateTime().getTime() - now.getTime() + mPreferenceHelper.getClockOffset();
 			
-			((TextView) pv.findViewById(R.id.nextTime)).setText(mins);
+			// +1 min to adjust for out of whack values, or we get 0 min for the first response
+			int minutes = (int)diff/60000 + 1;
+			
+			((TextView) pv.findViewById(R.id.nextTime)).setText(minutes + " min");
 
 			return pv;
 		}

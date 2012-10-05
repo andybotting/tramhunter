@@ -137,8 +137,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 	// Menu items
 	private MenuItem mRefreshItem;
 	private MenuItem mFavouriteItem;
-	private View mRefreshIndeterminateProgressView; // save inflated layout for
-													// reference
+	private View mRefreshIndeterminateProgressView;
 
 	// Refresh
 	private boolean mShowDialog = true;
@@ -730,8 +729,6 @@ public class StopDetailsActivity extends SherlockListActivity {
 				String tramClassImage = UIUtils.getTramImage(tramClass);
 
 				if (tramClassImage != null) {
-					// if (LOGV) Log.v(TAG, "Tram Class: " + tramClass +
-					// " Tram Image: " + tramClassImage);
 					int resID = getResources().getIdentifier(tramClassImage, "drawable", getPackageName());
 					tramClassView.setPadding(3, 5, 3, 3);
 					tramClassView.setBackgroundResource(resID);

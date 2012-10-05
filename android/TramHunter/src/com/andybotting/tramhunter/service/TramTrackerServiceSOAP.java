@@ -68,7 +68,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String URL = "http://ws.tramtracker.com.au/pidsservice/pids.asmx";
 
 	private static final String CLIENTTYPE = "TRAMHUNTER";
-	private static final String CLIENTVERSION = "0.6.0";
+	private static final String CLIENTVERSION = "1.0.0";
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 
 	private PreferenceHelper mPreferenceHelper;
@@ -195,6 +195,14 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					// Parse timestamps
 					Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
 					Date requestDateTime = parseTimestamp(requestDateTimeString);
+					
+					// This is a dirty hack to save the clock offset between the
+					// TramTracker API and the local device. This is important
+					// for API calls which return times, but don't return a
+					// 'request' timestamp.
+					Date now = new Date();
+					long clockOffset = now.getTime() - requestDateTime.getTime();
+					mPreferenceHelper.setClockOffset(clockOffset);
 
 					tram.setInternalRouteNo(internalRouteNo);
 					tram.setRouteNo(routeNo);

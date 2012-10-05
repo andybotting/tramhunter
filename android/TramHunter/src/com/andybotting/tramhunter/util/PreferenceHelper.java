@@ -54,7 +54,7 @@ public class PreferenceHelper {
 	private static final String KEY_LAST_TWITTER_UPDATE = "last_twitter_update";
 	private static final String KEY_LAST_TWITTER_DATA = "last_twitter_data";
 	private static final String KEY_STATS_TIMESTAMP = "stats_timestamp";
-	
+	private static final String KEY_CLOCK_OFFSET = "clock_offset";
 	
 	private final SharedPreferences mPreferences;
 	private final Context mContext;
@@ -204,6 +204,24 @@ public class PreferenceHelper {
 		editor.putLong(KEY_STATS_TIMESTAMP, now.getTime());
 		editor.commit();
 	}	
+	
+	/**
+	 * Return a long representing the clock offset between the TT API clock and
+	 * local device time
+	 */
+	public long getClockOffset() {
+		return mPreferences.getLong(KEY_CLOCK_OFFSET, 0);
+	}
+
+	/**
+	 * Set a long representing the clock offset between the TT API clock and
+	 * local device time
+	 */
+	public void setClockOffset(long offset) {
+		SharedPreferences.Editor editor = mPreferences.edit();
+		editor.putLong(KEY_CLOCK_OFFSET, offset);
+		editor.commit();
+	}
 	
 	/**
      * Return a string representing the starred station/lines
