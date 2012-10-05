@@ -18,6 +18,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 
 import com.andybotting.tramhunter.objects.Stop;
@@ -103,14 +105,19 @@ public class TwitterFeed {
         	
             String username = userObject.getString("screen_name");
             String name = userObject.getString("name");
-            String text = tweetObject.getString("text");
+
+            // Decode HTML characters
+            // http://stackoverflow.com/questions/2918920/decode-html-entities-in-android
+            String encodedMessage = tweetObject.getString("text");
+            String message = Html.fromHtml(encodedMessage).toString();
+
             String date = tweetObject.getString("created_at");
             
             Tweet tweet = new Tweet();
             
             tweet.setUsername(username);
             tweet.setName(name);
-            tweet.setMessage(text);
+            tweet.setMessage(message);
             tweet.setDate(date);
 
 //			File filePath;
