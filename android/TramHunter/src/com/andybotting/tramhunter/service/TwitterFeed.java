@@ -19,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 
 import com.andybotting.tramhunter.objects.Stop;
