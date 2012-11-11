@@ -204,6 +204,12 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 					long clockOffset = now.getTime() - requestDateTime.getTime();
 					mPreferenceHelper.setClockOffset(clockOffset);
 
+					// Those Yarra Trams guys are a pack of bastards
+					if (specialEventMessage.contains("Android")) {
+						specialEventMessage = "";
+						hasSpecialEvent = false;
+					}
+
 					tram.setInternalRouteNo(internalRouteNo);
 					tram.setRouteNo(routeNo);
 					tram.setHeadboardRouteNo(headboardRouteNo);
