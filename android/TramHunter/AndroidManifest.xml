@@ -36,8 +36,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andybotting.tramhunter"
     android:installLocation="auto"
-    android:versionCode="1092"
-    android:versionName="1.1rc2" >
+    android:versionCode="1100"
+    android:versionName="1.1" >
     <!-- Keep the version code in sync with TramHunterDB and CLIENTVERSION in SOAP provider -->
 
     <!-- Application Permissions -->
