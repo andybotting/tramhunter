@@ -65,6 +65,7 @@ import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.StringUtil;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -459,7 +460,7 @@ public class HomeActivity extends SherlockFragmentActivity {
 			name.setText(tweet.getName());
 			username.setText("@" + tweet.getUsername());
 			message.setText(tweet.getMessage());
-			time.setText(tweet.twitterHumanFriendlyDate());
+			time.setText(StringUtil.humanFriendlyDate(tweet.getDateLong()));
 
 			// We're going to use our down twitter images for now.
 			// final Bitmap bitmap = BitmapFactory.decodeFile(tweet.getImagePath());
