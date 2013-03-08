@@ -66,13 +66,13 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DATABASE_NAME = "tramhunter.db";
 	
-	private static final String DATABASE_INTERNAL_PATH = "/data/data/"+ AUTHORITY + "/databases/";
+	private static final String DATABASE_INTERNAL_PATH = "/data/"+ AUTHORITY + "/databases/";
     
 	// Update this with the App Version Code (App Version x 100)
 	// E.g. 
 	//  App Version v0.2.92 = DB Version 292
 	// 	App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 1092;
+	private static final int DATABASE_VERSION = 1191;
 	
 	
 	private SQLiteDatabase mDB = null;
@@ -141,7 +141,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		if (LOGV) Log.d(TAG, "Getting DB from device internal storage");
 
 		SQLiteDatabase db = null;
-		String dbFile = DATABASE_INTERNAL_PATH + DATABASE_NAME;
+		String dbFile = mContext.getFilesDir().getPath() + DATABASE_INTERNAL_PATH + DATABASE_NAME;
 
 		try {		 	
 			this.createDB(dbFile);
