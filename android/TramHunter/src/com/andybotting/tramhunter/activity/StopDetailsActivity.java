@@ -311,9 +311,15 @@ public class StopDetailsActivity extends SherlockListActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mRefreshThread.isInterrupted()) {
+
+		if (mRefreshThread.isInterrupted())
 			mRefreshThread.start();
-		}
+
+		// Force update of tram times to prevent stale times if the app
+		// is opened again
+		mShowDialog = true;
+		getNextTramTimes();
+
 	}
 
 	/**
