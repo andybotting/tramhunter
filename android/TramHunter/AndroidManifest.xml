@@ -37,7 +37,8 @@
     package="com.andybotting.tramhunter"
     android:installLocation="auto"
     android:versionCode="1191"
-    android:versionName="1.2-rc1" >
+    android:versionName="1.2-rc1">
+
     <!-- Keep the version code in sync with TramHunterDB and CLIENTVERSION in SOAP provider -->
 
     <!-- Application Permissions -->
@@ -55,10 +56,15 @@
         android:targetSdkVersion="17" />
 
     <supports-screens
+        android:anyDensity="true"
         android:largeScreens="true"
         android:normalScreens="true"
-        android:smallScreens="true"
-        android:anyDensity="true" />
+        android:smallScreens="true" />
+
+    <!-- GoogleTV support -->
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
     <!--
          Application
@@ -66,17 +72,18 @@
 	     class before starting the application to provide static access to
 	     the application context
     -->
+
     <application
         android:name="com.andybotting.tramhunter.TramHunterApplication"
+        android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/Theme.TramHunterStyle"
-        android:allowBackup="true" >
+        android:theme="@style/Theme.TramHunterStyle">
 
         <!-- TramHunter Activity -->
         <activity
             android:name=".TramHunter"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -86,7 +93,7 @@
         <!-- Home Activity -->
         <activity
             android:name=".activity.HomeActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
         </activity>
 
         <!-- Routes List Activity -->
@@ -142,7 +149,7 @@
         <activity
             android:name=".activity.SearchActivity"
             android:label="@string/description_search"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -163,6 +170,7 @@
         <provider
             android:name=".dao.TramHunterProvider"
             android:authorities="com.andybotting.tramhunter"
+            android:exported="false"
             android:syncable="false" />
 
         <!-- declare the default searchable Activity for the whole app -->
@@ -170,7 +178,9 @@
             android:name="android.app.default_searchable"
             android:value=".activity.SearchActivity" />
 
-        <receiver android:name=".service.TramNotification" >
+        <receiver
+            android:name=".service.TramNotification"
+            android:exported="false">
             <intent-filter>
                 <action android:name="intentname" />
             </intent-filter>
@@ -180,7 +190,6 @@
         <uses-library
             android:name="com.google.android.maps"
             android:required="false" />
-
     </application>
 
 </manifest>
