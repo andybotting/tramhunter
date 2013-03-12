@@ -97,6 +97,11 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 	private boolean mShowBusy = true;
 
+	private String mErrorMessage = null;
+
+	private AsyncTask<Stop, Void, ArrayList<Stop>> mFindLastLocationTask;
+	private AsyncTask<Stop, Void, ArrayList<Stop>> mUpdateStopsTask;
+
 	/**
 	 * On Create
 	 */
@@ -165,7 +170,9 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			}
 		}
 
-		if (LOGV) Log.d(TAG, "Found initial location from: " + bestResult.getProvider() + " " + StringUtil.humanFriendlyDate(bestResult.getTime()) + " ago");
+		if (bestResult != null)
+			if (LOGV) Log.d(TAG, "Found initial location from: " + bestResult.getProvider() + " " + StringUtil.humanFriendlyDate(bestResult.getTime()) + " ago");
+
 		return bestResult;
 	}
 
@@ -190,6 +197,14 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	protected void onPause() {
 		// Stop listening for location updates when the Activity is inactive.
 		stopLocationListening();
+
+		// Kill tasks on pause
+		if (mFindLastLocationTask != null)
+			mFindLastLocationTask.cancel(true);
+
+		if (mUpdateStopsTask != null)
+			mUpdateStopsTask.cancel(true);
+
 		super.onPause();
 	}
 
@@ -318,8 +333,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 		if (LOGV) Log.d(TAG, "Getting location and updating stops");
 
-		// This isn't directly affecting the UI, so put it on a worker thread.
-		AsyncTask<Stop, Void, ArrayList<Stop>> findLastLocationTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
+		mFindLastLocationTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
 
 			// Can use UI thread here
 			protected void onPreExecute() {
@@ -335,14 +349,21 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			@Override
 			protected ArrayList<Stop> doInBackground(final Stop... params) {
 
-				// Don't die, but sleep a little while to wait for the location
-				// Not sure if this is a good idea.
+				// Loop for a while until we get a location fix.
+				// If we can't, then timeout and throw an error.
+				int i = 0;
 				while (mLastKnownLocation == null) {
 					try {
 						if (LOGV)
 							Log.d(TAG, "Location not found yet. Sleeping 1s");
 						Thread.sleep(1000);
-						
+						i++;
+
+						if (i == TramHunterConstants.MAX_WAIT_LOCATION) {
+							mErrorMessage = "Unable to find your location";
+							return null;
+						}
+
 					} catch (InterruptedException e) {
 					}
 				}
@@ -374,10 +395,20 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 
 			// Can use UI thread here
 			protected void onPostExecute(final ArrayList<Stop> sortedStops) {
-				StopsListAdapter stopsListAdapter;
-				// Refresh the entire list
-				stopsListAdapter = new StopsListAdapter(sortedStops, mLastKnownLocation);
-				setListAdapter(stopsListAdapter);
+
+				// Toast: Error fetching departure information
+				if (mErrorMessage != null) {
+					Toast.makeText(NearStopsActivity.this, mErrorMessage, Toast.LENGTH_LONG).show();
+					// Reset error message
+					mErrorMessage = null;
+					finish();
+				}
+				else {
+					StopsListAdapter stopsListAdapter;
+					// Refresh the entire list
+					stopsListAdapter = new StopsListAdapter(sortedStops, mLastKnownLocation);
+					setListAdapter(stopsListAdapter);
+				}
 
 				// If we've just been showing the loading screen
 				if (mListView.getVisibility() == View.GONE) {
@@ -387,7 +418,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			}
 		};
 
-		findLastLocationTask.execute();
+		mFindLastLocationTask.execute();
 	}
 
 	/**
@@ -399,7 +430,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 		if (LOGV) Log.d(TAG, "Updating stops list with location from: " + location.getProvider());
 
 		// This isn't directly affecting the UI, so put it on a worker thread.
-		AsyncTask<Stop, Void, ArrayList<Stop>> updateStopsTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
+		mUpdateStopsTask = new AsyncTask<Stop, Void, ArrayList<Stop>>() {
 
 			// Can use UI thread here
 			protected void onPreExecute() {
@@ -455,7 +486,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			}
 		};
 
-		updateStopsTask.execute();
+		mUpdateStopsTask.execute();
 	}	
 	
 	/**

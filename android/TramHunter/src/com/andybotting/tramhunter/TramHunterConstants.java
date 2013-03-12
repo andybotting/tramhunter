@@ -44,12 +44,15 @@ public class TramHunterConstants {
 
 	// The minimum distance between location updates
 	public static int MIN_DISTANCE = 50;
-	
+
 	// Time delta between comparing location updates
 	public static int LOCATION_UPDATE_DELTA = 1000 * 30;
 
 	// The maximum number of nearby stops to show in list.
 	public static int MAX_NEARBY_STOPS = 30;
+
+	// The maximum number of seconds to wait for a location fix.
+	public static int MAX_WAIT_LOCATION = 30;
 
 	/**
 	 * These values are constants used for intents, exteas, and shared
