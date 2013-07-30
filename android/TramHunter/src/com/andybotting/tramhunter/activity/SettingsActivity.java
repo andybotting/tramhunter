@@ -1,5 +1,5 @@
 /*  
- * Copyright 2012 Andy Botting <andy@andybotting.com>
+ * Copyright 2013 Andy Botting <andy@andybotting.com>
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 			mDefaultLaunchActivity.setSummary("Open " + getFreindlyDefaultActivityName(sharedPreferences) + " on launch");
 		} else if (key.equals(KEY_WELCOME_MESSAGE)) {
 			mDisplayWelcomeMessage.setSummary(sharedPreferences.getBoolean(key, KEY_WELCOME_MESSAGE_DEFAULT_VALUE) ? 
-					"Showing twitter feed" : "Hiding twitter feed");
+					"Showing tram quotes" : "Hiding tram quotes");
 		} else if (key.equals(KEY_TRAM_IMAGE)) {
 			mDisplayTramImage.setSummary(sharedPreferences.getBoolean(key, KEY_TRAM_IMAGE_DEFAULT_VALUE) ? 
 					"Showing tram images" : "Hiding tram images");

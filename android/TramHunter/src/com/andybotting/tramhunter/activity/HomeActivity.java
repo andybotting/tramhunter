@@ -1,5 +1,5 @@
 /*  
- * Copyright 2012 Andy Botting <andy@andybotting.com>
+ * Copyright 2013 Andy Botting <andy@andybotting.com>
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ package com.andybotting.tramhunter.activity;
 import java.io.UnsupportedEncodingException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -58,14 +60,15 @@ import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
 
 import com.andybotting.tramhunter.objects.Favourite;
-import com.andybotting.tramhunter.objects.Tweet;
-import com.andybotting.tramhunter.service.TwitterFeed;
+//import com.andybotting.tramhunter.objects.Tweet;
+//import com.andybotting.tramhunter.service.TwitterFeed;
 
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
 import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 import com.andybotting.tramhunter.util.StringUtil;
+//import com.andybotting.tramhunter.util.StringUtil;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -74,8 +77,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.os.AsyncTask;
+//import android.net.Uri;
+//import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
@@ -197,7 +200,10 @@ public class HomeActivity extends SherlockFragmentActivity {
 		// If we have a pager view (i.e. portrait mode and we have the
 		// settings enabled, then we'll show the twitter feed
 		if ((mPager != null) && (mPreferenceHelper.isWelcomeQuoteEnabled())) {
-			new FetchTweets().execute();
+			String[] quotes =  getResources().getStringArray(R.array.welcomeMessages);
+			InfoFragmentAdapter infoFragmentAdapter = new InfoFragmentAdapter(getSupportFragmentManager(), quotes);
+			mPager.setAdapter(infoFragmentAdapter);
+			updateRefreshStatus(INFO_SHOW);
 		}
 
 		// Favourite Stops
@@ -355,83 +361,50 @@ public class HomeActivity extends SherlockFragmentActivity {
 	}
 
 	/**
-	 * Async task for updating tube status data
-	 */
-	private class FetchTweets extends AsyncTask<Void, Void, ArrayList<Tweet>> {
-
-		protected void onPreExecute() {
-			updateRefreshStatus(INFO_LOADING);
-		}
-
-		@Override
-		protected ArrayList<Tweet> doInBackground(Void... unused) {
-
-			ArrayList<Tweet> tweets = null;
-			TwitterFeed twitter = new TwitterFeed();
-
-			try {
-				Log.v(TAG, "Fetching Tweets...");
-				tweets = twitter.getTweets();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return tweets;
-		}
-				
-		protected void onPostExecute(ArrayList<Tweet> tweets) {
-			if (tweets == null) {
-				Log.w(TAG, "Error fetching Tweets");
-				updateRefreshStatus(INFO_ERROR);
-			} else {
-				// Only if we're showing the panel
-				if (mPager != null) {
-					InfoFragmentAdapter infoFragmentAdapter = new InfoFragmentAdapter(getSupportFragmentManager(), tweets);
-					mPager.setAdapter(infoFragmentAdapter);
-					updateRefreshStatus(INFO_SHOW);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Fragment adapter for holding tweets
 	 */
 	public static class InfoFragmentAdapter extends FragmentStatePagerAdapter {
 
-		ArrayList<Tweet> tweets;
+		String[] quotes;
+		Integer[] shuffledInts;
 
-		public InfoFragmentAdapter(FragmentManager fm, ArrayList<Tweet> tweets) {
+		public InfoFragmentAdapter(FragmentManager fm, String[] quotes) {
 			super(fm);
-			this.tweets = tweets;
+			this.quotes = quotes;
+
+			// Shuffle an array of Integers for 'randomzing' the quotes
+			this.shuffledInts = new Integer[quotes.length];
+			for (int i = 0; i < quotes.length; i++) {
+				this.shuffledInts[i] = i;
+			}
+			Collections.shuffle(Arrays.asList(this.shuffledInts));
 		}
 
 		@Override
 		public int getCount() {
-			return tweets.size();
+			return quotes.length;
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			return ArrayFragment.newInstance(tweets.get(position));
+			int quoteNumber = shuffledInts[position];
+			String title = "Famous Tram Quote #" + (quoteNumber + 1);
+			return ArrayFragment.newInstance(quotes[quoteNumber], title);
 		}
 	}
 
 	/**
-	 * Tweet fragment
+	 * Tweet fragment - unused for now
 	 */
 	public static class ArrayFragment extends Fragment {
-		Tweet tweet;
+		String quote;
+		String title;
 
-		static ArrayFragment newInstance(Tweet tweet) {
+		static ArrayFragment newInstance(String quote, String title) {
 			ArrayFragment f = new ArrayFragment();
 			Bundle args = new Bundle();
-
-			args.putString("name", tweet.getName());
-			args.putString("username", tweet.getUsername());
-			args.putString("message", tweet.getMessage());
-			args.putLong("date", tweet.getDateLong());
-			args.putString("imagePath", tweet.getImagePath());
-
+			args.putString("quote", quote);
+			args.putString("title", title);
 			f.setArguments(args);
 			return f;
 		}
@@ -439,47 +412,20 @@ public class HomeActivity extends SherlockFragmentActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			tweet = new Tweet();
-			tweet.setName(getArguments().getString("name"));
-			tweet.setUsername(getArguments().getString("username"));
-			tweet.setMessage(getArguments().getString("message"));
-			tweet.setDate(getArguments().getLong("date"));
-			tweet.setImagePath(getArguments().getString("imagePath"));
+			quote = getArguments().getString("quote");
+			title = getArguments().getString("title");
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			View v = inflater.inflate(R.layout.tweet_fragment, container, false);
-
-			TextView name = (TextView) v.findViewById(R.id.tweet_name);
-			TextView username = (TextView) v.findViewById(R.id.tweet_username);
-			TextView message = (TextView) v.findViewById(R.id.tweet_message);
-			TextView time = (TextView) v.findViewById(R.id.tweet_time);
-			ImageView image = (ImageView) v.findViewById(R.id.tweet_image);
-
-			name.setText(tweet.getName());
-			username.setText("@" + tweet.getUsername());
-			message.setText(tweet.getMessage());
-			time.setText(StringUtil.humanFriendlyDate(tweet.getDateLong()));
-
-			// We're going to use our down twitter images for now.
-			// final Bitmap bitmap = BitmapFactory.decodeFile(tweet.getImagePath());
-			// image.setImageBitmap(bitmap);
-			image.setImageResource(R.drawable.yarratrams_twitter);
-			
-			// Handle onClick to Twitter
-			View tweetLayout = v.findViewById(R.id.tweet_layout);
-			tweetLayout.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						String url = "http://twitter.com/" + tweet.getUsername();
-						Intent i = new Intent(Intent.ACTION_VIEW);
-						i.setData(Uri.parse(url));
-						startActivity(i);
-					}
-				}
-			);
-
+			View v = inflater.inflate(R.layout.quote_fragment, container, false);
+			TextView tvTitle = (TextView) v.findViewById(R.id.quote_title);
+			TextView tvMessage = (TextView) v.findViewById(R.id.quote_message);
+			ImageView ivImage = (ImageView) v.findViewById(R.id.quote_image);
+	
+			tvTitle.setText(title);
+			tvMessage.setText(quote);
+			ivImage.setImageResource(R.drawable.icon);
 			return v;
 		}
 	}
