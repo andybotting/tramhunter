@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2012 Andy Botting <andy@andybotting.com>
+    Copyright 2013 Andy Botting <andy@andybotting.com>
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 -->
 
 <resources>
-    <dimen name="info_window_height">80dip</dimen>
+    <dimen name="info_window_height">70dip</dimen>
  
     <dimen name="text_size_tiny">12sp</dimen>   
     <dimen name="text_size_small">14sp</dimen>
