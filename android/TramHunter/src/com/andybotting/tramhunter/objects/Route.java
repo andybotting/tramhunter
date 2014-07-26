@@ -46,6 +46,7 @@ public class Route {
 	
 	private int id;
 	private String number;
+	private int internalNumber;
 	private Destination destinationUp = null;
 	private Destination destinationDown = null;
 	
@@ -80,6 +81,23 @@ public class Route {
 	public void setNumber(String number) {
 		this.number = number;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getInternalNumber() {
+		return internalNumber;
+	}
+	
+	/**
+	 * 
+	 * @param internalNumber
+	 */
+	public void setInternalNumber(int internalNumber) {
+		this.internalNumber = internalNumber;
+	}	
+	
 	
 	/**
 	 * 

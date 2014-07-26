@@ -55,7 +55,6 @@ public class Stop {
 	private Location location;
 	private double latitude;
 	private double longitude;
-	private String suburb;
 	private List<Route> routes;
 	
 	private static final String NAME_PATTERN = "(.+) & (.+)";
@@ -236,17 +235,7 @@ public class Stop {
         int lng1E6 = (int) (longitude * 1E6);
         GeoPoint point = new GeoPoint(lat1E6, lng1E6);
         return point;
-	}
-	
-	
-	public void setSuburb(String suburb) {
-		suburb = this.suburb;
-	}
-	
-	
-	public String getSuburb() {
-	   return suburb;
-	}   
+	} 
 	
 	
 	public void setRoutes(List<Route> routes) {

@@ -68,7 +68,7 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 	private static final String URL = "http://ws.tramtracker.com.au/pidsservice/pids.asmx";
 
 	private static final String CLIENTTYPE = "TRAMHUNTER";
-	private static final String CLIENTVERSION = "1.3.0";
+	private static final String CLIENTVERSION = "1.4.0";
 	private static final String CLIENTWEBSERVICESVERSION = "6.4.0.0";
 
 	private PreferenceHelper mPreferenceHelper;
@@ -128,7 +128,6 @@ public class TramTrackerServiceSOAP implements TramTrackerService {
 				stop.setCityDirection(stopResult4.getProperty(2).toString());
 				// stop.setLatitude(Float.parseFloat(stopResult4.getProperty(3).toString()));
 				// stop.setLongitude(Float.parseFloat(stopResult4.getProperty(4).toString()));
-				stop.setSuburb(stopResult4.getProperty(5).toString());
 			}
 
 			return stop;

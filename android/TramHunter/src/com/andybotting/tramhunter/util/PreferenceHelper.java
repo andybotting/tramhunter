@@ -81,10 +81,9 @@ public class PreferenceHelper {
 		return mPreferences.getBoolean(SettingsActivity.KEY_TRAM_IMAGE, SettingsActivity.KEY_TRAM_IMAGE_DEFAULT_VALUE);
 	}
 
-	//public boolean isJSONAPIEnabled() {
-	//	return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API,
-	//	SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
-	//}
+	public boolean isJSONAPIEnabled() {
+		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
+	}
 
 	public boolean isSendStatsEnabled() {
 		return mPreferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
@@ -129,7 +128,7 @@ public class PreferenceHelper {
 	}
 	
     /**
-     * Set a long signalling the lastest version of the application launched
+     * Set a long signalling the latest version of the application launched
      */	
 	public void setFirstLaunchThisVersion() {
 		

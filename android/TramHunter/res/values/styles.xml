@@ -37,7 +37,6 @@
 
     <style name="Theme.TramHunterStyle" parent="Theme.Sherlock.Light.DarkActionBar">
         <item name="actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
-        <item name="android:actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
     </style>
 
     <style name="Widget.TramHunter.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse"></style>

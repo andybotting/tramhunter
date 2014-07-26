@@ -50,7 +50,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,10 +62,12 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 import com.andybotting.tramhunter.TramHunterApplication;
+import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.TramRun;
+import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
@@ -75,11 +76,11 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
 	private static final String BASE_URL = "http://extranetdev.yarratrams.com.au/PIDSServiceWCF/RestService";
-
 	private static final String CLIENT_TYPE = "TRAMHUNTER";
 
 	private Context mContext;
 	private PreferenceHelper mPreferenceHelper;
+	private TramHunterDB mDB;
 
 	public TramTrackerServiceJSON() {
 		mContext = TramHunterApplication.getContext();
@@ -99,8 +100,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 		String androidVersion = android.os.Build.VERSION.RELEASE;
 
-		if (androidVersion == null)
-			androidVersion = "N/A";
+		if (androidVersion == null) androidVersion = "N/A";
 
 		try {
 
@@ -130,8 +130,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 
 		// TramTracker required parameters
-		if (params == null)
-			params = new LinkedList<NameValuePair>();
+		if (params == null) params = new LinkedList<NameValuePair>();
 
 		params.add(new BasicNameValuePair("aid", CLIENT_TYPE));
 
@@ -142,6 +141,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 		try {
 			URI uri = new URI(url + "?" + paramString);
+			if (LOGV) Log.v(TAG, "Fetching URL: " + uri.toString());
 			HttpGet method = new HttpGet(uri);
 			HttpResponse response = httpClient.execute(method);
 			InputStream jsonData = response.getEntity().getContent();
@@ -167,8 +167,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			}
 			is.close();
 			String jsonData = sb.toString();
-			if (LOGV)
-				Log.v(TAG, "JSON Response: " + jsonData);
+			if (LOGV) Log.d(TAG, "JSON Response: " + jsonData);
 			jsonObject = new JSONObject(jsonData);
 		} catch (Exception e) {
 			throw new TramTrackerServiceException(e);
@@ -176,17 +175,15 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		return jsonObject;
 	}
 
-	private JSONObject getResponseObject(InputStream is) throws IOException, JSONException, TramTrackerServiceException {
+	private JSONObject getResponseObject(JSONObject serviceData) throws IOException, JSONException, TramTrackerServiceException {
 
 		JSONObject responseObject = null;
-		JSONObject serviceData = parseJSONStream(is);
 
 		String errorMessage = "TramTracker Service Error";
 
 		// If we have an error message returned from the API, pass it through
 		if (serviceData.getBoolean("hasError")) {
-			if (serviceData.has("errorMessage"))
-				errorMessage = serviceData.getString("errorMessage");
+			if (serviceData.has("errorMessage")) errorMessage = serviceData.getString("errorMessage");
 			throw new TramTrackerServiceException(errorMessage);
 		} else {
 			responseObject = serviceData.getJSONObject("responseObject");
@@ -195,17 +192,15 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		return responseObject;
 	}
 
-	private JSONArray getResponseArray(InputStream is) throws IOException, JSONException, TramTrackerServiceException {
+	private JSONArray getResponseArray(JSONObject serviceData) throws IOException, JSONException, TramTrackerServiceException {
 
 		JSONArray responseArray = null;
-		JSONObject serviceData = parseJSONStream(is);
 
 		String errorMessage = "TramTracker Service Error";
 
 		// If we have an error message returned from the API, pass it through
 		if (serviceData.getBoolean("hasError")) {
-			if (serviceData.has("errorMessage"))
-				errorMessage = serviceData.getString("errorMessage");
+			if (serviceData.has("errorMessage")) errorMessage = serviceData.getString("errorMessage");
 
 			if (errorMessage.contains("No or invalid device token provided.")) {
 				getNewClientGuid();
@@ -219,8 +214,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	}
 
 	/**
-	 * Parse the given {@link InputStream} into {@link Stop} assuming a JSON
-	 * format.
+	 * Parse the given {@link InputStream} into {@link Stop} assuming a JSON format.
 	 * 
 	 * @return Stop
 	 */
@@ -252,12 +246,10 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			String flagStopNo = responseObject.getString("FlagStopNo");
 			String stopName = responseObject.getString("StopName");
 			String cityDirection = responseObject.getString("CityDirection");
-			String suburbName = responseObject.getString("SuburbName");
 
 			stop.setFlagStopNumber(flagStopNo);
 			stop.setStopName(stopName);
 			stop.setCityDirection(cityDirection);
-			stop.setSuburb(suburbName);
 
 			return stop;
 		} catch (Exception e) {
@@ -273,7 +265,8 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			Stop stop = null;
 			String url = BASE_URL + "/GetStopInformation.aspx?s=" + tramTrackerID;
 			InputStream jsonData = getJSONData(url, null);
-			JSONObject responseObject = getResponseObject(jsonData);
+			JSONObject serviceData = parseJSONStream(jsonData);
+			JSONObject responseObject = getResponseObject(serviceData);
 			stop = parseStopInformation(responseObject);
 			stop.setTramTrackerID(tramTrackerID);
 			return stop;
@@ -285,12 +278,11 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	}
 
 	/**
-	 * Parse the given {@link InputStream} into {@link Stop} assuming a JSON
-	 * format.
+	 * Parse the given {@link InputStream} into {@link Stop} assuming a JSON format.
 	 * 
 	 * @return Stop
 	 */
-	public static List<NextTram> parseNextPredictedRoutesCollection(JSONArray responseArray) throws TramTrackerServiceException {
+	public static List<NextTram> parseNextPredictedRoutesCollection(JSONArray responseArray, Date requestTime) throws TramTrackerServiceException {
 
 		// [{
 		// "responseObject": [
@@ -344,7 +336,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 				int internalRouteNo = responseObject.getInt("InternalRouteNo");
 				String routeNo = responseObject.getString("RouteNo");
-				String headboardRouteNo = responseObject.getString("HeadboardRouteNo");
+				String headboardRouteNo = responseObject.getString("HeadBoardRouteNo");
 				int vehicleNo = responseObject.getInt("VehicleNo");
 				String destination = responseObject.getString("Destination");
 				boolean hasDisruption = responseObject.getBoolean("HasDisruption");
@@ -357,8 +349,6 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 				// Parse dates
 				String predictedArrivalDateTimeString = responseObject.getString("PredictedArrivalDateTime");
 				Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
-				String requestDateTimeString = responseObject.getString("RequestDateTime");
-				Date requestDateTime = parseTimestamp(requestDateTimeString);
 
 				NextTram tram = new NextTram();
 
@@ -375,7 +365,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 				tram.setHasSpecialEvent(hasSpecialEvent);
 				tram.setSpecialEventMessage(specialEventMessage);
 				tram.setPredictedArrivalDateTime(predictedArrivalDateTime);
-				tram.setRequestDateTime(requestDateTime);
+				tram.setRequestDateTime(requestTime);
 
 				nextTrams.add(tram);
 			}
@@ -397,8 +387,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 		// Route number
 		String routeNumber = "0";
-		if (route != null)
-			routeNumber = route.getNumber();
+		if (route != null) routeNumber = route.getNumber();
 
 		// Stop ID
 		int tramTrackerID = stop.getTramTrackerID();
@@ -410,13 +399,18 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			String method = "GetNextPredictedRoutesCollection";
 			String url = String.format("%s/%s/%s/%s/%s/", BASE_URL, method, tramTrackerID, routeNumber, lowFloor);
 
-			// This method requires the CID parameter
 			List<NameValuePair> params = new LinkedList<NameValuePair>();
-			params.add(new BasicNameValuePair("cid", "false"));
+			// This call required the 'cid' value. We usually just use '1' for this.
+			params.add(new BasicNameValuePair("cid", "1"));
 
 			InputStream jsonData = getJSONData(url, params);
-			JSONArray responseArray = getResponseArray(jsonData);
-			nextTrams = parseNextPredictedRoutesCollection(responseArray);
+			JSONObject serviceData = parseJSONStream(jsonData);
+			JSONArray responseArray = getResponseArray(serviceData);
+
+			String requestTime = serviceData.getString("timeRequested");
+			Date requestDateTime = parseTimestamp(requestTime);
+
+			nextTrams = parseNextPredictedRoutesCollection(responseArray, requestDateTime);
 
 			return nextTrams;
 
@@ -427,10 +421,122 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	}
 
 	/**
+	 * 
+	 */
+	public TramRun parseGetNextPredictedArrivalTimeAtStopsForTramNo(JSONObject responseObject, Date requestTime) throws TramTrackerServiceException {
+
+		// {
+		// "errorMessage": null,
+		// "hasError": false,
+		// "hasResponse": true,
+		// "responseObject": {
+		// "__type": "NextPredictedArrivalTimeAtStopsForTramNoInfo",
+		// "AtLayover": false,
+		// "Available": true,
+		// "DisruptionMessage": null,
+		// "HasDisruption": false,
+		// "HasSpecialEvent": false,
+		// "HeadBoardRouteNo": "109",
+		// "NextPredictedStopsDetails": [
+		// {
+		// "PredictedArrivalDateTime": "\/Date(1406371302000+1000)\/",
+		// "StopNo": 1707,
+		// "StopSeq": null
+		// },
+		// {
+		// "PredictedArrivalDateTime": "\/Date(1406371422000+1000)\/",
+		// "StopNo": 3357,
+		// "StopSeq": null
+		// },
+		// {
+		// "PredictedArrivalDateTime": "\/Date(1406371482000+1000)\/",
+		// "StopNo": 3356,
+		// "StopSeq": null
+		// }
+		// ],
+		// "RouteNo": "109",
+		// "SpecialEventMessage": "",
+		// "Up": false,
+		// "VehicleNo": 3001
+		// },
+		// "timeRequested": "\/Date(1406371299805+1000)\/",
+		// "timeResponded": "\/Date(1406371302351+1000)\/",
+		// "webMethodCalled": "GetNextPredictedArrivalTimeAtStopsForTramNo"
+		// }
+
+		mDB = new TramHunterDB();
+		TramRun tramRun = new TramRun();
+
+		try {
+			int vehicleNumber = responseObject.getInt("VehicleNo");
+			boolean isAtLayover = responseObject.getBoolean("AtLayover");
+			boolean isAvailable = responseObject.getBoolean("Available");
+			boolean hasSpecialEvent = responseObject.getBoolean("HasSpecialEvent");
+			boolean hasDisruption = responseObject.getBoolean("HasDisruption");
+
+			tramRun.setVehicleNo(vehicleNumber);
+			tramRun.setIsAtLayover(isAtLayover);
+			tramRun.setIsAvailable(isAvailable);
+			tramRun.setHasSpecialEvent(hasSpecialEvent);
+			tramRun.setHasDisruption(hasDisruption);
+
+			JSONArray nextPredictedStopsDetails = responseObject.getJSONArray("NextPredictedStopsDetails");
+
+			int objCount = nextPredictedStopsDetails.length();
+			for (int i = 0; i < objCount; i++) {
+
+				JSONObject timeObject = nextPredictedStopsDetails.getJSONObject(i);
+
+				TramRunTime tramRunTime = new TramRunTime();
+
+				// Get stop string and fetch stop from DB
+				int stopNumber = timeObject.getInt("StopNo");
+				Stop stop = mDB.getStop(stopNumber);
+				tramRunTime.setStop(stop);
+
+				// Get predicted time and parse it to a java datetime
+				String predictedArrivalDateTimeString = timeObject.getString("PredictedArrivalDateTime");
+				Date predictedArrivalDateTime = parseTimestamp(predictedArrivalDateTimeString);
+				tramRunTime.setPredictedArrivalDateTime(predictedArrivalDateTime);
+
+				tramRun.addTramRunTime(tramRunTime);
+			}
+		} catch (Exception e) {
+			throw new TramTrackerServiceException(e.toString());
+		} finally {
+			mDB.close();
+		}
+
+		return tramRun;
+	}
+
+	/**
 	 * TODO: Update this
 	 */
 	public TramRun getNextPredictedArrivalTimeAtStopsForTramNo(int tram) throws TramTrackerServiceException {
-		TramRun tramRun = new TramRun();
+
+		TramRun tramRun = null;
+
+		try {
+			// GetNextPredictedArrivalTimeAtStopsForTramNo/{vehicleNumber}/
+			String method = "GetNextPredictedArrivalTimeAtStopsForTramNo";
+			String url = String.format("%s/%s/%s/", BASE_URL, method, tram);
+
+			List<NameValuePair> params = new LinkedList<NameValuePair>();
+
+			InputStream jsonData = getJSONData(url, params);
+			JSONObject serviceData = parseJSONStream(jsonData);
+
+			// Actual information object
+			JSONObject responseObject = serviceData.getJSONObject("responseObject");
+
+			String requestTime = serviceData.getString("timeRequested");
+			Date requestDateTime = parseTimestamp(requestTime);
+
+			tramRun = parseGetNextPredictedArrivalTimeAtStopsForTramNo(responseObject, requestDateTime);
+		} catch (Exception e) {
+			throw new TramTrackerServiceException(e);
+		}
 		return tramRun;
 	}
 
@@ -488,9 +594,8 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			HttpGet method = new HttpGet(uri);
 			HttpResponse response = httpClient.execute(method);
 			InputStream jsonData = response.getEntity().getContent();
-
-			// TODO: Split this into seperate methods?
-			JSONArray responseArray = getResponseArray(jsonData);
+			JSONObject serviceData = parseJSONStream(jsonData);
+			JSONArray responseArray = getResponseArray(serviceData);
 			JSONObject responseObject = responseArray.getJSONObject(0);
 
 			String guid = responseObject.getString("DeviceToken");
@@ -513,8 +618,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 		// If we don't have a GUID yet, get from from TramTracker
 		if (guid == null) {
-			if (LOGV)
-				Log.d(TAG, "GUID is null, fetching new one");
+			if (LOGV) Log.d(TAG, "GUID is null, fetching new one");
 			guid = getNewClientGuid();
 		}
 

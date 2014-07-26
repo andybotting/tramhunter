@@ -56,12 +56,12 @@ import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.TramRun;
 import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
+import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
@@ -76,9 +76,9 @@ public class TramRunActivity extends SherlockListActivity {
 
 	private ListAdapter mListAdapter;
 	private ListView mListView;
-	
+
 	private PreferenceHelper mPreferenceHelper;
-	
+
 	private TramTrackerService ttService;
 
 	private String mErrorMessage = null;
@@ -99,8 +99,7 @@ public class TramRunActivity extends SherlockListActivity {
 	// Handle the timer
 	Handler UpdateHandler = new Handler() {
 		public void handleMessage(Message msg) {
-			if (!mFirstDepartureReqest)
-				mShowDialog = false;
+			if (!mFirstDepartureReqest) mShowDialog = false;
 			getTramRun();
 		}
 	};
@@ -121,7 +120,7 @@ public class TramRunActivity extends SherlockListActivity {
 
 		// Preferences
 		mPreferenceHelper = new PreferenceHelper();
-		
+
 		// Set up our list
 		mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
@@ -130,7 +129,7 @@ public class TramRunActivity extends SherlockListActivity {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVehicleNumber = extras.getInt("vehicleNumber");
-			
+
 			// Throw an error if we don't actually have a vehicle ID
 			if (mVehicleNumber <= 0) {
 				Toast.makeText(this, "Stop details are not available for this service.", Toast.LENGTH_LONG).show();
@@ -139,14 +138,18 @@ public class TramRunActivity extends SherlockListActivity {
 		}
 
 		// Set the title
-		//final String title = mStop.getStopName();
+		// final String title = mStop.getStopName();
 		String title = "Stops for Tram #" + mVehicleNumber;
 		actionBar.setTitle(title);
 
 		// Display stop data
 		displayTramRun();
 
-		ttService = new TramTrackerServiceSOAP();
+		// Get our TramTracker service, either SOAP (def) or JSON
+		if (mPreferenceHelper.isJSONAPIEnabled())
+			ttService = new TramTrackerServiceJSON();
+		else
+			ttService = new TramTrackerServiceSOAP();
 
 		// Our thread for updating the stops every 60 secs
 		mRefreshThread = new Thread(new CountDown());
@@ -190,22 +193,21 @@ public class TramRunActivity extends SherlockListActivity {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId())
-			{
+		switch (item.getItemId()) {
 
-			case R.id.menu_refresh:
-				mShowDialog = true; // Show the 'loading' view if specifically
-									// clicked
-				getTramRun();
-				return true;
+		case R.id.menu_refresh:
+			mShowDialog = true; // Show the 'loading' view if specifically
+								// clicked
+			getTramRun();
+			return true;
 
-			case android.R.id.home:
-				finish();
-				return true;
+		case android.R.id.home:
+			finish();
+			return true;
 
-			default:
-				return super.onOptionsItemSelected(item);
-			}
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	/**
@@ -215,13 +217,12 @@ public class TramRunActivity extends SherlockListActivity {
 
 		// Loading screen
 		findViewById(R.id.departures_loading).setVisibility(isRefreshing ? View.VISIBLE : View.GONE);
-		
+
 		if (isRefreshing) {
 			mListView.setVisibility(View.GONE);
 			mListView.getEmptyView().setVisibility(View.GONE);
 			findViewById(R.id.departures_loading).setVisibility(View.VISIBLE);
-		}
-		else {
+		} else {
 			findViewById(R.id.departures_loading).setVisibility(View.GONE);
 			// The 'No Results' view or the stop times list
 			if (mListAdapter.getCount() > 0) {
@@ -232,7 +233,6 @@ public class TramRunActivity extends SherlockListActivity {
 				mListView.getEmptyView().setVisibility(View.GONE);
 			}
 		}
-
 
 		// Refresh spinner in Action Bar
 		if (mRefreshItem != null) {
@@ -283,26 +283,23 @@ public class TramRunActivity extends SherlockListActivity {
 	private void getTramRun() {
 		// Really dumb check that we're not starting two update threads
 		// at once.
-		if (!mIsRefreshing)
-			new GetTramRun().execute();
+		if (!mIsRefreshing) new GetTramRun().execute();
 	}
 
 	/**
 	 * Background task for fetching tram times
 	 */
 	private class GetTramRun extends AsyncTask<TramRun, Void, TramRun> {
-		
+
 		@Override
 		protected void onPreExecute() {
 			mIsRefreshing = true;
-			if (mShowDialog)
-				showLoadingView(true);
+			if (mShowDialog) showLoadingView(true);
 		}
 
 		@Override
 		protected TramRun doInBackground(final TramRun... params) {
-			if (LOGV)
-				Log.v(TAG, "Fetching getNextPredictedRoutesCollection...");
+			if (LOGV) Log.v(TAG, "Fetching getNextPredictedRoutesCollection...");
 			try {
 				// Get out next trams
 				mTramRun = ttService.getNextPredictedArrivalTimeAtStopsForTramNo(mVehicleNumber);
@@ -311,8 +308,7 @@ public class TramRunActivity extends SherlockListActivity {
 				// Retry a couple of times before error
 				if (mErrorRetry < MAX_ERRORS) {
 					mErrorRetry++;
-					if (LOGV)
-						Log.e(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e);
+					if (LOGV) Log.e(TAG, "Error " + mErrorRetry + " of " + MAX_ERRORS + ": " + e);
 					this.doInBackground(params);
 				} else {
 					// Save the error message for the toast
@@ -361,12 +357,11 @@ public class TramRunActivity extends SherlockListActivity {
 	 * Create a NextTramsListAdapter for showing our next trams
 	 */
 	private class NextTramsListAdapter extends BaseAdapter {
-		
+
 		Date now = new Date();
 
 		public int getCount() {
-			if (mTramRun == null)
-				return 0;
+			if (mTramRun == null) return 0;
 			return mTramRun.getTramRunTimeCount();
 		}
 
@@ -393,10 +388,10 @@ public class TramRunActivity extends SherlockListActivity {
 			// We factor in the clock offset here to fix the times. See the SOAP
 			// provider for info about why we do this.
 			long diff = runTime.getPredictedArrivalDateTime().getTime() - now.getTime() + mPreferenceHelper.getClockOffset();
-			
+
 			// +1 min to adjust for out of whack values, or we get 0 min for the first response
-			int minutes = (int)diff/60000 + 1;
-			
+			int minutes = (int) diff / 60000 + 1;
+
 			((TextView) pv.findViewById(R.id.nextTime)).setText(minutes + " min");
 
 			return pv;

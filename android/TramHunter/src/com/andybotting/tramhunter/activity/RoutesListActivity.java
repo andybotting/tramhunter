@@ -53,7 +53,6 @@ import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleExpandableListAdapter;
-
 import android.widget.ExpandableListView.OnChildClickListener;
 
 public class RoutesListActivity extends SherlockExpandableListActivity {

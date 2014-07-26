@@ -36,8 +36,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andybotting.tramhunter"
     android:installLocation="auto"
-    android:versionCode="1300"
-    android:versionName="1.3">
+    android:versionCode="1391"
+    android:versionName="1.4-rc1">
 
     <!-- Keep the version code in sync with TramHunterDB and CLIENTVERSION in SOAP provider -->
 
@@ -53,7 +53,7 @@
     <!-- Require Android 2.1 for ActionBarSherlock -->
     <uses-sdk
         android:minSdkVersion="7"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <supports-screens
         android:anyDensity="true"
