@@ -659,14 +659,6 @@ public class StopDetailsActivity extends SherlockListActivity {
 						if (specialEventMessage.length() > 10)
 							showSpecialEvent(specialEventMessage);
 
-						if (mPreferenceHelper.isSendStatsEnabled()) {
-							new Thread() {
-								public void run() {
-									uploadStats();
-								}
-							}.start();
-						}
-
 						// Reset the first departure request
 						mFirstDepartureReqest = false;
 					}
@@ -748,59 +740,6 @@ public class StopDetailsActivity extends SherlockListActivity {
 
 			return pv;
 		}
-	}
-
-	/**
-	 * Upload statistics to our web server
-	 */
-	private void uploadStats() {
-		if (LOGV) Log.i(TAG, "Sending stop request statistics");
-
-		// gather all of the device info
-		try {
-			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String device_uuid = tm.getDeviceId();
-			String device_id = "00000000000000000000000000000000";
-			if (device_uuid != null) {
-				device_id = GenericUtil.MD5(device_uuid);
-			}
-
-			LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-			Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-			// post the data
-			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost("http://tramhunter.andybotting.com/stats/stop/send");
-			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			pairs.add(new BasicNameValuePair("device_id", device_id));
-			pairs.add(new BasicNameValuePair("guid", ttService.getGUID()));
-			pairs.add(new BasicNameValuePair("ttid", String.valueOf(mStop.getTramTrackerID())));
-
-			if (location != null) {
-				pairs.add(new BasicNameValuePair("latitude", String.valueOf(location.getLatitude())));
-				pairs.add(new BasicNameValuePair("longitude", String.valueOf(location.getLongitude())));
-				pairs.add(new BasicNameValuePair("accuracy", String.valueOf(location.getAccuracy())));
-			}
-
-			try {
-				post.setEntity(new UrlEncodedFormEntity(pairs));
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-
-			try {
-				HttpResponse response = client.execute(post);
-				response.getStatusLine().getStatusCode();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 	}
 
 }

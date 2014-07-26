@@ -53,7 +53,6 @@ public class PreferenceHelper {
 	private static final String KEY_LAST_UPDATE = "last_update";
 	private static final String KEY_LAST_TWITTER_UPDATE = "last_twitter_update";
 	private static final String KEY_LAST_TWITTER_DATA = "last_twitter_data";
-	private static final String KEY_STATS_TIMESTAMP = "stats_timestamp";
 	private static final String KEY_CLOCK_OFFSET = "clock_offset";
 	
 	private final SharedPreferences mPreferences;
@@ -83,10 +82,6 @@ public class PreferenceHelper {
 
 	public boolean isJSONAPIEnabled() {
 		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
-	}
-
-	public boolean isSendStatsEnabled() {
-		return mPreferences.getBoolean(SettingsActivity.KEY_SEND_STATS, SettingsActivity.KEY_SEND_STATS_DEFAULT_VALUE);
 	}
 	
     /**
@@ -185,25 +180,8 @@ public class PreferenceHelper {
 		editor.putLong(KEY_LAST_TWITTER_UPDATE, now.getTime());
 		editor.commit();
 	}
-	
-	
-	/**
-     * Return a long representing the last stats send date
-     */
-	public long getStatsTimestamp() {
-		return mPreferences.getLong(KEY_STATS_TIMESTAMP, 0);
-	}
-	
-    /**
-     * Set a long representing the last update
-     */	
-	public void setStatsTimestamp() {
-		Date now = new Date();
-		SharedPreferences.Editor editor = mPreferences.edit();
-		editor.putLong(KEY_STATS_TIMESTAMP, now.getTime());
-		editor.commit();
-	}	
-	
+
+
 	/**
 	 * Return a long representing the clock offset between the TT API clock and
 	 * local device time
