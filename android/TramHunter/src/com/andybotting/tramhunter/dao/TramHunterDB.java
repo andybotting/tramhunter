@@ -544,8 +544,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 		c.close();
 		db.close();
-
-		System.out.println(routes);
 		return routes;
 	}
 
