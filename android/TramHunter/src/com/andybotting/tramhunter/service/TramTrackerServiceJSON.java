@@ -75,7 +75,11 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	private static final String TAG = "TTServiceJSON";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
-	private static final String BASE_URL = "http://extranetdev.yarratrams.com.au/PIDSServiceWCF/RestService";
+	// Production
+	private static final String BASE_URL = "http://ws2.tramtracker.com.au/TramTracker/RestService";
+	// Development
+	//private static final String BASE_URL = "http://extranetdev.yarratrams.com.au/PIDSServiceWCF/RestService";
+
 	private static final String CLIENT_TYPE = "TRAMHUNTER";
 
 	private Context mContext;
