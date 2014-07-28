@@ -54,6 +54,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.andybotting.tramhunter.TramHunterApplication;
+import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
@@ -63,7 +64,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String TAG = "TramHunterDB";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
-	private static final String AUTHORITY = "com.andybotting.tramhunter";
 	private static final String DATABASE_NAME = "tramhunter.db";
 
 	// private static final String DATABASE_INTERNAL_PATH = "/data/"+ AUTHORITY + "/databases/";
@@ -167,7 +167,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) return null;
 
 		// Build the directory on the SD Card, if it doesn't exist
-		File appDbDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + AUTHORITY + "/files");
+		File appDbDir = Environment.getExternalStorageDirectory();
 		if (!appDbDir.exists()) {
 			if (LOGV) Log.v(TAG, "Making database directory on SD Card");
 			appDbDir.mkdirs();
@@ -205,14 +205,15 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		boolean dbExist = checkDB(dbFile);
 
 		if (dbExist) {
-			if (LOGV) Log.d(TAG, "Found existing DB at " + dbFile);
+			//if (LOGV) Log.d(TAG, "Found existing DB at " + dbFile);
 
 			mDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
 			int thisDBVersion = mDB.getVersion();
 			mDB.close();
 
-			if (LOGV) Log.v(TAG, "Current DB Version: v" + thisDBVersion + " - Shipped DB Version is v" + DATABASE_VERSION);
+			//if (LOGV) Log.d(TAG, "Current DB Version: v" + thisDBVersion + " - Shipped DB Version is v" + DATABASE_VERSION);
 			if (thisDBVersion < DATABASE_VERSION) {
+				if (LOGV) Log.d(TAG, "Current DB Version: v" + thisDBVersion + " - Shipped DB Version is v" + DATABASE_VERSION);
 				try {
 					copyDB(dbFile);
 				} catch (IOException e) {
@@ -240,7 +241,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 */
 	private boolean checkDB(String dbFile) {
 		SQLiteDatabase checkDB = null;
-		if (LOGV) Log.d(TAG, "Checking for an existing DB at " + dbFile);
+		//if (LOGV) Log.d(TAG, "Checking for an existing DB at " + dbFile);
 
 		try {
 			checkDB = SQLiteDatabase.openDatabase(dbFile, null, SQLiteDatabase.OPEN_READONLY);
@@ -951,8 +952,8 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 *
 	 */
 	public static class Stops implements BaseColumns, StopsColumns {
-		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/stops/");
-		public static final Uri CONTENT_ROUTES_URI = Uri.parse("content://" + AUTHORITY + "/stops/route/");
+		public static final Uri CONTENT_URI = Uri.parse("content://" + TramHunterConstants.AUTHORITY + "/stops/");
+		public static final Uri CONTENT_ROUTES_URI = Uri.parse("content://" + TramHunterConstants.AUTHORITY + "/stops/route/");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/com.andybotting.dbcopytest.stop";
 		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/com.andybotting.dbcopytest.stop";
 		public static final String CONTENT_ROUTES_TYPE = "vnd.android.cursor.item/com.andybotting.dbcopytest.routestop";
@@ -965,7 +966,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 *
 	 */
 	public static class Routes implements BaseColumns, RoutesColumns {
-		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/routes/");
+		public static final Uri CONTENT_URI = Uri.parse("content://" + TramHunterConstants.AUTHORITY + "/routes/");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/com.andybotting.dbcopytest.route";
 		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/com.andybotting.dbcopytest.route";
 

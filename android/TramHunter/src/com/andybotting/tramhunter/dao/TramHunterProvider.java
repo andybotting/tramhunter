@@ -46,14 +46,13 @@ import android.text.TextUtils;
 
 import java.util.List;
 
+import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Stop;
 
 /**
  * Provides search suggestions for tram stops
  */
 public class TramHunterProvider extends ContentProvider {
-
-    public static String AUTHORITY = "com.andybotting.tramhunter";
 
     private static final int SEARCH_SUGGEST = 0;
     
@@ -66,12 +65,12 @@ public class TramHunterProvider extends ContentProvider {
     	SearchManager.SUGGEST_COLUMN_INTENT_DATA,
     };
 
-    private static UriMatcher buildUriMatcher() {
-    	UriMatcher matcher =  new UriMatcher(UriMatcher.NO_MATCH);
-    	matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
-    	matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY + "/*", SEARCH_SUGGEST);
-    	return matcher;
-    }
+	private static UriMatcher buildUriMatcher() {
+		UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+		matcher.addURI(TramHunterConstants.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
+		matcher.addURI(TramHunterConstants.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY + "/*", SEARCH_SUGGEST);
+		return matcher;
+	}
 
     @Override
     public boolean onCreate() {

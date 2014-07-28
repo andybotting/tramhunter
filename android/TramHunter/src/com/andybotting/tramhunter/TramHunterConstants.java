@@ -36,8 +36,11 @@ package com.andybotting.tramhunter;
 
 public class TramHunterConstants {
 
+	// Package name for DB purposes
+	public static String AUTHORITY = "com.andybotting.tramhunter";
+
 	/**
-	 * These values control the user experience of your app. You should
+	 * Location discovery settings
 	 */
 	// The minimum time between location updates
 	public static int MIN_TIME = 1000 * 20;
