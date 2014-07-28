@@ -34,37 +34,43 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/departures_row"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	style="@style/ListItem" >
+    android:id="@+id/departures_row"
+    style="@style/ListItem"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-	<ImageView android:id="@+id/starImageView"
-		android:src="@drawable/star_on"	
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
- 		android:visibility="invisible" />		
+    <ImageView
+        android:id="@+id/starImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/star_on"
+        android:visibility="invisible" />
 
-	<TextView android:id="@+id/stopNameTextView"
-		style="@style/ListTitle"	
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentTop="true"		
-		android:layout_toLeftOf="@+id/starImageView" />
-				
-	<TextView android:id="@+id/stopDetailsTextView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@+id/stopNameTextView"
-		style="@style/ListSubtitle"
-		android:textSize="@dimen/text_size_tiny" />
-		
-	<TextView android:id="@+id/stopRoutesTextView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@+id/stopDetailsTextView"
-		style="@style/ListSubtitle"
-		android:textSize="@dimen/text_size_tiny" />	
-		
+    <TextView
+        android:id="@+id/stopNameTextView"
+        style="@style/ListTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/starImageView" />
+
+    <TextView
+        android:id="@+id/stopDetailsTextView"
+        style="@style/ListSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/stopNameTextView"
+        android:textSize="@dimen/text_size_tiny" />
+
+    <TextView
+        android:id="@+id/stopRoutesTextView"
+        style="@style/ListSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/stopDetailsTextView"
+        android:textSize="@dimen/text_size_tiny" />
+
 </RelativeLayout>
