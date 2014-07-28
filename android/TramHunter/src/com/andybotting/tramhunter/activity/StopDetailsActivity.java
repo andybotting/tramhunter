@@ -34,20 +34,11 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -55,13 +46,10 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -103,7 +91,6 @@ import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
 public class StopDetailsActivity extends SherlockListActivity {
@@ -450,7 +437,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 			if (isRefreshing) {
 				if (mRefreshIndeterminateProgressView == null) {
 					LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					mRefreshIndeterminateProgressView = inflater.inflate(R.layout.actionbar_progress, null);
+					mRefreshIndeterminateProgressView = inflater.inflate(R.layout.actionbar_progress, mListView, false);
 				}
 				mRefreshItem.setActionView(mRefreshIndeterminateProgressView);
 			} else {
