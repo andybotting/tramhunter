@@ -34,40 +34,46 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/departures_row"
-    android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip"
     style="@style/ListItem">
 
-	<TextView android:id="@+id/routeNumber"
-		android:layout_width="40dip"
-		android:layout_height="wrap_content"
-		android:textSize="@dimen/text_size_medium" />
-	
-	<RelativeLayout
-		android:layout_height="wrap_content"
-		android:layout_width="0dip"
-		android:layout_weight="10">
-		
-		<TextView android:id="@+id/routeDestination"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:singleLine="true"
-			android:ellipsize="end"
-			android:textSize="@dimen/text_size_medium" />
-		
-		<ImageView android:id="@+id/tramClass"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"	
-			android:layout_below="@+id/routeDestination" />
-			
-	</RelativeLayout>	
-	
-	<TextView android:id="@+id/nextTime"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:gravity="right"
-		android:textSize="@dimen/text_size_medium" />
+    <TextView
+        android:id="@+id/routeNumber"
+        android:layout_width="40dip"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_medium" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="99"
+        android:gravity="left">
+
+        <TextView
+            android:id="@+id/routeDestination"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="@dimen/text_size_medium" />
+
+        <ImageView
+            android:id="@+id/tramClass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/routeDestination" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/nextTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="right"
+        android:textSize="@dimen/text_size_medium" />
 
 </LinearLayout>

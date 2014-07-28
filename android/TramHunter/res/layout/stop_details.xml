@@ -32,144 +32,180 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-    
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-	
-	<!-- Stop tile -->
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:id="@+id/list_item_station"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    style="@style/HeaderItem">
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-	    <TextView android:id="@+id/stopNameTextView"
-	        android:layout_alignParentLeft="true"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        style="@style/Title" />
-	        
-	    <TextView android:id="@+id/stopDetailsTextView"
-			android:layout_below="@+id/stopNameTextView"
-	        android:layout_alignParentLeft="true"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        style="@style/Subtitle"
-	        android:textSize="@dimen/text_size_tiny" />
-	        			
-	    <TextView android:id="@+id/stopRoutesTextView"
-			android:layout_below="@+id/stopDetailsTextView"
-	        android:layout_alignParentLeft="true"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        style="@style/Subtitle"
-	        android:textSize="@dimen/text_size_tiny" />
-	        
-	    <Spinner android:id="@+id/routeSelectSpinner"
-	        android:prompt="@string/label_select_route"
-	        android:layout_below="@+id/stopRoutesTextView"
-	        android:layout_alignParentLeft="true"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        style="@style/Subtitle"
-	        android:textSize="@dimen/text_size_tiny"
-	        android:visibility="gone" />
-	        
-	</RelativeLayout>
-		
-		
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:orientation="horizontal"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:paddingLeft="10dip"
-	    android:paddingRight="10dip">
-	
-			<TextView
-				android:text="Route"
-				android:id="@+id/headingRouteNumber" 
-				android:textSize="@dimen/text_size_tiny"
-				android:layout_width="40dip"
-				android:layout_height="wrap_content" />
-			
-			<TextView
-				android:text="To" 
-				android:id="@+id/headingRouteDestination"
-				android:gravity="left"
-				android:layout_toRightOf="@+id/headingRouteNumber"
-				android:textSize="@dimen/text_size_tiny"
-				android:layout_width="0dip"
-				android:layout_weight="10"
-				android:layout_height="wrap_content" />
-			
-			<TextView
-   				android:text="Mins" 
-				android:id="@+id/headingNextTime" 
-				android:gravity="right"
-				android:layout_toRightOf="@+id/headingRouteDestination"
-				android:textSize="@dimen/text_size_tiny"
-				android:layout_width="40dip"
-				android:layout_height="wrap_content" />
-	
-	</LinearLayout>		
-	
-	<!-- Divider -->
-	<ImageView android:id="@+id/divider" 
-		android:layout_width="fill_parent"
-		android:layout_height="1px"
-		android:background="@drawable/list_divider"
-		android:layout_below="@+id/headingTable" />
-	
-	<!-- Empty List -->
-	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:id="@id/android:empty"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-       	android:layout_weight="1"
-        android:gravity="center">
-        
-		<TextView
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-            android:textSize="@dimen/text_size_small"
-			android:text="@string/label_no_results" />
-			
-	</RelativeLayout>
-	
-	
-	<!--  ListView to hold our stop_details_row list items -->
-	<ListView android:id="@android:id/list"
-	   	android:layout_width="fill_parent"
-	   	android:layout_height="wrap_content"
-       	android:layout_weight="1"
-       	android:headerDividersEnabled="true"
-       	android:footerDividersEnabled="true" />  
+    <!-- Stop tile -->
+    <RelativeLayout
+        android:id="@+id/list_item_station"
+        style="@style/HeaderItem"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
 
-	<!-- Loading Spinner -->
-	<LinearLayout
+        <TextView
+            android:id="@+id/stopNameTextView"
+            style="@style/Title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true" />
+
+        <TextView
+            android:id="@+id/stopDetailsTextView"
+            style="@style/Subtitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/stopNameTextView"
+            android:textSize="@dimen/text_size_tiny" />
+
+        <TextView
+            android:id="@+id/stopRoutesTextView"
+            style="@style/Subtitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/stopDetailsTextView"
+            android:textSize="@dimen/text_size_tiny" />
+
+        <Spinner
+            android:id="@+id/routeSelectSpinner"
+            style="@style/Subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/stopRoutesTextView"
+            android:prompt="@string/label_select_route"
+            android:textSize="@dimen/text_size_tiny"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip" >
+
+        <TextView
+            android:id="@+id/headingRouteNumber"
+            android:layout_width="40dip"
+            android:layout_height="wrap_content"
+            android:text="Route"
+            android:textSize="@dimen/text_size_tiny" />
+
+        <TextView
+            android:id="@+id/headingRouteDestination"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:gravity="left"
+            android:text="To"
+            android:textSize="@dimen/text_size_tiny" />
+
+        <TextView
+            android:id="@+id/headingNextTime"
+            android:layout_width="40dip"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="Mins"
+            android:textSize="@dimen/text_size_tiny" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <ImageView
+        android:id="@+id/divider"
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/headingTable"
+        android:background="@drawable/list_divider" />
+
+    <!-- Empty List -->
+    <RelativeLayout
+        android:id="@id/android:empty"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:gravity="center" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:text="@string/label_no_results"
+            android:textSize="@dimen/text_size_small" />
+    </RelativeLayout>
+
+    <!-- ListView to hold our stop_details_row list items -->
+    <LinearLayout
+        android:id="@+id/departures_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:footerDividersEnabled="true"
+            android:headerDividersEnabled="true" />
+
+        <RelativeLayout
+            android:id="@+id/special_event"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/special_event_message_divider"
+                android:layout_width="fill_parent"
+                android:layout_height="1px"
+                android:background="@drawable/list_divider" />
+
+            <ImageView
+                android:id="@+id/special_event_alert_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/special_event_message_divider"
+                android:paddingLeft="5dip"
+                android:paddingRight="5dip"
+                android:paddingTop="5dip"
+                android:src="@drawable/ic_dialog_alert" />
+
+            <TextView
+                android:id="@+id/special_event_message"
+                style="@style/Subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/special_event_message_divider"
+                android:layout_toRightOf="@+id/special_event_alert_icon"
+                android:textSize="@dimen/text_size_tiny" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- Loading Spinner -->
+    <LinearLayout
         android:id="@+id/departures_loading"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-       	android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
         android:gravity="center"
-        android:visibility="gone">
-        
+        android:visibility="gone" >
+
         <ProgressBar
             style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingRight="6dip"
-            android:indeterminate="true"/>
-            
+            android:indeterminate="true"
+            android:paddingRight="6dip" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size_small"
-            android:text="@string/label_loading" />
-            
-    </LinearLayout>         	
+            android:text="@string/label_loading"
+            android:textSize="@dimen/text_size_small" />
+    </LinearLayout>
 
 </LinearLayout>

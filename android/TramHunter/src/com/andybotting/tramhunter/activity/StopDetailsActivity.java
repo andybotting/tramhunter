@@ -157,7 +157,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 		// Set up our list
 		mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
-		mListView.setVisibility(View.GONE);
+		findViewById(R.id.departures_list).setVisibility(View.GONE);
 
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -425,8 +425,10 @@ public class StopDetailsActivity extends SherlockListActivity {
 		if (mListAdapter.getCount() < 2) {
 			// Only 1 entry means an error, so make it < 2
 			mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+			findViewById(R.id.departures_list).setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 		} else {
 			mListView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+			findViewById(R.id.departures_list).setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 		}
 
 		// Loading screen
@@ -638,24 +640,20 @@ public class StopDetailsActivity extends SherlockListActivity {
 						setListAdapter(mListAdapter);
 					}
 
-					// If it's the first load of data
-					if (mFirstDepartureReqest) {
-						// > 10 because ksoap2 fills in anytype{} instead of
-						// null
-						String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
-						if (specialEventMessage.length() > 10)
-							showSpecialEvent(specialEventMessage);
-
-						// Reset the first departure request
-						mFirstDepartureReqest = false;
+					String specialEventMessage = nextTrams.get(0).getSpecialEventMessage();
+					if (specialEventMessage.length() > 10) {
+						findViewById(R.id.special_event).setVisibility(View.VISIBLE);
+						((TextView) findViewById(R.id.special_event_message)).setText(specialEventMessage);
+					} else {
+						findViewById(R.id.special_event).setVisibility(View.GONE);
 					}
 				}
 
 				if (noResults) {
 					mListView.getEmptyView().setVisibility(noResults ? View.VISIBLE : View.GONE);
 					mListView.setVisibility(noResults ? View.VISIBLE : View.GONE);
+					findViewById(R.id.departures_list).setVisibility(noResults ? View.VISIBLE : View.GONE);
 				}
-
 			}
 
 			// Hide the loading spinners
@@ -664,18 +662,6 @@ public class StopDetailsActivity extends SherlockListActivity {
 		}
 	}
 
-	/**
-	 * Show a dialog message for a given 'Special Event'
-	 */
-	private void showSpecialEvent(String message) {
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(
-				new ContextThemeWrapper(this, R.style.AlertDialog));
-		dialogBuilder.setTitle(R.string.title_special_event);
-		dialogBuilder.setMessage(message);
-		dialogBuilder.setPositiveButton(android.R.string.ok, null);
-		dialogBuilder.setIcon(R.drawable.ic_dialog_alert);
-		dialogBuilder.show();
-	}
 
 	/**
 	 * Create a NextTramsListAdapter for showing our next trams
