@@ -151,7 +151,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:footerDividersEnabled="true"
-            android:headerDividersEnabled="true" />
+            android:headerDividersEnabled="true"
+            android:padding="2dip" />
 
         <RelativeLayout
             android:id="@+id/special_event"
