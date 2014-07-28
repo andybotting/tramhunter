@@ -22,7 +22,7 @@ The main features of Tram Hunter are:
   - Tram icons representing the approaching tram model
   - See tram stops on a map
   - Network map
-  - Yarra Trams twitter feed for latest tram network issues
+  - Yarra Trams twitter feed for latest tram network issues (Broken for now)
 
 
 Installation
@@ -58,6 +58,35 @@ Contact
 
 Change Log
 ==========
+
+Latest Changes in v1.4
+----------------------
+
+  - Remove annoying special event popup!
+  - Updated Stops DB (includes new Route 12)
+  - Add support for new Tram Tracker JSON API (will replace the old SOAP API soon)
+  - Removed anonymous stats
+
+Latest Changes in v1.3
+----------------------
+
+  - Updated Stops DB
+  - Removed broken Twitter feed due to Twitter API changes
+  - Tram quotes return!
+
+Latest Changes in v1.2
+----------------------
+
+  - Updated Stops DB
+  - Much improved location handling
+  - Refresh stop times automatically when app resumed
+
+Latest Changes in v1.1
+----------------------
+
+  - Add screen for showing upcoming stops! Click a departure to show list.
+  - Open correct settings screen for adjusting location settings
+  - Handle devices without Google Maps installed
 
 Latest Changes in v1.0
 ----------------------
