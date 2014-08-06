@@ -88,16 +88,20 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private static final String TABLE_TRAMS = "trams";
 
 	// Join string for Stops-Destinations
-	private static final String TABLE_STOPS_JOIN_DESTINATIONS = "stops " + "JOIN destination_stops ON destination_stops.stop_id = stops._id "
-			+ "JOIN destinations ON destination_stops.destination_id = destinations._id";
+	private static final String TABLE_STOPS_JOIN_DESTINATIONS = "stops " +
+			"JOIN destination_stops ON destination_stops.stop_id = stops._id " +
+			"JOIN destinations ON destination_stops.destination_id = destinations._id";
 
 	// Join string for Stops-Routes
-	private static final String TABLE_STOPS_JOIN_ROUTES = "stops " + "JOIN destination_stops ON destination_stops.stop_id = stops._id "
-			+ "JOIN destinations ON destination_stops.destination_id = destinations._id " + "JOIN routes ON destinations.route_id = routes._id";
+	private static final String TABLE_STOPS_JOIN_ROUTES = "stops " +
+			"JOIN destination_stops ON destination_stops.stop_id = stops._id " +
+			"JOIN destinations ON destination_stops.destination_id = destinations._id " + 
+			"JOIN routes ON destinations.route_id = routes._id";
 
 	// Join string for Destinations-Routes
-	private static final String TABLE_DESTINATIONS_JOIN_ROUTES = "destinations "
-			+ "JOIN destination_stops ON destination_stops.destination_id = destinations._id " + "JOIN routes ON destinations.route_id = routes._id";
+	private static final String TABLE_DESTINATIONS_JOIN_ROUTES = "destinations " +
+			"JOIN destination_stops ON destination_stops.destination_id = destinations._id " +
+			"JOIN routes ON destinations.route_id = routes._id";
 
 	/**
 	 * Constructor for TramHunterDB without providing a context
@@ -439,8 +443,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public Route getRoute(int routeId) {
 		SQLiteDatabase db = getDatabase();
 
-		Cursor c = db.query(TABLE_ROUTES, new String[] { "_id", "number", "internal_number" }, RoutesColumns.ID + " = '" + routeId + "'", null, null, null,
-				null);
+		String[] columns = new String[] { "_id", "number", "internal_number" };
+		String selection = RoutesColumns.ID + " = '" + routeId + "'";
+
+		Cursor c = db.query(TABLE_ROUTES, columns, selection, null, null, null, null);
 
 		Route route = null;
 
@@ -456,8 +462,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 			// TODO: We should call this as another method, but doing it here
 			// until we get out db create/close stuff sorted
-			Cursor d = db.query(TABLE_DESTINATIONS, new String[] { "destinations._id", "destination", "direction" }, DestinationsColumns.ROUTE_ID + " = '"
-					+ routeId + "'", null, null, null, null);
+
+			String[] sub_columns = new String[] { "destinations._id", "destination", "direction" };
+			String sub_selection = DestinationsColumns.ROUTE_ID + " = '" + routeId + "'";
+
+			Cursor d = db.query(TABLE_DESTINATIONS, sub_columns, sub_selection, null, null, null, null);
 
 			if (d.moveToFirst()) {
 				do {
@@ -494,9 +503,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		SQLiteDatabase db = getDatabase();
 
 		List<Route> routes = new ArrayList<Route>();
+		String[] columns = new String[] { "_id", "number", "internal_number" };
 		String orderBy = Routes.INTERNAL_NUMBER + " ASC";
 
-		Cursor c = db.query(TABLE_ROUTES, new String[] { "_id", "number", "internal_number" }, null, null, null, null, orderBy);
+		Cursor c = db.query(TABLE_ROUTES, columns, null, null, null, null, orderBy);
 
 		if (c.moveToFirst()) {
 			do {
@@ -558,8 +568,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 		List<Destination> destinations = new ArrayList<Destination>();
 
-		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, new String[] { "destinations._id", "number", "destinations.destination", "direction" }, null, null,
-				"destinations._id", null, null);
+		String[] columns = new String[] { "destinations._id", "number", "destinations.destination", "direction" };
+		String groupBy = "destinations._id";
+
+		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, columns, null, null, groupBy, null, null);
 
 		if (c.moveToFirst()) {
 			do {
@@ -592,8 +604,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public Destination getDestination(long destinationId) {
 		SQLiteDatabase db = getDatabase();
 
-		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, new String[] { "destinations._id", "number", "destination", "direction" }, "destinations._id = '"
-				+ destinationId + "'", null, null, null, null);
+		String[] columns = new String[] { "destinations._id", "number", "destination", "direction" };
+		String selection = "destinations._id = '" + destinationId + "'";
+
+		Cursor c = db.query(TABLE_DESTINATIONS_JOIN_ROUTES, columns, selection, null, null, null, null);
 
 		Destination dest = null;
 
@@ -626,9 +640,13 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		SQLiteDatabase db = getDatabase();
 
 		List<Route> routes = new ArrayList<Route>();
+		String[] columns = new String[] { "routes._id AS route_id", "number", "internal_number" };
+		String selection = StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'";
+		String groupBy = RoutesColumns.INTERNAL_NUMBER;
+		String orderBy = Routes.INTERNAL_NUMBER + " ASC";
 
-		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, new String[] { "routes._id AS route_id", "number", "internal_number" }, StopsColumns.TRAMTRACKER_ID
-				+ " = '" + tramTrackerId + "'", null, "routes._id", null, "routes._id", null);
+		// String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit
+		Cursor c = db.query(TABLE_STOPS_JOIN_ROUTES, columns, selection, null, groupBy, null, orderBy, null);
 
 		if (c.moveToFirst()) {
 			do {
@@ -675,31 +693,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Get a list of favourite stops using the 'old' method
-	 * 
-	 * @param db
-	 * @return List
-	 */
-	public List<Integer> getOldFavouriteStops() {
-		SQLiteDatabase db = getDatabase();
-		List<Integer> favouriteStops = new ArrayList<Integer>();
-
-		Cursor c = db.query(TABLE_STOPS, new String[] { StopsColumns.TRAMTRACKER_ID }, "starred = 1", null, null, null, null, null);
-
-		if (c.moveToFirst()) {
-			do {
-				int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
-				int tramTrackerID = c.getInt(col_tramTrackerID);
-				favouriteStops.add(tramTrackerID);
-
-			} while (c.moveToNext());
-		}
-
-		c.close();
-		return favouriteStops;
-	}
-
-	/**
 	 * Get a list of Stops for a particular destination
 	 * 
 	 * @return List
@@ -709,8 +702,11 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 		List<Stop> stops = new ArrayList<Stop>();
 
-		Cursor c = db.query(TABLE_STOPS_JOIN_DESTINATIONS, null, "destinations._id = '" + destinationId + "'", null, "stops._id", null,
-				DestinationsStopsColumns.STOP_ORDER, null);
+		String selection = "destinations._id = '" + destinationId + "'";
+		String groupBy = "stops._id";
+		String orderBy = DestinationsStopsColumns.STOP_ORDER;
+
+		Cursor c = db.query(TABLE_STOPS_JOIN_DESTINATIONS, null, selection, null, groupBy, null, orderBy, null);
 
 		if (c.moveToFirst()) {
 			do {
@@ -767,7 +763,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public Stop getStop(int tramTrackerId) {
 		SQLiteDatabase db = getDatabase();
 
-		Cursor c = db.query(TABLE_STOPS, null, StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'", null, null, null, null);
+		String selection = StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'";
+
+		Cursor c = db.query(TABLE_STOPS, null, selection, null, null, null, null);
 
 		Stop stop = null;
 
@@ -808,8 +806,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public boolean checkStop(int tramTrackerId) {
 		SQLiteDatabase db = getDatabase();
 
-		Cursor c = db.query(TABLE_STOPS, new String[] { StopsColumns.TRAMTRACKER_ID }, StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'", null, null,
-				null, null);
+		String[] columns = new String[] { StopsColumns.TRAMTRACKER_ID };
+		String selection = StopsColumns.TRAMTRACKER_ID + " = '" + tramTrackerId + "'";
+
+		Cursor c = db.query(TABLE_STOPS, columns, selection, null, null, null, null);
 
 		int numRows = c.getCount();
 		c.moveToFirst();
@@ -861,7 +861,10 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public String getTramClass(int vehicleNo) {
 		SQLiteDatabase db = getDatabase();
 
-		Cursor c = db.query(TABLE_TRAMS, new String[] { TramsColumns.CLASS }, TramsColumns.NUMBER + " = '" + vehicleNo + "'", null, null, null, null);
+		String[] columns = new String[] { TramsColumns.CLASS };
+		String selection = TramsColumns.NUMBER + " = '" + vehicleNo + "'";
+
+		Cursor c = db.query(TABLE_TRAMS, columns, selection, null, null, null, null);
 
 		String tramClass = "";
 
@@ -879,9 +882,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * Database columns for Stops
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static interface StopsColumns {
 		public static final String ID = "_id";
@@ -897,9 +897,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * Database columns for Destinations
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static interface DestinationsColumns {
 		public static final String ID = "_id";
@@ -910,9 +907,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * Database columns for Routes
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static interface RoutesColumns {
 		public static final String ID = "_id";
@@ -922,9 +916,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * Database columns for Destinations-Stops
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static interface DestinationsStopsColumns {
 		public static final String ID = "_id";
@@ -935,9 +926,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * Database columns for Trams
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static interface TramsColumns {
 		public static final String ID = "_id";
@@ -947,9 +935,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * URI values for Stops
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static class Stops implements BaseColumns, StopsColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + TramHunterConstants.AUTHORITY + "/stops/");
@@ -961,9 +946,6 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	/**
 	 * URI values for Routes
-	 * 
-	 * @author andy
-	 *
 	 */
 	public static class Routes implements BaseColumns, RoutesColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + TramHunterConstants.AUTHORITY + "/routes/");
