@@ -34,64 +34,46 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.io.UnsupportedEncodingException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
-
 import com.andybotting.tramhunter.objects.Favourite;
-//import com.andybotting.tramhunter.objects.Tweet;
-//import com.andybotting.tramhunter.service.TwitterFeed;
-
+import com.andybotting.tramhunter.objects.Tweet;
+import com.andybotting.tramhunter.service.TwitterFeed;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.FavouriteStopUtil;
-import com.andybotting.tramhunter.util.GenericUtil;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 import com.andybotting.tramhunter.util.StringUtil;
-//import com.andybotting.tramhunter.util.StringUtil;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
-//import android.net.Uri;
-//import android.os.AsyncTask;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -150,8 +132,7 @@ public class HomeActivity extends SherlockFragmentActivity {
 				intent = null;
 			} else if (activityName.equals("StopsListActivity")) {
 				// Should be renamed to FavStopsListActivity, but causes a
-				// problem
-				// on upgrade, so we'll just leave it
+				// problem on upgrade, so we'll just leave it
 				startActivity(new Intent(this, FavouriteActivity.class));
 			} else if (activityName.equals("ClosestStopsListActivity")) {
 				Favourite closestFavouriteStop = mFavouriteStopUtil.getClosestFavouriteStop();
@@ -198,10 +179,11 @@ public class HomeActivity extends SherlockFragmentActivity {
 		// If we have a pager view (i.e. portrait mode and we have the
 		// settings enabled, then we'll show the twitter feed
 		if ((mPager != null) && (mPreferenceHelper.isWelcomeQuoteEnabled())) {
-			String[] quotes =  getResources().getStringArray(R.array.welcomeMessages);
-			InfoFragmentAdapter infoFragmentAdapter = new InfoFragmentAdapter(getSupportFragmentManager(), quotes);
-			mPager.setAdapter(infoFragmentAdapter);
-			updateRefreshStatus(INFO_SHOW);
+			new FetchTweets().execute();
+			// String[] quotes = getResources().getStringArray(R.array.welcomeMessages);
+			// InfoFragmentAdapter infoFragmentAdapter = new InfoFragmentAdapter(getSupportFragmentManager(), quotes);
+			// mPager.setAdapter(infoFragmentAdapter);
+			// updateRefreshStatus(INFO_SHOW);
 		}
 
 		// Favourite Stops
@@ -359,18 +341,147 @@ public class HomeActivity extends SherlockFragmentActivity {
 	}
 
 	/**
+	 * Async task for updating Twitter feed
+	 */
+	private class FetchTweets extends AsyncTask<Void, Void, ArrayList<Tweet>> {
+
+		protected void onPreExecute() {
+			updateRefreshStatus(INFO_LOADING);
+		}
+
+		@Override
+		protected ArrayList<Tweet> doInBackground(Void... unused) {
+
+			ArrayList<Tweet> tweets = null;
+			TwitterFeed twitter = new TwitterFeed();
+
+			try {
+				Log.v(TAG, "Fetching Tweets...");
+				tweets = twitter.getTweets();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return tweets;
+		}
+
+		protected void onPostExecute(ArrayList<Tweet> tweets) {
+			if (tweets == null) {
+				Log.w(TAG, "Error fetching Tweets");
+				updateRefreshStatus(INFO_ERROR);
+			} else {
+				// Only if we're showing the panel
+				if (mPager != null) {
+					InfoFragmentAdapter infoFragmentAdapter = new InfoFragmentAdapter(getSupportFragmentManager(), tweets);
+					mPager.setAdapter(infoFragmentAdapter);
+					updateRefreshStatus(INFO_SHOW);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Fragment adapter for holding tweets
 	 */
 	public static class InfoFragmentAdapter extends FragmentStatePagerAdapter {
 
+		ArrayList<Tweet> tweets;
+
+		public InfoFragmentAdapter(FragmentManager fm, ArrayList<Tweet> tweets) {
+			super(fm);
+			this.tweets = tweets;
+		}
+
+		@Override
+		public int getCount() {
+			return tweets.size();
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return ArrayFragment.newInstance(tweets.get(position));
+		}
+	}
+
+	/**
+	 * Tweet fragment
+	 */
+	public static class ArrayFragment extends Fragment {
+		Tweet tweet;
+
+		static ArrayFragment newInstance(Tweet tweet) {
+			ArrayFragment f = new ArrayFragment();
+			Bundle args = new Bundle();
+
+			args.putString("name", tweet.getName());
+			args.putString("username", tweet.getUsername());
+			args.putString("message", tweet.getMessage());
+			args.putLong("date", tweet.getDateLong());
+			args.putString("imagePath", tweet.getImagePath());
+
+			f.setArguments(args);
+			return f;
+		}
+
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			tweet = new Tweet();
+			tweet.setName(getArguments().getString("name"));
+			tweet.setUsername(getArguments().getString("username"));
+			tweet.setMessage(getArguments().getString("message"));
+			tweet.setDate(getArguments().getLong("date"));
+			tweet.setImagePath(getArguments().getString("imagePath"));
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.tweet_fragment, container, false);
+
+			TextView name = (TextView) v.findViewById(R.id.tweet_name);
+			TextView username = (TextView) v.findViewById(R.id.tweet_username);
+			TextView message = (TextView) v.findViewById(R.id.tweet_message);
+			TextView time = (TextView) v.findViewById(R.id.tweet_time);
+			ImageView image = (ImageView) v.findViewById(R.id.tweet_image);
+
+			name.setText(tweet.getName());
+			username.setText("@" + tweet.getUsername());
+			message.setText(tweet.getMessage());
+			time.setText(StringUtil.humanFriendlyDate(tweet.getDateLong()));
+
+			// We're going to use our down twitter images for now.
+			final Bitmap bitmap = BitmapFactory.decodeFile(tweet.getImagePath());
+			image.setImageBitmap(bitmap);
+			// image.setImageResource(R.drawable.yarratrams_twitter);
+
+			// Handle onClick to Twitter
+			View tweetLayout = v.findViewById(R.id.tweet_layout);
+			tweetLayout.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					String url = "http://twitter.com/" + tweet.getUsername();
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse(url));
+					startActivity(i);
+				}
+			});
+
+			return v;
+		}
+	}
+
+	/**
+	 * Fragment adapter for holding quotes
+	 */
+	public static class QuoteFragmentAdapter extends FragmentStatePagerAdapter {
+
 		String[] quotes;
 		Integer[] shuffledInts;
 
-		public InfoFragmentAdapter(FragmentManager fm, String[] quotes) {
+		public QuoteFragmentAdapter(FragmentManager fm, String[] quotes) {
 			super(fm);
 			this.quotes = quotes;
 
-			// Shuffle an array of Integers for 'randomzing' the quotes
+			// Shuffle an array of Integers for 'randomising' the quotes
 			this.shuffledInts = new Integer[quotes.length];
 			for (int i = 0; i < quotes.length; i++) {
 				this.shuffledInts[i] = i;
@@ -387,14 +498,14 @@ public class HomeActivity extends SherlockFragmentActivity {
 		public Fragment getItem(int position) {
 			int quoteNumber = shuffledInts[position];
 			String title = "Famous Tram Quote #" + (quoteNumber + 1);
-			return ArrayFragment.newInstance(quotes[quoteNumber], title);
+			return QuoteArrayFragment.newInstance(quotes[quoteNumber], title);
 		}
 	}
 
 	/**
-	 * Tweet fragment - unused for now
+	 * Quote fragment
 	 */
-	public static class ArrayFragment extends Fragment {
+	public static class QuoteArrayFragment extends Fragment {
 		String quote;
 		String title;
 

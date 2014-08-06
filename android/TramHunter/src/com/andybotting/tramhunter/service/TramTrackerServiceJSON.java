@@ -50,6 +50,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +70,7 @@ import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.TramRun;
 import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.UserAgent;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
 
@@ -91,38 +93,6 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		this.mPreferenceHelper = new PreferenceHelper();
 	}
 
-	/**
-	 * Generate a User Agent
-	 */
-	private String getUserAgent() {
-
-		final PackageManager pm = mContext.getPackageManager();
-
-		String packageName = "Unknown";
-		String packageVersion = "Unknown";
-		String applicationName = "Unknown";
-
-		String androidVersion = android.os.Build.VERSION.RELEASE;
-
-		if (androidVersion == null) androidVersion = "N/A";
-
-		try {
-
-			packageName = mContext.getPackageName();
-
-			// App info
-			ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
-			applicationName = (String) pm.getApplicationLabel(ai);
-
-			// Package info
-			PackageInfo pi = mContext.getPackageManager().getPackageInfo(packageName, 0);
-			packageVersion = pi.versionName;
-		} catch (NameNotFoundException e) {
-			return "Unknown";
-		}
-
-		return String.format("%s/%s (Android %s)", applicationName, packageVersion, androidVersion);
-	}
 
 	/**
 	 * Fetch JSON data over HTTP
@@ -132,6 +102,8 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 	public InputStream getJSONData(String url, List<NameValuePair> params) throws TramTrackerServiceException {
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+		String userAgent = UserAgent.getUserAgent();
+		httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
 
 		// TramTracker required parameters
 		if (params == null) params = new LinkedList<NameValuePair>();
@@ -378,7 +350,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 		// Route number
 		String routeNumber = "0";
-		if (route != null) routeNumber = route.getNumber();
+		if (route != null) routeNumber = Integer.toString(route.getInternalNumber());
 
 		// Stop ID
 		int tramTrackerID = stop.getTramTrackerID();
@@ -574,7 +546,7 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		// TODO: Work out what these should really be
 		List<NameValuePair> params = new LinkedList<NameValuePair>();
 		params.add(new BasicNameValuePair("aid", CLIENT_TYPE));
-		params.add(new BasicNameValuePair("devInfo", getUserAgent()));
+		params.add(new BasicNameValuePair("devInfo", UserAgent.getUserAgent()));
 
 		String paramString = URLEncodedUtils.format(params, "utf-8");
 		String url = BASE_URL + "/GetDeviceToken/" + "?" + paramString;

@@ -35,7 +35,8 @@
 
 <resources>
     <dimen name="info_window_height">70dip</dimen>
- 
+
+    <dimen name="text_size_very_tiny">11sp</dimen>
     <dimen name="text_size_tiny">12sp</dimen>   
     <dimen name="text_size_small">14sp</dimen>
     <dimen name="text_size_medium">18sp</dimen>
