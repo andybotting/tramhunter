@@ -54,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	public static final boolean KEY_TRAM_IMAGE_DEFAULT_VALUE = true;
 
 	public static final String KEY_USE_JSON_API = "useJSONAPI";
-	public static final boolean KEY_USE_JSON_API_DEFAULT_VALUE = false;
+	public static final boolean KEY_USE_JSON_API_DEFAULT_VALUE = true;
 
 	private ListPreference mDefaultLaunchActivity;
 	private CheckBoxPreference mDisplayWelcomeMessage;
@@ -107,13 +107,13 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 			mDefaultLaunchActivity.setSummary("Open " + getFreindlyDefaultActivityName(sharedPreferences) + " on launch");
 		} else if (key.equals(KEY_WELCOME_MESSAGE)) {
 			mDisplayWelcomeMessage.setSummary(sharedPreferences.getBoolean(key, KEY_WELCOME_MESSAGE_DEFAULT_VALUE) ? 
-					"Showing tram quotes" : "Hiding tram quotes");
+					"Showing Twitter status feed" : "Hiding Twitter status feed");
 		} else if (key.equals(KEY_TRAM_IMAGE)) {
 			mDisplayTramImage.setSummary(sharedPreferences.getBoolean(key, KEY_TRAM_IMAGE_DEFAULT_VALUE) ? 
 					"Showing tram images" : "Hiding tram images");
 		} else if (key.equals(KEY_USE_JSON_API)) {
 			mUseJSONAPI.setSummary(sharedPreferences.getBoolean(key, KEY_USE_JSON_API_DEFAULT_VALUE) ? 
-					"Using JSON API" : "Using deprecated SOAP API");
+					"Using new, fast JSON API" : "Using old, slower SOAP API");
 		}
 	}
 
