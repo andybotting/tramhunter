@@ -81,7 +81,6 @@ import android.widget.Toast;
 public class HomeActivity extends SherlockFragmentActivity {
 
 	private static final String TAG = "Home";
-	private static final boolean LOGV = Log.isLoggable(TAG, Log.DEBUG);
 
 	private PreferenceHelper mPreferenceHelper;
 	private FavouriteStopUtil mFavouriteStopUtil;

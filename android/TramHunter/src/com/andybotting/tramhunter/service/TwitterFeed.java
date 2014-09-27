@@ -26,11 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.http.AndroidHttpClient;
@@ -39,7 +34,6 @@ import android.text.Html;
 import android.util.Log;
 
 import com.andybotting.tramhunter.TramHunterApplication;
-import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.Tweet;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.PreferenceHelper;
@@ -52,14 +46,10 @@ public class TwitterFeed {
 
 	// private static final String TRAM_HUNTER_TWITTER_URL =
 	// "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=tram_hunter&count=2";
-	private static final String YARRA_TRAMS_TWITTER_URL = "http://tramhunter2.appspot.com/twitter_feed/";
+	private static final String TWITTER_FEED_URL = "http://tramhunter1.appspot.com/twitter_feed/";
+	private static final String TWITTER_FEED_URL_BACKUP = "http://tramhunter2.appspot.com/twitter_feed/";
 	private static final int TWITTER_UPDATE_MINS = 5;
 
-	private Context mContext;
-
-	public TwitterFeed() {
-		mContext = TramHunterApplication.getContext();
-	}
 
 	/**
 	 * Fetch JSON data over HTTP
@@ -74,6 +64,14 @@ public class TwitterFeed {
 		HttpGet method = new HttpGet(uri);
 		method.addHeader("Accept-Encoding", "gzip");
 		HttpResponse response = httpClient.execute(method);
+		
+		int responseCode = response.getStatusLine().getStatusCode();
+		if (LOGV) Log.i(TAG, "Return code for " + url + " is: " + responseCode);
+
+		if (responseCode != java.net.HttpURLConnection.HTTP_OK) {
+			Log.e(TAG, "Received HTTP status: " + responseCode);
+			throw new IOException ("HTTP reponse code was: " + responseCode);
+		}
 
 		// Handle GZIP'd response from Twitter
 		// (which is about half the time for some reason)
@@ -190,8 +188,18 @@ public class TwitterFeed {
 		// Kick off an update
 		if ((timeDiff > TWITTER_UPDATE_MINS * 60000) || (savedTwitterData == null)) {
 			if (LOGV) Log.v(TAG, "Fetching fresh twitter feed...");
-
-			InputStream jsonData = getJSONData(YARRA_TRAMS_TWITTER_URL);
+			
+			InputStream jsonData = null; 
+			try {
+				jsonData = getJSONData(TWITTER_FEED_URL);
+			} catch (IOException e) {
+				// Try backup
+				jsonData = getJSONData(TWITTER_FEED_URL_BACKUP);
+			}
+			
+			if (jsonData == null)
+				throw new IllegalStateException("Unable to fetch Twitter feed");
+			
 			tweetArray = parseJSONArray(jsonData);
 
 			// Save this data for next time

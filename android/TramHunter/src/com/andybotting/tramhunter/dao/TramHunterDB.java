@@ -66,13 +66,9 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "tramhunter.db";
 
-	// private static final String DATABASE_INTERNAL_PATH = "/data/"+ AUTHORITY + "/databases/";
-
 	// Update this with the App Version Code (App Version x 100)
-	// E.g.
-	// App Version v0.2.92 = DB Version 292
-	// App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 1400;
+	// E.g. App Version v1.2.0 = DB Version 1200
+	private static final int DATABASE_VERSION = 1500;
 
 	private SQLiteDatabase mDB = null;
 	private Context mContext;
@@ -95,7 +91,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	// Join string for Stops-Routes
 	private static final String TABLE_STOPS_JOIN_ROUTES = "stops " +
 			"JOIN destination_stops ON destination_stops.stop_id = stops._id " +
-			"JOIN destinations ON destination_stops.destination_id = destinations._id " + 
+			"JOIN destinations ON destination_stops.destination_id = destinations._id " +
 			"JOIN routes ON destinations.route_id = routes._id";
 
 	// Join string for Destinations-Routes

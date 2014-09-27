@@ -55,14 +55,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
-import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.NextTram;
 import com.andybotting.tramhunter.objects.Route;
@@ -84,12 +78,10 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 
 	private static final String CLIENT_TYPE = "TRAMHUNTER";
 
-	private Context mContext;
 	private PreferenceHelper mPreferenceHelper;
 	private TramHunterDB mDB;
 
 	public TramTrackerServiceJSON() {
-		mContext = TramHunterApplication.getContext();
 		this.mPreferenceHelper = new PreferenceHelper();
 	}
 
