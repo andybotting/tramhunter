@@ -86,7 +86,6 @@ import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.service.TramNotification;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
-import com.andybotting.tramhunter.service.TramTrackerServiceSOAP;
 import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.PreferenceHelper;
@@ -269,11 +268,8 @@ public class StopDetailsActivity extends SherlockListActivity {
 		// Display stop data
 		displayStop(mStop);
 
-		// Get our TramTracker service, either SOAP (def) or JSON
-		if (mPreferenceHelper.isJSONAPIEnabled())
-			ttService = new TramTrackerServiceJSON();
-		else
-			ttService = new TramTrackerServiceSOAP();
+		// Get our TramTracker service
+		ttService = new TramTrackerServiceJSON();
 
 		// Our thread for updating the stops every 60 secs
 		mRefreshThread = new Thread(new CountDown());

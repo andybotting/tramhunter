@@ -79,10 +79,6 @@ public class PreferenceHelper {
 	public boolean isTramImageEnabled() {
 		return mPreferences.getBoolean(SettingsActivity.KEY_TRAM_IMAGE, SettingsActivity.KEY_TRAM_IMAGE_DEFAULT_VALUE);
 	}
-
-	public boolean isJSONAPIEnabled() {
-		return mPreferences.getBoolean(SettingsActivity.KEY_USE_JSON_API, SettingsActivity.KEY_USE_JSON_API_DEFAULT_VALUE);
-	}
 	
     /**
      * Return a string representing the GUID

@@ -53,13 +53,9 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	public static final String KEY_TRAM_IMAGE = "displayTramImage";
 	public static final boolean KEY_TRAM_IMAGE_DEFAULT_VALUE = true;
 
-	public static final String KEY_USE_JSON_API = "useJSONAPI";
-	public static final boolean KEY_USE_JSON_API_DEFAULT_VALUE = true;
-
 	private ListPreference mDefaultLaunchActivity;
 	private CheckBoxPreference mDisplayWelcomeMessage;
 	private CheckBoxPreference mDisplayTramImage;
-	private CheckBoxPreference mUseJSONAPI;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +67,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		mDefaultLaunchActivity = (ListPreference) getPreferenceScreen().findPreference(KEY_DEFAULT_LAUNCH_ACTIVITY);
 		mDisplayWelcomeMessage = (CheckBoxPreference) getPreferenceScreen().findPreference(KEY_WELCOME_MESSAGE);
 		mDisplayTramImage = (CheckBoxPreference) getPreferenceScreen().findPreference(KEY_TRAM_IMAGE);
-		mUseJSONAPI = (CheckBoxPreference) getPreferenceScreen().findPreference(KEY_USE_JSON_API);
 
 	}
 
@@ -83,7 +78,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_DEFAULT_LAUNCH_ACTIVITY);
 		setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_WELCOME_MESSAGE);
 		setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_TRAM_IMAGE);
-		setPreferenceSummary(getPreferenceScreen().getSharedPreferences(), KEY_USE_JSON_API);
 
 		// Set up a listener whenever a key changes
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
@@ -111,9 +105,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		} else if (key.equals(KEY_TRAM_IMAGE)) {
 			mDisplayTramImage.setSummary(sharedPreferences.getBoolean(key, KEY_TRAM_IMAGE_DEFAULT_VALUE) ? 
 					"Showing tram images" : "Hiding tram images");
-		} else if (key.equals(KEY_USE_JSON_API)) {
-			mUseJSONAPI.setSummary(sharedPreferences.getBoolean(key, KEY_USE_JSON_API_DEFAULT_VALUE) ? 
-					"Using new, fast JSON API" : "Using old, slower SOAP API");
 		}
 	}
 
