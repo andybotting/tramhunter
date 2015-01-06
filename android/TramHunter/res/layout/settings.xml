@@ -53,9 +53,4 @@
         android:title="Default Launch Screen" >
     </ListPreference>
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="useJSONAPI"
-        android:title="Use JSON API" />
-
 </PreferenceScreen>
