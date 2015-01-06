@@ -182,6 +182,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/special_event_message_divider"
                 android:layout_toRightOf="@+id/special_event_alert_icon"
+                android:paddingBottom="4dip"
+                android:paddingTop="3dip"
                 android:textSize="@dimen/text_size_tiny" />
         </RelativeLayout>
     </LinearLayout>
