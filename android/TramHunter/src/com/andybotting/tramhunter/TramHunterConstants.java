@@ -58,7 +58,7 @@ public class TramHunterConstants {
 	public static int MAX_WAIT_LOCATION = 30;
 
 	/**
-	 * These values are constants used for intents, exteas, and shared
+	 * These values are constants used for intents, extras, and shared
 	 * preferences. You shouldn't need to modify them.
 	 */
 	public static boolean SUPPORTS_JELLYBEAN = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
