@@ -41,7 +41,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -52,7 +52,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
-
 import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Destination;
@@ -68,7 +67,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	// Update this with the App Version Code (App Version x 100)
 	// E.g. App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 1500;
+	private static final int DATABASE_VERSION = 1600;
 
 	private SQLiteDatabase mDB = null;
 	private Context mContext;
@@ -115,7 +114,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	public SQLiteDatabase getDatabase() {
 		SQLiteDatabase db;
 
-		if (LOGV) Log.d(TAG, "Getting DB");
+		//if (LOGV) Log.d(TAG, "Getting DB");
 		db = getExternalStorageDB();
 		if (db == null) {
 			if (LOGV) Log.w(TAG, "DB from SD Card failed, using internal");
@@ -159,15 +158,16 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	 * 
 	 * @return SQLiteDatabase
 	 */
+	@SuppressLint("NewApi")
 	private SQLiteDatabase getExternalStorageDB() {
-		if (LOGV) Log.d(TAG, "Getting DB from external storage (SD Card)");
+		//if (LOGV) Log.d(TAG, "Getting DB from external storage (SD Card)");
 
 		SQLiteDatabase db = null;
 
+		File appDbDir = mContext.getExternalFilesDir(null);
 		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) return null;
 
 		// Build the directory on the SD Card, if it doesn't exist
-		File appDbDir = Environment.getExternalStorageDirectory();
 		if (!appDbDir.exists()) {
 			if (LOGV) Log.v(TAG, "Making database directory on SD Card");
 			appDbDir.mkdirs();
