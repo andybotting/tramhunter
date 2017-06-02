@@ -35,33 +35,37 @@
 package com.andybotting.tramhunter.activity;
 
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.MenuItem;
-
-import com.andybotting.tramhunter.ui.TouchListView;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.FavouriteList;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.ui.TouchListView;
 
-public class FavouriteActivity extends SherlockListActivity {
+public class FavouriteActivity extends AppCompatActivity {
 
 	private final static int CONTEXT_MENU_SET_NAME = 0;
 	private final static int CONTEXT_MENU_VIEW_STOP = 1;
@@ -89,6 +93,26 @@ public class FavouriteActivity extends SherlockListActivity {
 		mFavourites = new FavouriteList();
 
 		displayFavStops(true);
+	}
+
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (TouchListView) findViewById(android.R.id.list);
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
 	}
 
 	@Override

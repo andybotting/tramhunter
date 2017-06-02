@@ -35,11 +35,11 @@
 
 <resources>
 
-    <style name="Theme.TramHunterStyle" parent="Theme.Sherlock.Light.DarkActionBar">
+    <style name="Theme.TramHunterStyle" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarStyle">@style/Widget.TramHunter.ActionBar</item>
     </style>
 
-    <style name="Widget.TramHunter.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse"></style>
+    <style name="Widget.TramHunter.ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse"></style>
 
     <style name="AlertDialog" parent="@android:style/Theme.Dialog">
         <item name="android:textColor">@color/white</item>

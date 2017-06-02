@@ -34,32 +34,35 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
+import android.widget.SimpleExpandableListAdapter;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockExpandableListActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Route;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.SimpleExpandableListAdapter;
-import android.widget.ExpandableListView.OnChildClickListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class RoutesListActivity extends SherlockExpandableListActivity {
+public class RoutesListActivity extends AppCompatActivity {
 
 	private List<Route> routes;
 	private List<Destination> destinations;
 	private ExpandableListAdapter mAdapter;
+	private ExpandableListView mExpandableListView;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -91,6 +94,26 @@ public class RoutesListActivity extends SherlockExpandableListActivity {
 		});
 
 		displayRoutes();
+	}
+
+	protected ExpandableListView getExpandableListView() {
+		if (mExpandableListView == null) {
+			mExpandableListView = (ExpandableListView) findViewById(android.R.id.list);
+		}
+		return mExpandableListView;
+	}
+
+	protected void setExpandableListAdapter(ExpandableListAdapter adapter) {
+		getExpandableListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getExpandableListAdapter() {
+		ListAdapter adapter = getExpandableListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
 	}
 
 	/**
@@ -154,7 +177,7 @@ public class RoutesListActivity extends SherlockExpandableListActivity {
 					new int[] { android.R.id.text1, android.R.id.text2 }
 				);
 
-		setListAdapter(mAdapter);
+		setExpandableListAdapter(mAdapter);
 
 	}
 

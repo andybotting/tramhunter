@@ -40,7 +40,7 @@
 	
 	<!-- Empty List -->
 	<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:id="@id/android:empty"
+	    android:id="@+id/empty_list"
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
        	android:layout_weight="1"
@@ -58,7 +58,7 @@
 	
 	
 	<!--  ListView to hold our stop_details_row list items -->
-	<ListView android:id="@android:id/list"
+	<ListView android:id="@+id/departures_list"
 	   	android:layout_width="fill_parent"
 	   	android:layout_height="wrap_content"
        	android:layout_weight="1"

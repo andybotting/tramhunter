@@ -44,10 +44,10 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 
-import java.util.List;
-
 import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Stop;
+
+import java.util.List;
 
 /**
  * Provides search suggestions for tram stops

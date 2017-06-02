@@ -34,12 +34,6 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -50,33 +44,42 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.dao.TramHunterDB;
-
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.util.StringUtil;
 
-public class NearStopsActivity extends SherlockListActivity implements LocationListener {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static android.content.Context.LOCATION_SERVICE;
+
+public class NearStopsActivity extends AppCompatActivity implements LocationListener {
 
 	private static final String TAG = "NearStopsActivity";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
@@ -142,6 +145,26 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 			buildAlertNoLocationServices();
 
 		// onResume will be called and getLocationAndUpdateStops()
+	}
+
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (ListView) findViewById(android.R.id.list);
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
 	}
 
 	/**
@@ -266,7 +289,7 @@ public class NearStopsActivity extends SherlockListActivity implements LocationL
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.near_stops, menu);
 		return super.onCreateOptionsMenu(menu);
 	}

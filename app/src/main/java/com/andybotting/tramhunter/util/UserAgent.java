@@ -34,12 +34,13 @@
 
 package com.andybotting.tramhunter.util;
 
-import com.andybotting.tramhunter.TramHunterApplication;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+
+import com.andybotting.tramhunter.TramHunterApplication;
 
 public class UserAgent {
 	

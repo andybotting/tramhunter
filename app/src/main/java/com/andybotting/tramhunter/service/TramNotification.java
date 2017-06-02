@@ -41,6 +41,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.activity.HomeActivity;
@@ -72,9 +73,22 @@ public class TramNotification extends BroadcastReceiver {
 		final Intent notificationIntent = new Intent(context, HomeActivity.class);
 		final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+		NotificationCompat.Builder b = new NotificationCompat.Builder(context);
 
-		notificationManager.notify(TRAM_APPROACHING_NOTIFICATION, notification);
+		b.setAutoCancel(true)
+				.setDefaults(Notification.DEFAULT_ALL)
+				.setWhen(System.currentTimeMillis())
+				.setSmallIcon(icon)
+				.setTicker(tickerText)
+				.setContentTitle(contentTitle)
+				.setContentText(contentText)
+				.setDefaults(Notification.DEFAULT_VIBRATE|Notification.DEFAULT_SOUND)
+				.setContentIntent(contentIntent)
+				.setContentInfo("Info");
+
+
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(1, b.build());
 	}
 
 }

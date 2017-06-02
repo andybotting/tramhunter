@@ -34,16 +34,16 @@
 
 package com.andybotting.tramhunter.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import android.location.Location;
 import android.location.LocationManager;
 
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.FavouriteList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class FavouriteStopUtil {
 	private static final int UNLIMITED_METRES_AWAY = 0;

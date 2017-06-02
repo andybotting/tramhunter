@@ -34,16 +34,16 @@
 
 package com.andybotting.tramhunter.util;
 
-import java.util.Date;
-
-import com.andybotting.tramhunter.TramHunterApplication;
-import com.andybotting.tramhunter.activity.SettingsActivity;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.preference.PreferenceManager;
+
+import com.andybotting.tramhunter.TramHunterApplication;
+import com.andybotting.tramhunter.activity.SettingsActivity;
+
+import java.util.Date;
 
 public class PreferenceHelper {
 	

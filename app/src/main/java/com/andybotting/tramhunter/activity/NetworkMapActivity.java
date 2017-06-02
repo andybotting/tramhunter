@@ -34,16 +34,16 @@
 
 package com.andybotting.tramhunter.activity;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
-import com.andybotting.tramhunter.R;
-
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-public class NetworkMapActivity extends SherlockActivity {
+import com.andybotting.tramhunter.R;
+
+public class NetworkMapActivity extends AppCompatActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

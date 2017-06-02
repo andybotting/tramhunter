@@ -34,33 +34,34 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.List;
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.MenuItem;
+import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Stop;
 
-public class StopsListActivity extends SherlockListActivity {
+import java.util.List;
+
+public class StopsListActivity extends AppCompatActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 
@@ -110,6 +111,26 @@ public class StopsListActivity extends SherlockListActivity {
 			displayStopsForDestination(destinationId);
 		}
 
+	}
+
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (ListView) findViewById(android.R.id.list);
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
 	}
 
 	/**

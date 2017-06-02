@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
+            <option value="/mnt/nas/projects/tramhunter-android-studio" />
+            <option value="/mnt/nas/projects/tramhunter-android-studio/app" />
           </set>
         </option>
         <option name="myModules">

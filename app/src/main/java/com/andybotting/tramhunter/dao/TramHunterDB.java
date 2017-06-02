@@ -34,13 +34,6 @@
 
 package com.andybotting.tramhunter.dao;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
@@ -52,11 +45,20 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
+
 import com.andybotting.tramhunter.TramHunterApplication;
 import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Destination;
 import com.andybotting.tramhunter.objects.Route;
 import com.andybotting.tramhunter.objects.Stop;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TramHunterDB extends SQLiteOpenHelper {
 
@@ -67,7 +69,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 
 	// Update this with the App Version Code (App Version x 100)
 	// E.g. App Version v1.2.0 = DB Version 1200
-	private static final int DATABASE_VERSION = 1600;
+	private static final int DATABASE_VERSION = 1700;
 
 	private SQLiteDatabase mDB = null;
 	private Context mContext;

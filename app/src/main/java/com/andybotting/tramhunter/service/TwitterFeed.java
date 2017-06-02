@@ -1,5 +1,29 @@
 package com.andybotting.tramhunter.service;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.http.AndroidHttpClient;
+import android.os.Environment;
+import android.text.Html;
+import android.util.Log;
+
+import com.andybotting.tramhunter.TramHunterApplication;
+import com.andybotting.tramhunter.objects.Tweet;
+import com.andybotting.tramhunter.ui.UIUtils;
+import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.UserAgent;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -15,30 +39,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.http.AndroidHttpClient;
-import android.os.Environment;
-import android.text.Html;
-import android.util.Log;
-
-import com.andybotting.tramhunter.TramHunterApplication;
-import com.andybotting.tramhunter.objects.Tweet;
-import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-import com.andybotting.tramhunter.util.UserAgent;
-
 public class TwitterFeed {
 
 	private static final String TAG = "YarraTramsTwitter";
@@ -46,8 +46,8 @@ public class TwitterFeed {
 
 	// private static final String TRAM_HUNTER_TWITTER_URL =
 	// "http://api.twitter.com/1/statuses/user_timeline.json?exclude_replies=true&screen_name=tram_hunter&count=2";
-	private static final String TWITTER_FEED_URL = "http://tramhunter1.appspot.com/twitter_feed/";
-	private static final String TWITTER_FEED_URL_BACKUP = "http://tramhunter2.appspot.com/twitter_feed/";
+	private static final String TWITTER_FEED_URL = "http://tramhunter3.appspot.com/twitter_feed/";
+	private static final String TWITTER_FEED_URL_BACKUP = "http://tramhunter.appspot.com/twitter_feed/";
 	private static final int TWITTER_UPDATE_MINS = 5;
 
 

@@ -34,18 +34,18 @@
 
 package com.andybotting.tramhunter.objects;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import android.util.Log;
+
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.util.PreferenceHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class FavouriteList {
 	

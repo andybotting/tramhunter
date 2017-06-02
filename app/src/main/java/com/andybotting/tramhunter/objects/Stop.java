@@ -34,13 +34,13 @@
 
 package com.andybotting.tramhunter.objects;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.location.Location;
 
 import com.google.android.maps.GeoPoint;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Stop { 

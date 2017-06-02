@@ -34,14 +34,14 @@
 
 package com.andybotting.tramhunter.activity;
 
-import com.andybotting.tramhunter.R;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+
+import com.andybotting.tramhunter.R;
 
 @SuppressWarnings("deprecation")
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {

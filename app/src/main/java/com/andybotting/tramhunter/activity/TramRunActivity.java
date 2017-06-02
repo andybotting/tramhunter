@@ -34,28 +34,27 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.Date;
-
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.TramRun;
 import com.andybotting.tramhunter.objects.TramRunTime;
@@ -64,7 +63,9 @@ import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
-public class TramRunActivity extends SherlockListActivity {
+import java.util.Date;
+
+public class TramRunActivity extends AppCompatActivity {
 
 	private static final String TAG = "TramRunActivity";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
@@ -154,6 +155,28 @@ public class TramRunActivity extends SherlockListActivity {
 
 	}
 
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (ListView) findViewById(R.id.departures_list);
+			mListView.setEmptyView(findViewById(R.id.empty_list));
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
+	}
+
 	@Override
 	public void onStop() {
 		super.onStop();
@@ -173,7 +196,7 @@ public class TramRunActivity extends SherlockListActivity {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.tram_run, menu);
 
 		// Get our refresh item for animating later
@@ -184,8 +207,6 @@ public class TramRunActivity extends SherlockListActivity {
 
 	/**
 	 * Menu actions
-	 * 
-	 * @param menuItem
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -246,8 +267,6 @@ public class TramRunActivity extends SherlockListActivity {
 
 	/**
 	 * Display the details for a given stop
-	 * 
-	 * @param stop
 	 */
 	private void displayTramRun() {
 

@@ -73,9 +73,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import java.util.Date;
-
 import com.andybotting.tramhunter.activity.HomeActivity;
+
+import java.util.Date;
 
 public class UIUtils {
 

@@ -34,26 +34,6 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.TramHunter;
-import com.andybotting.tramhunter.objects.Favourite;
-import com.andybotting.tramhunter.objects.Tweet;
-import com.andybotting.tramhunter.service.TwitterFeed;
-import com.andybotting.tramhunter.ui.UIUtils;
-import com.andybotting.tramhunter.util.FavouriteStopUtil;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-import com.andybotting.tramhunter.util.StringUtil;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -69,16 +49,39 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class HomeActivity extends SherlockFragmentActivity {
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.TramHunter;
+import com.andybotting.tramhunter.objects.Favourite;
+import com.andybotting.tramhunter.objects.Tweet;
+import com.andybotting.tramhunter.service.TwitterFeed;
+import com.andybotting.tramhunter.ui.UIUtils;
+import com.andybotting.tramhunter.util.FavouriteStopUtil;
+import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
+
+import static android.content.Context.LOCATION_SERVICE;
+
+public class HomeActivity extends AppCompatActivity {
 
 	private static final String TAG = "Home";
 
@@ -280,7 +283,7 @@ public class HomeActivity extends SherlockFragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.home, menu);
 
 		return true;

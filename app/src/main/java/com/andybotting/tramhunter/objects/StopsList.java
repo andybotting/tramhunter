@@ -34,10 +34,10 @@
 
 package com.andybotting.tramhunter.objects;
 
-import java.util.ArrayList;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
 
 public class StopsList extends ArrayList<Stop> implements Parcelable{
 

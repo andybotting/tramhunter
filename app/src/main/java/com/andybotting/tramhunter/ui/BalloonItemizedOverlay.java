@@ -50,10 +50,6 @@
 package com.andybotting.tramhunter.ui;
 
 
-
-import java.lang.reflect.Method; 
-import java.util.List;
-
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -68,6 +64,9 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * An abstract extension of ItemizedOverlay for displaying an information balloon

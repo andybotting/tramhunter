@@ -16,8 +16,6 @@
 
 package com.andybotting.tramhunter.location;
 
-import java.util.List;
-
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,6 +25,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+
+import java.util.List;
 
 /**
  * Optimized implementation of Last Location Finder for devices running Gingerbread  

@@ -34,12 +34,6 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.List;
-
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -49,31 +43,31 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.dao.TramHunterDB;
@@ -90,7 +84,13 @@ import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.ui.UIUtils;
 import com.andybotting.tramhunter.util.PreferenceHelper;
 
-public class StopDetailsActivity extends SherlockListActivity {
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+public class StopDetailsActivity extends AppCompatActivity {
 
 	private static final String TAG = "StopDetailsActivity";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
@@ -152,8 +152,9 @@ public class StopDetailsActivity extends SherlockListActivity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		// Set up our list
+        mListView = getListView();
 		mListAdapter = new NextTramsListAdapter();
-		mListView = getListView();
+
 		findViewById(R.id.departures_list).setVisibility(View.GONE);
 
 		mListView.setOnItemClickListener(new OnItemClickListener() {
@@ -278,6 +279,27 @@ public class StopDetailsActivity extends SherlockListActivity {
 
 	}
 
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (ListView) findViewById(R.id.departures_list);
+            mListView.setEmptyView(findViewById(R.id.empty_list));
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
+	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -309,7 +331,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.stop_details, menu);
 
 		// Get our refresh item for animating later
@@ -336,8 +358,6 @@ public class StopDetailsActivity extends SherlockListActivity {
 
 	/**
 	 * Menu actions
-	 * 
-	 * @param menuItem
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -418,7 +438,7 @@ public class StopDetailsActivity extends SherlockListActivity {
 		// The 'No Results' view or the stop times list
 		if (mListAdapter.getCount() < 2) {
 			// Only 1 entry means an error, so make it < 2
-			mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
+            mListView.getEmptyView().setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 			findViewById(R.id.departures_list).setVisibility(isRefreshing ? View.GONE : View.VISIBLE);
 		} else {
 			mListView.setVisibility(isRefreshing ? View.GONE : View.VISIBLE);

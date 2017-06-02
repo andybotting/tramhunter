@@ -34,15 +34,16 @@
 
 package com.andybotting.tramhunter.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import android.util.Log;
+
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.NextTram;
+import com.andybotting.tramhunter.objects.Route;
+import com.andybotting.tramhunter.objects.Stop;
+import com.andybotting.tramhunter.objects.TramRun;
+import com.andybotting.tramhunter.objects.TramRunTime;
+import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.UserAgent;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -55,16 +56,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
-import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.objects.NextTram;
-import com.andybotting.tramhunter.objects.Route;
-import com.andybotting.tramhunter.objects.Stop;
-import com.andybotting.tramhunter.objects.TramRun;
-import com.andybotting.tramhunter.objects.TramRunTime;
-import com.andybotting.tramhunter.util.PreferenceHelper;
-import com.andybotting.tramhunter.util.UserAgent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TramTrackerServiceJSON implements TramTrackerService {
 

@@ -34,21 +34,17 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockMapActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.StopsList;
 import com.andybotting.tramhunter.ui.BalloonItemizedOverlay;
-
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
@@ -56,7 +52,10 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class StopMapActivity extends SherlockMapActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class StopMapActivity extends AppCompatActivity {
 
 	private List<Overlay> mMapOverlays;
 
@@ -237,7 +236,6 @@ public class StopMapActivity extends SherlockMapActivity {
 		super.onStop();
 	}
 
-	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
 	}

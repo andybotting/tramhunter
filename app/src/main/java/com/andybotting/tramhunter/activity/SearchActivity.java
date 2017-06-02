@@ -68,30 +68,32 @@
 
 package com.andybotting.tramhunter.activity;
 
-import java.util.List;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.andybotting.tramhunter.R;
-import com.andybotting.tramhunter.dao.TramHunterDB;
-import com.andybotting.tramhunter.objects.Stop;
-
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class SearchActivity extends SherlockListActivity {
+import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
+
+import java.util.List;
+
+public class SearchActivity extends AppCompatActivity {
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
 
@@ -140,6 +142,26 @@ public class SearchActivity extends SherlockListActivity {
 			setListAdapter(mListAdapter);
 		}
 
+	}
+
+	protected ListView getListView() {
+		if (mListView == null) {
+			mListView = (ListView) findViewById(android.R.id.list);
+		}
+		return mListView;
+	}
+
+	protected void setListAdapter(ListAdapter adapter) {
+		getListView().setAdapter(adapter);
+	}
+
+	protected ListAdapter getListAdapter() {
+		ListAdapter adapter = getListView().getAdapter();
+		if (adapter instanceof HeaderViewListAdapter) {
+			return ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+		} else {
+			return adapter;
+		}
 	}
 
 	/**
