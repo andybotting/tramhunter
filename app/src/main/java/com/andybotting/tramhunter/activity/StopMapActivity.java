@@ -55,7 +55,7 @@ import com.google.android.maps.OverlayItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StopMapActivity extends AppCompatActivity {
+public class StopMapActivity extends AppCompatMapActivity {
 
 	private List<Overlay> mMapOverlays;
 
