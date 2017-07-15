@@ -38,6 +38,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -145,6 +146,17 @@ public class StopMapActivity extends AppCompatActivity implements OnMapReadyCall
                 }
             }
         }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode==REQUEST_PERMISSION_LOCATION){
+            if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED && mMapView!=null ){
+                mMapView.setMyLocationEnabled(true);
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
