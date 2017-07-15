@@ -136,11 +136,11 @@ public class StopMapActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        if(marker.getTag() instanceof Long){
-            //clicked a marker with a StopId tag
-            long stopId = (long) marker.getTag();
+        if(marker.getTag() instanceof Integer){
+            //clicked a marker with a TramTrackerID tag
+            int tramTrackerID = (int) marker.getTag();
             for(Stop stop : mStops){
-                if(stop.getId()==stopId){
+                if(stop.getTramTrackerID()==tramTrackerID){
                     viewStop(stop);
                     break;
                 }
