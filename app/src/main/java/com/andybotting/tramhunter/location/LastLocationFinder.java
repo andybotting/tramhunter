@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * Optimized implementation of Last Location Finder for devices running Gingerbread  
- * and above.
+ * and below Marshmallow (no runtime permissions or Fused Location Provider).
  * 
  * This class let's you find the "best" (most accurate and timely) previously 
  * detected location using whatever providers are available. 
@@ -39,6 +39,7 @@ import java.util.List;
  * return the newest location (where one exists) and setup a oneshot 
  * location update to find the current location.
  */
+@SuppressWarnings("MissingPermission")
 public class LastLocationFinder {
   
   protected static String TAG = "LastLocationFinder";

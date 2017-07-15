@@ -414,20 +414,15 @@ public class StopDetailsActivity extends AppCompatActivity {
 	 */
 	private void showMap() {
 
-		// Detect Google Maps
-		try {
-			Class.forName("com.google.android.maps.MapActivity");
-			// Map view
-			Bundle bundle = new Bundle();
-			StopsList mStopList = new StopsList();
-			mStopList.add(mStop);
-			bundle.putParcelable("stopslist", mStopList);
-			final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, 1);
-		} catch (Exception e) {
-			Toast.makeText(this, "Google Maps are not available", Toast.LENGTH_LONG).show();
-		};
+		// Map view
+		Bundle bundle = new Bundle();
+		StopsList mStopList = new StopsList();
+		mStopList.add(mStop);
+		bundle.putParcelable("stopslist", mStopList);
+		final Intent intent = new Intent(StopDetailsActivity.this, StopMapActivity.class);
+		intent.putExtras(bundle);
+		startActivityForResult(intent, 1);
+
 	}
 
 	/**

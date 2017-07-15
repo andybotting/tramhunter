@@ -1,3 +1,6 @@
+# Secret API keys and config
+secrets.xml
+
 # Built application files
 /*/build/
 /build

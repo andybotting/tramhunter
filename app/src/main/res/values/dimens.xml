@@ -43,4 +43,5 @@
     <dimen name="text_size_large">22sp</dimen>
     
     <dimen name="margin_dialog">5sp</dimen>
+    <dimen name="map_bounds_padding">10dp</dimen>
 </resources>

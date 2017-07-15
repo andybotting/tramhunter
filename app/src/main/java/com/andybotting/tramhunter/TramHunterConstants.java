@@ -34,6 +34,8 @@
 
 package com.andybotting.tramhunter;
 
+import android.os.Build;
+
 public class TramHunterConstants {
 
 	// Package name for DB purposes
@@ -61,12 +63,19 @@ public class TramHunterConstants {
 	 * These values are constants used for intents, extras, and shared
 	 * preferences. You shouldn't need to modify them.
 	 */
+	//
+
+	/**
+	 * Supports Runtime permissions
+	 */
+	public static boolean SUPPORTS_MARSHMALLOW = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
 	public static boolean SUPPORTS_JELLYBEAN = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
 	public static boolean SUPPORTS_ICS = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 	public static boolean SUPPORTS_GINGERBREAD = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD;
 	public static boolean SUPPORTS_HONEYCOMB = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
 	public static boolean SUPPORTS_FROYO = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO;
 	public static boolean SUPPORTS_ECLAIR = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ECLAIR_MR1;
+
 }
 
 

@@ -780,7 +780,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 			int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
 			int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
 
-			stop.setId(c.getInt(col_id));
+			stop.setId(c.getLong(col_id));
 			stop.setTramTrackerID(c.getInt(col_tramTrackerID));
 			stop.setFlagStopNumber(c.getString(col_flagStopNumber));
 			stop.setPrimaryName(c.getString(col_primaryName));
@@ -830,6 +830,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 	private Stop getStopFromCursor(Cursor c) {
 		Stop stop = new Stop();
 
+		int col_id = c.getColumnIndexOrThrow(StopsColumns.ID);
 		int col_tramTrackerID = c.getColumnIndexOrThrow(StopsColumns.TRAMTRACKER_ID);
 		int col_flagStopNumber = c.getColumnIndexOrThrow(StopsColumns.FLAG_NUMBER);
 		int col_primaryName = c.getColumnIndexOrThrow(StopsColumns.PRIMARY_NAME);
@@ -839,6 +840,7 @@ public class TramHunterDB extends SQLiteOpenHelper {
 		int col_latitude = c.getColumnIndexOrThrow(StopsColumns.LATITUDE);
 		int col_longitude = c.getColumnIndexOrThrow(StopsColumns.LONGITUDE);
 
+		stop.setId(c.getLong(col_id));
 		stop.setTramTrackerID(c.getInt(col_tramTrackerID));
 		stop.setFlagStopNumber(c.getString(col_flagStopNumber));
 		stop.setPrimaryName(c.getString(col_primaryName));

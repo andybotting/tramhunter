@@ -34,16 +34,21 @@
 
 package com.andybotting.tramhunter.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -77,14 +82,13 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static android.content.Context.LOCATION_SERVICE;
-
 public class NearStopsActivity extends AppCompatActivity implements LocationListener {
 
 	private static final String TAG = "NearStopsActivity";
 	private static final boolean LOGV = Log.isLoggable(TAG, Log.INFO);
 
 	private final static int CONTEXT_MENU_VIEW_STOP = 0;
+	private static final int REQUEST_PERMISSION_LOCATION = 101;
 
 	private final String ACTIVITY_TITLE = "Nearest Stops"; // ±
 
@@ -168,11 +172,16 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	}
 
 	/**
-	 * Check Android settings that we have enabled location providers
+	 * Check Android settings that we have enabled location providers.
 	 */
 	protected boolean hasLocationEnabled() {
+		// getBestProvider returns null if permission denied (or if location services are off)
+		// If permission granted, and location services are off,
+		// getBestProvider returns 'passive', but getProviders returns empty list
+		// this may be a framework bug?
 		String bestAvailableProvider = mLocationManager.getBestProvider(mCriteria, true);
-		if (bestAvailableProvider == null)
+		List<String> providers = mLocationManager.getProviders(mCriteria, true);
+		if (bestAvailableProvider == null || providers.size()==0)
 			return false;
 		return true;
 	}
@@ -180,6 +189,7 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	/**
 	 * Fetch the best last known location
 	 */
+	@SuppressWarnings("MissingPermission")
 	protected Location getInitialLocation() {
 
 		Location bestResult = mLastKnownLocation;
@@ -244,22 +254,53 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	 * Build an alert dialog
 	 */
 	private void buildAlertNoLocationServices() {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("You do not have GPS or Wireless network location services enabled.\n\nWould you like to enable them now?").setTitle("No Location Services")
-				.setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		if(TramHunterConstants.SUPPORTS_MARSHMALLOW
+				&& ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+			if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+				//this occurs if the user says 'no' to the requestPermissions() screen too many times
+				//take them to permission settings in app settings
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage("Location permission is required.\n\nWould you like to grant permission in app settings?").setTitle("No Location Permission")
+						.setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
-						dialog.dismiss();
-						launchLocationSettings();
+						launchPermissionSettings();
 					}
 				}).setNegativeButton("No", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog, final int id) {
-						dialog.cancel();
 						finish();
 					}
 				});
+				builder.show();
+			}
+			else {
+				//launch regular runtime permission check
+				ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+			}
+		}
+		else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage("You do not have GPS or Wireless network location services enabled.\n\nWould you like to enable them now?").setTitle("No Location Services")
+					.setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				public void onClick(final DialogInterface dialog, final int id) {
+					dialog.dismiss();
+					launchLocationSettings();
+				}
+			}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+				public void onClick(final DialogInterface dialog, final int id) {
+					dialog.cancel();
+					finish();
+				}
+			});
+			builder.show();
+		}
+	}
 
-		AlertDialog alert = builder.create();
-		alert.show();
+	/**
+	 * Open up the app permissions screen
+	 */
+	private void launchPermissionSettings() {
+		final Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:"+getPackageName()));
+		startActivity(intent);
 	}
 
 	/**
@@ -268,6 +309,18 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	private void launchLocationSettings() {
 		final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 		startActivityForResult(intent, -1);
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		if(requestCode==REQUEST_PERMISSION_LOCATION){
+			if(grantResults.length==0 || grantResults[0]!=PackageManager.PERMISSION_GRANTED ){
+				//denied.
+				finish();
+			}
+			// Otherwise, if successful onResume will do what we need.
+		}
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 	}
 
 	/**
@@ -316,18 +369,12 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	 */
 	private void showMap() {
 
-		// Detect Google Maps
-		try {
-			Class.forName("com.google.android.maps.MapActivity");
-			// Map view
-			Bundle bundle = new Bundle();
-			bundle.putParcelable("stopslist", mNearStopsList);
-			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, -1);
-		} catch (Exception e) {
-			Toast.makeText(this, "Google Maps not available", Toast.LENGTH_LONG).show();
-		}
+		// Map view
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("stopslist", mNearStopsList);
+		Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
+		intent.putExtras(bundle);
+		startActivityForResult(intent, -1);
 	}
 
 	/**
@@ -606,6 +653,7 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	/**
 	 * Start listening for location events
 	 */
+	@SuppressWarnings("MissingPermission")
 	private void startLocationListening() {
 		if (mLocationManager != null) {
 

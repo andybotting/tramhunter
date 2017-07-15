@@ -47,33 +47,39 @@ import java.util.TreeMap;
 
 public class FavouriteStopUtil {
 	private static final int UNLIMITED_METRES_AWAY = 0;
-	
+
 	private final LocationManager locationManager;
-	
+
 	public FavouriteStopUtil(LocationManager locationManager) {
 		this.locationManager = locationManager;
 	}
 
-	
+
 	public Favourite getClosestFavouriteStop() {
 		final List<Favourite> closestFavourites = getClosestFavourites(1, UNLIMITED_METRES_AWAY);
 		return (closestFavourites.isEmpty()) ? null : closestFavourites.get(0);
 	}
 
-	
+
 	public List<Favourite> getClosestFavourites(final int maxNumberOfStops, final int maxMetresAway) {
-		
+
 		FavouriteList favouriteList = new FavouriteList();
 		List<Favourite> closestFavourites = new ArrayList<Favourite>();
-		
+
 		if (favouriteList.hasFavourites()) {
-			
+
 			// Get our list of favourites
 			List<Favourite> favourites = favouriteList.getFavouriteItems();
-			
+
 			// Get our last location
-			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			
+			Location location;
+			try {
+				location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			}
+			catch (SecurityException e){
+				//location permission denied.
+				return closestFavourites;
+			}
 			SortedMap<Double, Favourite> sortedFavouriteMap = new TreeMap<Double, Favourite>();
 			
 			if (location != null) {
