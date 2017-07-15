@@ -60,6 +60,7 @@
     <string name="routes">Routes</string>
     <string name="title_special_event">Special Event</string>
     <string name="title_view_stop">View Stop</string>
+    <string name="title_stop_map">Stops Map</string>
 
     <!-- Menu icons -->
     <string name="btn_starred">Favourite\nStops</string>

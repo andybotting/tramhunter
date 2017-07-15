@@ -36,7 +36,7 @@ package com.andybotting.tramhunter.objects;
 
 import android.location.Location;
 
-import com.google.android.maps.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -228,12 +228,10 @@ public class Stop {
     }
 	
 	/**
-	 * @return the GeoPoint of the stop
+	 * @return the LatLng of the stop
 	 */
-	public GeoPoint getGeoPoint() {
-        int lat1E6 = (int) (latitude * 1E6);
-        int lng1E6 = (int) (longitude * 1E6);
-        GeoPoint point = new GeoPoint(lat1E6, lng1E6);
+	public LatLng getLatLng() {
+		LatLng point = new LatLng(latitude, longitude);
         return point;
 	} 
 	

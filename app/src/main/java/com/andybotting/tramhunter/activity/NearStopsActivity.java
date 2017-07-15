@@ -77,8 +77,6 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static android.content.Context.LOCATION_SERVICE;
-
 public class NearStopsActivity extends AppCompatActivity implements LocationListener {
 
 	private static final String TAG = "NearStopsActivity";
@@ -316,18 +314,12 @@ public class NearStopsActivity extends AppCompatActivity implements LocationList
 	 */
 	private void showMap() {
 
-		// Detect Google Maps
-		try {
-			Class.forName("com.google.android.maps.MapActivity");
-			// Map view
-			Bundle bundle = new Bundle();
-			bundle.putParcelable("stopslist", mNearStopsList);
-			Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
-			intent.putExtras(bundle);
-			startActivityForResult(intent, -1);
-		} catch (Exception e) {
-			Toast.makeText(this, "Google Maps not available", Toast.LENGTH_LONG).show();
-		}
+		// Map view
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("stopslist", mNearStopsList);
+		Intent intent = new Intent(NearStopsActivity.this, StopMapActivity.class);
+		intent.putExtras(bundle);
+		startActivityForResult(intent, -1);
 	}
 
 	/**
