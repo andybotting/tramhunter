@@ -35,6 +35,7 @@
 package com.andybotting.tramhunter.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,6 +49,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
@@ -56,12 +58,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
+import com.andybotting.tramhunter.dao.TramHunterDB;
+import com.andybotting.tramhunter.objects.Stop;
 import com.andybotting.tramhunter.objects.TramRun;
 import com.andybotting.tramhunter.objects.TramRunTime;
 import com.andybotting.tramhunter.service.TramTrackerService;
 import com.andybotting.tramhunter.service.TramTrackerServiceException;
 import com.andybotting.tramhunter.service.TramTrackerServiceJSON;
 import com.andybotting.tramhunter.util.PreferenceHelper;
+import com.andybotting.tramhunter.util.StringUtil;
 
 import java.util.Date;
 
@@ -124,6 +129,7 @@ public class TramRunActivity extends AppCompatActivity {
 		// Set up our list
 		mListAdapter = new NextTramsListAdapter();
 		mListView = getListView();
+		mListView.setOnItemClickListener(listView_OnItemClickListener);
 		mListView.setVisibility(View.GONE);
 
 		final Bundle extras = getIntent().getExtras();
@@ -134,12 +140,18 @@ public class TramRunActivity extends AppCompatActivity {
 			if (mVehicleNumber <= 0) {
 				Toast.makeText(this, "Stop details are not available for this service.", Toast.LENGTH_LONG).show();
 				finish();
+				return;
 			}
 		}
 
 		// Set the title
 		// final String title = mStop.getStopName();
-		String title = "Stops for Tram #" + mVehicleNumber;
+		TramHunterDB dB = new TramHunterDB();
+		String prefix = "#";
+		String tramClass = dB.getTramClass(mVehicleNumber);
+		if(tramClass!=null)
+			prefix=tramClass+".";
+		String title = "Stops for Tram " + prefix + mVehicleNumber;
 		actionBar.setTitle(title);
 
 		// Display stop data
@@ -175,6 +187,30 @@ public class TramRunActivity extends AppCompatActivity {
 		} else {
 			return adapter;
 		}
+	}
+
+	/**
+	 * On click of menu item
+	 */
+	private AdapterView.OnItemClickListener listView_OnItemClickListener = new AdapterView.OnItemClickListener() {
+		public void onItemClick(AdapterView<?> adapterView, View row, int position, long id) {
+			viewStop(((TramRunTime)adapterView.getItemAtPosition(position)));
+		}
+	};
+
+	/**
+	 * View a stop
+	 */
+	private void viewStop(TramRunTime tramRunTime) {
+		Stop stop = tramRunTime.getStop();
+		int tramTrackerId = stop.getTramTrackerID();
+
+		Bundle bundle = new Bundle();
+		bundle.putInt("tramTrackerId", tramTrackerId);
+		Intent intent = new Intent(TramRunActivity.this, StopDetailsActivity.class);
+		intent.putExtras(bundle);
+
+		startActivityForResult(intent, 1);
 	}
 
 	@Override
@@ -381,7 +417,7 @@ public class TramRunActivity extends AppCompatActivity {
 		}
 
 		public Object getItem(int position) {
-			return position;
+			return mTramRun.getTramRunTime(position);
 		}
 
 		public long getItemId(int position) {
@@ -397,7 +433,7 @@ public class TramRunActivity extends AppCompatActivity {
 				pv = convertView;
 			}
 
-			TramRunTime runTime = (TramRunTime) mTramRun.getTramRunTime(position);
+			TramRunTime runTime = (TramRunTime) getItem(position);
 			((TextView) pv.findViewById(R.id.stopName)).setText(runTime.getStop().getPrimaryName());
 
 			// We factor in the clock offset here to fix the times. See the SOAP

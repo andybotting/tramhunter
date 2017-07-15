@@ -67,7 +67,7 @@
     <string name="btn_browse">Browse by\nRoutes</string>
     <string name="btn_nearby">Nearby\nStops</string>
     <string name="btn_settings">Application\nSettings</string>
-    <string name="btn_search">Search\nfor Stops</string>
+    <string name="btn_search">Enter\nVehicle Number</string>
     <string name="btn_map">Network\nMap</string>
 
     <!-- Labels -->
@@ -120,5 +120,9 @@
 
     <!-- Other -->
     <string name="tram_quote">Tram Quote</string>
+
+    <!-- Search for Vehicle by number-->
+    <string name="enter_vehicle_number_hint">Enter vehicle number</string>
+    <string name="enter_vehicle_number_error">The vehicle number is found above the doors</string>
 
 </resources>
