@@ -448,6 +448,12 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 				// Get stop string and fetch stop from DB
 				int stopNumber = timeObject.getInt("StopNo");
 				Stop stop = mDB.getStop(stopNumber);
+				if(stop==null){
+					//YT has built another new tram stop since last DB update
+					stop = new Stop();
+					stop.setTramTrackerID(stopNumber);
+					stop.setPrimaryName(String.format("Unknown stop (%d)", stopNumber));
+				}
 				tramRunTime.setStop(stop);
 
 				// Get predicted time and parse it to a java datetime

@@ -259,6 +259,12 @@ public class StopDetailsActivity extends AppCompatActivity {
 		// Create out DB instance
 		mDB = new TramHunterDB();
 		mStop = mDB.getStop(mTramTrackerId);
+		if(mStop==null){
+			//YT has built another new tram stop since last DB update
+			mStop = new Stop();
+			mStop.setTramTrackerID(mTramTrackerId);
+			mStop.setPrimaryName(String.format("Unknown stop (%d)", mTramTrackerId));
+		}
 		if (routeId > -1)
 			mRoute = mDB.getRoute(routeId);
 
