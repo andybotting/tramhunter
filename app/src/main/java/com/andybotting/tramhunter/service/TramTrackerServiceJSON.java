@@ -241,10 +241,14 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 			String flagStopNo = responseObject.getString("FlagStopNo");
 			String stopName = responseObject.getString("StopName");
 			String cityDirection = responseObject.getString("CityDirection");
+			double latitude = responseObject.getDouble("Latitude");
+			double longitude = responseObject.getDouble("Longitude");
 
 			stop.setFlagStopNumber(flagStopNo);
 			stop.setStopName(stopName);
 			stop.setCityDirection(cityDirection);
+			stop.setLatitude(latitude);
+			stop.setLongitude(longitude);
 
 			return stop;
 		} catch (Exception e) {
@@ -259,13 +263,14 @@ public class TramTrackerServiceJSON implements TramTrackerService {
 		try {
 			Stop stop = null;
 
-			// TODO: Update this for JSON
-			String url = BASE_URL + "/GetStopInformation.aspx?s=" + tramTrackerID;
+			String method = "GetStopInformation";
+			String url = String.format("%s/%s/%d/", BASE_URL, method, tramTrackerID);
 			InputStream jsonData = getJSONData(url, null);
 			JSONObject serviceData = parseJSONStream(jsonData);
-			JSONObject responseObject = getResponseObject(serviceData);
-			stop = parseStopInformation(responseObject);
+			JSONArray responseArray = getResponseArray(serviceData);
+			stop = parseStopInformation(responseArray.getJSONObject(0));
 			stop.setTramTrackerID(tramTrackerID);
+			stop.setId(Stop.ID_LOADED_FROM_NETWORK);
 			return stop;
 		} catch (Exception e) {
 			// Throw a TramTrackerServiceException to encapsulate all

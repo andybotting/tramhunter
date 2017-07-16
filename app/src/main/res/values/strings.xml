@@ -100,6 +100,7 @@
     <string name="no_favourite_stops">You currently have no favourite tram stops.\n\nTo add favourite tram stops simply click the favourite star when browsing tram stops.\n\nDo you want to browse some now?</string>
 
     <!-- Dialog -->
+    <string name="dialog_error_fetching_stop_details">Error fetching stop details (<xliff:g id="error">%1$s</xliff:g>)</string>
     <string name="dialog_error_fetching">Error fetching departure times (<xliff:g id="error">%1$s</xliff:g>)</string>
     <string name="dialog_set_name">Set stop name</string>
     <string name="dialog_set_name_message">Set a custom name for \'<xliff:g id="name">%1$s</xliff:g>\'</string>
