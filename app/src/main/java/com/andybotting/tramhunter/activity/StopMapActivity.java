@@ -212,7 +212,7 @@ public class StopMapActivity extends AppCompatActivity implements OnMapReadyCall
                     .anchor(0.5f, 1f)
                     .position(point);
             Marker marker = mMapView.addMarker(options);
-            marker.setTag(stop.getId());
+            marker.setTag(stop.getTramTrackerID());
 
         }
 

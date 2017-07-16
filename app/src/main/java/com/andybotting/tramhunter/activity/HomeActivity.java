@@ -34,7 +34,7 @@
 
 package com.andybotting.tramhunter.activity;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -54,18 +54,22 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.TramHunter;
+import com.andybotting.tramhunter.TramHunterConstants;
 import com.andybotting.tramhunter.objects.Favourite;
 import com.andybotting.tramhunter.objects.Tweet;
 import com.andybotting.tramhunter.service.TwitterFeed;
@@ -212,7 +216,51 @@ public class HomeActivity extends AppCompatActivity {
 		// Search
 		findViewById(R.id.home_btn_search).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				UIUtils.goSearch(HomeActivity.this);
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+				View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.vehicle_number_dialog, null, false);
+				final EditText editText= (EditText) view.findViewById(R.id.editText);
+				final DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						try {
+							int vehicleNumber = Integer.parseInt(editText.getText().toString().trim());
+							Intent intent = new Intent(HomeActivity.this, TramRunActivity.class);
+							intent.putExtra("vehicleNumber", vehicleNumber);
+							startActivity(intent);
+							if (which == DialogInterface.BUTTON_NEUTRAL) //from keyEvent, need to manually dismiss.
+								dialog.dismiss();
+						} catch (NumberFormatException e) {
+							Toast.makeText(HomeActivity.this, R.string.enter_vehicle_number_error, Toast.LENGTH_SHORT).show();
+						}
+					}
+				};
+				builder.setView(view)
+						.setTitle(R.string.enter_vehicle_number_hint)
+						.setPositiveButton("Ok", positiveListener)
+						.setNegativeButton("Cancel", null)
+				.setOnKeyListener(new DialogInterface.OnKeyListener() {
+					@Override
+					public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+						if(event.getAction() == KeyEvent.ACTION_DOWN) switch (keyCode){
+							case KeyEvent.KEYCODE_ENTER:
+							case KeyEvent.KEYCODE_SEARCH:
+								positiveListener.onClick(dialog, DialogInterface.BUTTON_NEUTRAL);
+								return true;
+						}
+						return false;
+					}
+				});
+				AlertDialog dialog = builder.create();
+				dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+					@Override
+					public void onShow(DialogInterface dialogInterface) {
+						editText.requestFocus();
+						InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+						imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+					}
+				});
+				dialog.show();
 			}
 		});
 
@@ -262,8 +310,8 @@ public class HomeActivity extends AppCompatActivity {
 		}
 
 		// Build alert dialog, using a ContextThemeWrapper for proper theming
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
-		View aboutView = View.inflate(new ContextThemeWrapper(this, R.style.AlertDialog), R.layout.dialog_about, null);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialog);
+		View aboutView = View.inflate(dialogBuilder.getContext(), R.layout.dialog_about, null);
 		dialogBuilder.setTitle(heading);
 		dialogBuilder.setView(aboutView);
 		dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

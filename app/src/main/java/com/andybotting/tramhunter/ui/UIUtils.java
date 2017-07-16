@@ -181,6 +181,10 @@ public class UIUtils {
 			return "class_d2";
 		else if (tramClass.matches("E"))
 			return "class_e";
+		else if (tramClass.matches("E1"))
+			return "class_e";
+		else if (tramClass.matches("E2"))
+			return "class_e";
 		else if (tramClass.matches("SW5"))
 			return "class_w";
 		else if (tramClass.matches("SW6"))
