@@ -259,12 +259,17 @@ public class StopDetailsActivity extends AppCompatActivity {
 		// Create out DB instance
 		mDB = new TramHunterDB();
 		mStop = mDB.getStop(mTramTrackerId);
+		if(mStop==null){
+			//YT has built another new tram stop since last DB update
+			mStop = new Stop();
+			mStop.setId(Stop.ID_MISSING);
+			mStop.setTramTrackerID(mTramTrackerId);
+			mStop.setPrimaryName(String.format("Unknown stop (%d)", mTramTrackerId));
+		}
 		if (routeId > -1)
 			mRoute = mDB.getRoute(routeId);
 
-		// Set the title
-		final String title = mStop.getStopName();
-		actionBar.setTitle(title);
+
 
 		// Display stop data
 		displayStop(mStop);
@@ -318,6 +323,9 @@ public class StopDetailsActivity extends AppCompatActivity {
 
 		if (mRefreshThread.isInterrupted())
 			mRefreshThread.start();
+
+		if(mStop.getId()==Stop.ID_MISSING) //-1 means not in our db, -2 means already loaded from network.
+			new GetStopDetails().execute(mStop.getTramTrackerID());
 
 		// Force update of tram times to prevent stale times if the app
 		// is opened again
@@ -469,6 +477,12 @@ public class StopDetailsActivity extends AppCompatActivity {
 		String stopDetails = stop.getStopDetailsLine();
 		String stopRoutes = stop.getRoutesString();
 
+		// Set the title
+		ActionBar actionBar = getSupportActionBar();
+		final String title = stop.getStopName();
+		actionBar.setTitle(title);
+
+
 		((TextView) findViewById(R.id.stopNameTextView)).setText(stopName);
 		((TextView) findViewById(R.id.stopDetailsTextView)).setText(stopDetails);
 		((TextView) findViewById(R.id.stopRoutesTextView)).setText(stopRoutes);
@@ -561,7 +575,27 @@ public class StopDetailsActivity extends AppCompatActivity {
 		if (!mIsRefreshing)
 			new GetNextTramTimes().execute();
 	}
+	private class GetStopDetails extends AsyncTask<Integer, Void, Stop> {
+		@Override
+		protected Stop doInBackground(Integer... tramTrackerId) {
+			try{
+				Stop newStop = ttService.getStopInformation(mStop.getTramTrackerID());
+				return newStop;
+			}catch (TramTrackerServiceException e){
+				final CharSequence message = getApplicationContext().getString(R.string.dialog_error_fetching_stop_details, mErrorMessage);
+				Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+			}
+			return null;
+		}
 
+		@Override
+		protected void onPostExecute(Stop stop) {
+			if(stop!=null){
+				mStop=stop;
+				displayStop(mStop);
+			}
+		}
+	}
 	/**
 	 * Background task for fetching tram times
 	 */
@@ -619,6 +653,7 @@ public class StopDetailsActivity extends AppCompatActivity {
 
 		@Override
 		protected void onPostExecute(List<NextTram> nextTrams) {
+			if(mStop.getId()<0) displayStop(mStop);
 			if (mErrorRetry == MAX_ERRORS) {
 
 				// Toast: Error fetching departure information

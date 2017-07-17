@@ -43,9 +43,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class Stop { 
-	
-	private long id = -1;
+public class Stop {
+	public static final long ID_MISSING = -1;
+	public static final long ID_LOADED_FROM_NETWORK = -2;
+
+	private long id = ID_MISSING;
 	private int tramTrackerID = -1;
 	private String flagStopNumber;
 	private String primaryName;
