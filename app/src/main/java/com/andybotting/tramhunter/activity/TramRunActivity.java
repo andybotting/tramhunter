@@ -40,6 +40,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -294,9 +295,9 @@ public class TramRunActivity extends AppCompatActivity {
 					LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					mRefreshIndeterminateProgressView = inflater.inflate(R.layout.actionbar_progress, null);
 				}
-				mRefreshItem.setActionView(mRefreshIndeterminateProgressView);
+				MenuItemCompat.setActionView(mRefreshItem, mRefreshIndeterminateProgressView);
 			} else {
-				mRefreshItem.setActionView(null);
+				MenuItemCompat.setActionView(mRefreshItem, null);
 			}
 		}
 	}
