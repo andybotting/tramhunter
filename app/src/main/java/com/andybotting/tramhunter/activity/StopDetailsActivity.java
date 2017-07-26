@@ -734,7 +734,7 @@ public class StopDetailsActivity extends AppCompatActivity {
 			}
 
 			NextTram thisTram = (NextTram) mNextTrams.get(position);
-			((TextView) pv.findViewById(R.id.routeNumber)).setText(thisTram.getRouteNo());
+			((TextView) pv.findViewById(R.id.routeNumber)).setText(thisTram.getHeadboardRouteNo());
 			((TextView) pv.findViewById(R.id.routeDestination)).setText(thisTram.getDestination());
 			((TextView) pv.findViewById(R.id.nextTime)).setText(thisTram.humanMinutesAway());
 
