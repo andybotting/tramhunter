@@ -57,6 +57,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.andybotting.tramhunter.R;
 import com.andybotting.tramhunter.objects.Favourite;
@@ -70,6 +71,7 @@ public class FavouriteActivity extends AppCompatActivity {
 	private final static int CONTEXT_MENU_SET_NAME = 0;
 	private final static int CONTEXT_MENU_VIEW_STOP = 1;
 	private final static int CONTEXT_MENU_UNFAVOURITE = 2;
+	private final static int CONTEXT_MENU_HOMESCREEN_SHORTCUT = 3;
 
 	private FavouritesListAdapter mListAdapter;
 	private FavouriteList mFavourites;
@@ -281,10 +283,11 @@ public class FavouriteActivity extends AppCompatActivity {
 
 			menu.setHeaderIcon(R.drawable.icon);
 			menu.setHeaderTitle(favourite.getName());
-			// TODO: These should be set in strings.xml
+			// TODO: These should be set in strings.xml / menu xml
 			menu.add(0, CONTEXT_MENU_SET_NAME, CONTEXT_MENU_SET_NAME, "Set Stop Name");
 			menu.add(0, CONTEXT_MENU_VIEW_STOP, CONTEXT_MENU_VIEW_STOP, "View Stop");
 			menu.add(0, CONTEXT_MENU_UNFAVOURITE, CONTEXT_MENU_UNFAVOURITE, "Unfavourite Stop");
+			menu.add(0, CONTEXT_MENU_HOMESCREEN_SHORTCUT, CONTEXT_MENU_HOMESCREEN_SHORTCUT, "Create Shortcut");
 		}
 	};
 
@@ -314,9 +317,32 @@ public class FavouriteActivity extends AppCompatActivity {
 				mFavourites.writeFavourites();
 				displayStops();
 				return true;
+			case CONTEXT_MENU_HOMESCREEN_SHORTCUT:
+				createHomescreenShortcut(favourite);
+				return true;
 		}
 
 		return super.onContextItemSelected(item);
+	}
+
+	private void createHomescreenShortcut(Favourite favourite){
+		Intent shortcutIntent = new Intent(this, StopDetailsActivity.class);
+		shortcutIntent.putExtra("tramTrackerId", favourite.getStop().getTramTrackerID());
+		Route route = favourite.getRoute();
+		if (route != null)
+			shortcutIntent.putExtra("routeId", route.getId());
+
+		shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		final Intent putShortcutIntent = new Intent();
+		putShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+		putShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, favourite.getName());
+		//TODO: create a good icon for this
+		putShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.star_on));
+		putShortcutIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+		sendBroadcast(putShortcutIntent);
+		Toast.makeText(this, R.string.toast_creating_homescreen_shortcut, Toast.LENGTH_SHORT).show();
 	}
 
 	/**
