@@ -145,20 +145,15 @@ public class TramRunActivity extends AppCompatActivity {
 		}
 
 		// Set the title
-		// final String title = mStop.getStopName();
 		TramHunterDB dB = new TramHunterDB();
-		String prefix = "#";
-		String tramClass = dB.getTramClass(mVehicleNumber);
-		if(tramClass!=null)
-			prefix=tramClass+".";
-		String title = "Stops for Tram " + prefix + mVehicleNumber;
+		String title = "Stops for Tram " + mVehicleNumber;
 		actionBar.setTitle(title);
-
-		// Display stop data
-		displayTramRun();
 
 		// Get our TramTracker service
 		ttService = new TramTrackerServiceJSON();
+
+		// Display stop data
+		displayTramRun();
 
 		// Our thread for updating the stops every 60 secs
 		mRefreshThread = new Thread(new CountDown());

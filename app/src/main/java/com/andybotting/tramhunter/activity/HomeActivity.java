@@ -219,7 +219,7 @@ public class HomeActivity extends AppCompatActivity {
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
 				View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.vehicle_number_dialog, null, false);
-				final EditText editText= (EditText) view.findViewById(R.id.editText);
+				final EditText editText = (EditText) view.findViewById(R.id.editText);
 				final DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
