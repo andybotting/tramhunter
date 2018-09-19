@@ -15,6 +15,7 @@ secrets.xml
 bin/
 gen/
 out/
+app/
 
 # Gradle files
 .gradle/
