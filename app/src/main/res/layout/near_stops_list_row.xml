@@ -48,7 +48,7 @@
 
 	<TextView android:id="@+id/stop_distance"
 		style="@style/ListSubtitle"
-		android:textColor="@color/aqua"
+		android:textColor="#0064FF"
 		android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
     	android:layout_alignParentRight="true" />	
